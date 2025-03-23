@@ -37,6 +37,7 @@
 				Upload From File
 			</a>
 
+
 		</div>
 		<div class="col-6 text-end">
 			<div class="mb-3">
@@ -188,34 +189,32 @@
     </script>
 }
 
-<script>
-	document.addEventListener('DOMContentLoaded', function () {
-		const checkboxes = document.querySelectorAll('.export-check');
-		const exportButtons = document.getElementById('exportButtons');
-
-		function toggleExportButtons() {
-			const anyChecked = Array.from(checkboxes).some(cb => cb.checked);
-			exportButtons.classList.toggle('visible', anyChecked);
-		}
-
-		checkboxes.forEach(cb => {
-			cb.addEventListener('change', toggleExportButtons);
+@if (TempData["Success"] != null)
+{
+	<script>
+		window.addEventListener('DOMContentLoaded', () => {
+			showToast('@TempData["Success"]', 'success');
 		});
+	</script>
+}
 
-		toggleExportButtons(); // Run on load
-	});
-</script>
 
-@* @if (TempData["Success"] != null) *@
-@* { *@
-@* 	<script> *@
-@* 		window.addEventListener('DOMContentLoaded', () => { *@
-@* 			const toastEl = document.getElementById('appToast'); *@
-@* 			if (toastEl) { *@
-@* 				const toast = new bootstrap.Toast(toastEl, { delay: 4000 }); *@
-@* 				toast.show(); *@
-@* 			} *@
-@* 		}); *@
-@* 	</script> *@
-@* } *@
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+ 		const checkboxes = document.querySelectorAll('.export-check');		
+		 const exportButtons = document.getElementById('exportButtons');
+
+ 		function toggleExportButtons() {
+ 			const anyChecked = Array.from(checkboxes).some(cb => cb.checked);
+ 			exportButtons.classList.toggle('visible', anyChecked);
+ 		}
+
+ 		checkboxes.forEach(cb => {
+ 			cb.addEventListener('change', toggleExportButtons);
+ 		});
+
+ 		toggleExportButtons(); // Run on load
+ 	});
+ </script>
+
 
