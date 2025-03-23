@@ -1,0 +1,77 @@
+﻿@model PegRegister
+
+<div class="container mt-4">
+	<div class="row">
+		<div class="col-md-8 offset-md-2">
+			<div class="card">
+				<div class="card-header bg-danger text-white">
+					<h3>Delete Peg</h3>
+				</div>
+				<div class="card-body">
+					<form asp-action="DeletePost" method="post">
+						<input type="hidden" name="id" value="@Model.Id"/>
+						<div class="row">
+							<div class="col-md-6">
+								<div class="form-group mb-3">
+									<label class="form-label">Peg Number</label>
+									<p class="form-control-plaintext border rounded px-3 py-2">@Model.PegName</p>
+								</div>
+							</div>
+							<div class="col-md-6">
+								<div class="form-group mb-3">
+									<label class="form-label">Level Number</label>
+									<p class="form-control-plaintext border rounded px-3 py-2">@Model.Level</p>
+								</div>
+							</div>
+						</div>
+						<div class="form-group mb-3">
+							<label class="form-label">Locality</label>
+							<p class="form-control-plaintext border rounded px-3 py-2">@Model.Locality</p>
+						</div>
+						<div class="row">
+							<div class="col-md-4">
+								<div class="form-group mb-3">
+									<label class="form-label">Y Coord</label>
+									<p class="form-control-plaintext border rounded px-3 py-2">@Model.YCoord</p>
+								</div>
+							</div>
+							<div class="col-md-4">
+								<div class="form-group mb-3">
+									<label class="form-label">X Coord</label>
+									<p class="form-control-plaintext border rounded px-3 py-2">@Model.XCoord</p>
+								</div>
+							</div>
+							<div class="col-md-4">
+								<div class="form-group mb-3">
+									<label class="form-label">Z Coord</label>
+									<p class="form-control-plaintext border rounded px-3 py-2">@Model.ZCoord</p>
+								</div>
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-md-6">
+								<div class="form-group mb-3">
+									<label class="form-label">Surveyor</label>
+									<p class="form-control-plaintext border rounded px-3 py-2">@Model.Surveyor</p>
+								</div>
+							</div>
+							<div class="col-md-6">
+								<div class="form-group mb-3">
+									<label class="form-label">Survey Date</label>
+									<p class="form-control-plaintext border rounded px-3 py-2">@Model.SurveyDate</p>
+								</div>
+							</div>
+						</div>
+						
+						
+						
+						<div class="d-flex justify-content-between">
+							<button type="submit" class="btn btn-danger">Delete</button>
+							<a asp-controller="PegRegister" asp-action="Index" asp-route-filter="@TempData["LastFilter"]" class="btn btn-success">Cancel</a>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
