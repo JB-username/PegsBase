@@ -1,0 +1,45 @@
+﻿@using Newtonsoft.Json;
+
+@model List<PegRegister>
+
+<h2>Preview Pegs</h2>
+
+<form asp-action="ConfirmImport" method="post">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Peg Name</th>
+                <th>Level</th>
+                <th>Locality</th>
+                <th>Y</th>
+                <th>X</th>
+                <th>Z</th>
+                <th>Grade</th>
+                <th>Surveyor</th>
+                <th>Survey Date</th>
+                <th>Point Type</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var peg in Model)
+            {
+                <tr>
+                    <td>@peg.PegName</td>
+                    <td>@peg.Level</td>
+                    <td>@peg.Locality</td>
+                    <td>@peg.YCoord</td>
+                    <td>@peg.XCoord</td>
+                    <td>@peg.ZCoord</td>
+                    <td>@peg.GradeElevation</td>
+                    <td>@peg.Surveyor</td>
+                    <td>@peg.SurveyDate.ToShortDateString()</td>
+                    <td>@peg.PointType</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <input type="hidden" name="pegs" value='@Html.Raw(JsonConvert.SerializeObject(Model))' />
+    <button class="btn btn-success" type="submit">Confirm and Save</button>
+</form>
+
