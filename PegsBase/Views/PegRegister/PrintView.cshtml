@@ -1,0 +1,75 @@
+﻿@model List<PegsBase.Models.PegRegister>
+
+@section Styles {
+    <style>
+        @@media print {
+            /* Hide everything by default */
+            body *
+
+        {
+            visibility: hidden;
+        }
+
+        /* Show only the print area */
+        .print-area, .print-area * {
+            visibility: visible;
+        }
+
+        .print-area {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+        }
+
+        }
+    </style>
+}
+
+<div class="container mt-4">
+    <a href="@Url.Action("Index", "PegRegister")" class="btn btn-secondary mb-3 d-print-none">
+        Back to List
+    </a>
+
+    <div class="print-area">
+        <div class="table-responsive">
+            <table class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th>Peg Number</th>
+                        <th>Level</th>
+                        <th>Locality</th>
+                        <th>Y Coord</th>
+                        <th>X Coord</th>
+                        <th>Z Coord</th>
+                        <th>Grade</th>
+                        <th>Surveyor</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var entry in Model)
+                    {
+                        <tr>
+                            <td>@entry.PegName</td>
+                            <td>@entry.Level</td>
+                            <td>@entry.Locality</td>
+                            <td>@entry.YCoord</td>
+                            <td>@entry.XCoord</td>
+                            <td>@entry.ZCoord</td>
+                            <td>@entry.GradeElevation</td>
+                            <td>@entry.Surveyor</td>
+                            <td>@entry.SurveyDate.ToShortDateString()</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    window.onload = function () {
+        window.print();
+    };
+</script>
