@@ -71,6 +71,7 @@ namespace PegsBase.Controllers
                 _dbContext.PegRegister.Add(obj);
                 _dbContext.SaveChanges();
 
+                TempData["Success"] = "Peg created successfully.";
                 return RedirectToAction("Index");
             }
 
@@ -108,6 +109,7 @@ namespace PegsBase.Controllers
                 _dbContext.PegRegister.Update(obj);
                 _dbContext.SaveChanges();
 
+                TempData["Success"] = "Peg updated successfully.";
                 return RedirectToAction("Index");
             }
 
@@ -371,6 +373,23 @@ namespace PegsBase.Controllers
             var bytes = Encoding.UTF8.GetBytes(csv);
             return File(bytes, "text/csv", "PegTemplate.csv");
         }
+
+        [HttpPost]
+        public IActionResult PrintSelected(List<int> selectedIds)
+        {
+            if (selectedIds == null || !selectedIds.Any())
+            {
+                TempData["Error"] = "No pegs selected to print.";
+                return RedirectToAction("Index");
+            }
+
+            var pegs = _dbContext.PegRegister
+                .Where(p => selectedIds.Contains(p.Id))
+                .ToList();
+
+            return View("PrintView", pegs); // Pass data to a dedicated print view
+        }
+
 
     }
 }

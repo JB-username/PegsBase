@@ -9,9 +9,19 @@
 
 @if (TempData["Success"] != null)
 {
-	<div class="alert alert-info">
-		Success: @TempData["Success"]
+	<div class="alert alert-info alert-dismissible fade show" role="alert" id="successAlert">
+		<strong>Success:</strong> @TempData["Success"]
 	</div>
+
+	<script>
+		setTimeout(function () {
+			var alertElem = document.getElementById("successAlert");
+			if (alertElem) {
+				alertElem.classList.remove("show");
+				alertElem.classList.add("hide");
+			}
+		}, 5000);
+	</script>
 }
 
 
@@ -163,6 +173,13 @@
 		</div>
 
 		<div class="col-md-6 d-flex justify-content-end gap-2">
+			<button type="submit"
+					formaction="/PegRegister/PrintSelected"
+					formmethod="post"
+					class="btn btn-info">
+				Print Selected
+			</button>
+
 			<button type="submit"
 					formaction="/PegRegister/ExportSelectedToCsv"
 					class="btn btn-success">
