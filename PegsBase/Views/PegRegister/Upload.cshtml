@@ -2,14 +2,20 @@
     ViewData["Title"] = "Upload Pegs";
 }
 
-<h2>Upload Peg CSV</h2>
+<h2 class="my-lg-5 text-center">Upload Peg CSV</h2>
 
 <form asp-action="Upload" enctype="multipart/form-data" method="post">
     <div class="mb-3">
         <label for="file" class="form-label">Choose CSV File</label>
         <input class="form-control" type="file" name="file" accept=".csv" required />
     </div>
-    <button class="btn btn-primary" type="submit">Preview</button>
-    <a class="btn btn-outline-secondary" asp-action="DownloadTemplate">Download Template</a>
+    <div class="row mt-lg-5">
+        <div class="col-md-6">
+            <button class="btn btn-primary" type="submit">Preview</button>
+        </div>
+        <div class="col-md-6 text-end">
+            <a class="btn btn-outline-info" asp-action="DownloadTemplate">Download Template</a>
+        </div>
+    </div>
 </form>
 

@@ -1,13 +1,14 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.Json;
+using Newtonsoft.Json;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using PegsBase.Data;
 using PegsBase.Models;
 using PegsBase.Models.Enums;
 using PegsBase.Services.Parsing;
-using System.Text;
-using Newtonsoft.Json;
 using PegsBase.Services.Parsing.Interfaces;
+using System.Text;
 
 namespace PegsBase.Controllers
 {
@@ -15,11 +16,16 @@ namespace PegsBase.Controllers
     {
         private readonly ApplicationDbContext _dbContext;
         private readonly IPegFileParser _pegFileParser;
+        private readonly ICoordinateDatParserService _coordinateDatParserService;
 
-        public PegRegisterController(ApplicationDbContext db, IPegFileParser pegFileParser)
+        public PegRegisterController(
+            ApplicationDbContext db, 
+            IPegFileParser pegFileParser,
+            ICoordinateDatParserService coordinateDatParserService)
         {
             _dbContext = db;
             _pegFileParser = pegFileParser;
+            _coordinateDatParserService = coordinateDatParserService;
         }
 
         public IActionResult Index(SurveyPointType? filter, string sortOrder)
@@ -390,6 +396,94 @@ namespace PegsBase.Controllers
             return View("PrintView", pegs); // Pass data to a dedicated print view
         }
 
+        [HttpGet]
+        public IActionResult UploadDat()
+        {
+            return View(new CoordinateUploadViewModel());
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> UploadDat(CoordinateUploadViewModel model)
+        {
+            if (model.CoordinateFile == null || model.CoordinateFile.Length == 0)
+            {
+                ModelState.AddModelError("CoordinateFile", "Please select a .dat file.");
+                return View(model);
+            }
+
+            using var reader = new StreamReader(model.CoordinateFile.OpenReadStream());
+            var parsedRows = await _coordinateDatParserService.ParseDatAsync(reader);
+
+            model.PreviewRows = parsedRows.Take(2).ToList(); // Only show first 2
+
+            if (!model.PreviewRows.Any())
+            {
+                ModelState.AddModelError("", "No valid rows were found in the file.");
+                return View(model);
+            }
+
+            TempData["RedirectAfterSaveUrl"] = model.RedirectAfterSaveUrl;
+
+            return View("PreviewCoordinate", model);
+        }
+
+
+        [HttpPost]
+        public async Task<IActionResult> SaveCoordinatePegs(CoordinateUploadViewModel model)
+        {
+            if (model.PreviewRows == null || !model.PreviewRows.Any())
+            {
+                ModelState.AddModelError("", "No pegs to save.");
+                return View("PreviewCoordinate", model);
+            }
+
+            var rowsToSave = model.PreviewRows.Take(2).ToList();
+            int savedCount = 0;
+            List<string> duplicatePegNames = new();
+
+            foreach (var preview in rowsToSave)
+            {
+                if (string.IsNullOrWhiteSpace(preview.PegName)) continue;
+
+                bool exists = _dbContext.PegRegister.Any(p => p.PegName == preview.PegName);
+                if (exists)
+                {
+                    duplicatePegNames.Add(preview.PegName);
+                    continue;
+                }
+
+                var peg = new PegRegister
+                {
+                    PegName = preview.PegName,
+                    XCoord = preview.XCoord,
+                    YCoord = preview.YCoord,
+                    ZCoord = preview.ZCoord,
+                    GradeElevation = preview.GradeElevation,
+                    Surveyor = preview.Surveyor ?? "Unknown",
+                    Locality = preview.Locality ?? "Unknown",
+                    SurveyDate = preview.SurveyDate ?? DateOnly.FromDateTime(DateTime.Today),
+                    Level = preview.Level ?? 0,
+                    PointType = preview.Type.GetValueOrDefault(SurveyPointType.Peg)
+                };
+
+                _dbContext.PegRegister.Add(peg);
+                savedCount++;
+            }
+
+            await _dbContext.SaveChangesAsync();
+
+            if (duplicatePegNames.Any())
+            {
+                TempData["Success"] = $"Uploaded {savedCount} peg(s). Skipped {duplicatePegNames.Count} duplicate(s): {string.Join(", ", duplicatePegNames)}.";
+            }
+            else
+            {
+                TempData["Success"] = $"Successfully uploaded {savedCount} coordinate peg(s).";
+            }
+
+
+            return RedirectToAction("Index", "PegRegister");
+        }
 
     }
 }

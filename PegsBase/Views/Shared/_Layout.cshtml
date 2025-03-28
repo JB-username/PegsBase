@@ -11,15 +11,18 @@
 
     @RenderSection("Styles", required: false)
 </head>
-<body>
+<body data-bs-theme="light">
     <header>
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-primary border-bottom box-shadow mb-3">
             <div class="container-fluid">
-                <a class="navbar-brand text-light" asp-area="" asp-controller="Home" asp-action="Index">PegsBase</a>
+                <a class="navbar-brand text-light" asp-area="" asp-controller="Home" asp-action="Index">
+                    <img src="~/favicon.svg" alt="Home" style="height: 32px; margin-right: 3px;" />
+                    PegsBase</a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
-                </button>
+                </button>               
+
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
                         <li class="nav-item">
@@ -33,6 +36,9 @@
                         </li>
                     </ul>
                 </div>
+                <div>
+                    <button id="darkModeToggle" class="btn btn-sm btn-outline-secondary">🌙</button>
+                </div>
             </div>
         </nav>
     </header>
@@ -42,9 +48,9 @@
         </main>
     </div>
 
-    <footer class="border-top footer text-muted">
+    <footer class="border-top bg-primary footer text-light"> 
         <div class="container text-center">
-            &copy; 2025 - PegsBase - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+            &copy; 2025 - PegsBase - Ampelon Digital 
         </div>
     </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
@@ -80,6 +86,27 @@
             <span class="visually-hidden">Loading...</span>
         </div>
     </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const body = document.body;
+
+            // Check system preference if no saved theme
+            const systemPrefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+            const savedTheme = localStorage.getItem("bsTheme") || (systemPrefersDark ? "dark" : "light");
+
+            // Apply saved or system preference theme
+            body.setAttribute("data-bs-theme", savedTheme);
+
+            // Toggle theme on button click
+            document.getElementById("darkModeToggle").addEventListener("click", () => {
+                const current = body.getAttribute("data-bs-theme");
+                const newTheme = current === "dark" ? "light" : "dark";
+                body.setAttribute("data-bs-theme", newTheme);
+                localStorage.setItem("bsTheme", newTheme);
+            });
+        });
+    </script>
 
 
 </body>

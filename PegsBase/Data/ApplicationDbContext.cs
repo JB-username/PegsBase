@@ -10,7 +10,9 @@ namespace PegsBase.Data
                 
         }
 
-        public DbSet<PegRegister> PegRegister { get; set; }   
+        public DbSet<PegRegister> PegRegister { get; set; }
+        public DbSet<RawSurveyData> RawSurveyData { get; set; }
+
     }
 }
 

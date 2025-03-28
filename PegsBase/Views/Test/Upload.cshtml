@@ -1,0 +1,40 @@
+﻿@model TestCoordinateUploadViewModel
+
+<h2>Test Upload</h2>
+
+@if (TempData["Message"] != null)
+{
+    <div class="alert alert-success">@TempData["Message"]</div>
+}
+
+<form asp-action="Upload" method="post" name="testForm">
+    @Html.AntiForgeryToken()
+
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Peg Name</th>
+                <th>Save</th>
+            </tr>
+        </thead>
+        <tbody>
+            @for (int i = 0; i < Model.PreviewRows.Count; i++)
+            {
+                <tr>
+                    <td>
+                        @Model.PreviewRows[i].PegName
+                        <input type="hidden" name="PreviewRows[@i].PegName" value="@Model.PreviewRows[i].PegName" />
+                    </td>
+                    <td>
+                        <input type="hidden" name="PreviewRows[@i].SaveToDatabase" value="false" />
+                        <input type="checkbox" name="PreviewRows[@i].SaveToDatabase" value="true"
+                               @(Model.PreviewRows[i].SaveToDatabase ? "checked=\"checked\"" : "") />
+
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <button type="submit" class="btn btn-primary">Submit</button>
+</form>

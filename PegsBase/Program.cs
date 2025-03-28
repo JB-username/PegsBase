@@ -4,6 +4,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL;
 using PegsBase.Data;
 using PegsBase.Services.Parsing;
 using PegsBase.Services.Parsing.Interfaces;
+using PegsBase.Services.PegCalc.Implementations;
+using PegsBase.Services.PegCalc.Interfaces;
 using System.Data.Common;
 using System.Globalization;
 
@@ -23,6 +25,9 @@ namespace PegsBase
                         "DefaultConnection")));
 
             builder.Services.AddScoped<IPegFileParser, CsvPegFileParser>();
+            builder.Services.AddScoped<ICoordinateDatParserService, CoordinateDatParserService>();
+            builder.Services.AddScoped<IPegCalcService, PegCalcService>();
+            builder.Services.AddScoped<IRawSurveyDataDatFileParser, RawSurveyDataDatFileParser>();
 
 
             var cultureInfo = new CultureInfo("en-US");

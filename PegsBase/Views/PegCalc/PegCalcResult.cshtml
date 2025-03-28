@@ -1,0 +1,338 @@
+﻿@model PegsBase.Models.ViewModels.PegCalcViewModel
+
+@{
+	ViewData["Title"] = "Peg Calculation Result";
+}
+
+<div id="print-section" class="card mt-lg-5">
+	<div class="card-body">
+		<div class="row mt-3 mx-3">
+			<div class="mb-3 col-md-6">
+				<strong>Survey Date:</strong> @Model.SurveyDate <br />
+				<strong>Surveyor:</strong> @Model.Surveyor <br />
+				<strong>Locality:</strong> @Model.Locality <br />
+			</div>
+			<div class="mb-3 col-md-6">
+				<div class="row">
+					<h2 class="mb-3 text-primary text-end"><strong>@Model.ForeSightPeg</strong></h2>
+				</div>
+				<div class="row">
+					<p class="fs-6 small text-muted text-end"><small>Generated With PegsBase</small></p>
+				</div>
+			</div>
+		</div>
+
+		<div class="mx-4">
+			<div class="card shadow-sm border-0 mb-4">
+				<div class="card-header bg-primary-subtle fw-bold fs-5 border-bottom">
+					Horizontal Angles
+				</div>
+				<div class="card-body p-3 report-card">
+
+					<!-- Arc Indicator Row -->
+					<div class="mb-1">
+						<div class="row">
+							<div class="col"></div>
+							<div class="col"></div>
+							<div class="col">
+								<span class="text-muted text-end">arc 1</span>
+							</div>
+							<div class="col"></div>
+							<div class="col">
+								<span class="text-muted text-end">arc 2</span>
+							</div>
+						</div>
+					</div>
+
+
+					<!-- Backsight Row -->
+					<div class="mb-3">
+						<div class="row">
+							<div class="col fw-bold mb-1">Backsight: <span class="text-primary">@Model.BackSightPeg</span></div>
+							<div class="col"><span class="value">@Model.FormatDMS(Model.HAngleDirectArc1Backsight)</span></div>
+							<div class="col"><span class="value">@Model.FormatDMS(Model.HAngleTransitArc1Backsight)</span></div>
+							<div class="col"><span class="value">@Model.FormatDMS(Model.HAngleDirectArc2Backsight)</span></div>
+							<div class="col"><span class="value">@Model.FormatDMS(Model.HAngleTransitArc2Backsight)</span></div>
+						</div>
+					</div>
+
+					<!-- Foresight Row -->
+					<div class="mb-3">
+						<div class="row">
+							<div class="col fw-bold mb-1">Foresight: <span class="text-success">@Model.ForeSightPeg</span></div>
+							<div class="col"><span class="value">@Model.FormatDMS(Model.HAngleDirectArc1Foresight)</span></div>
+							<div class="col"><span class="value">@Model.FormatDMS(Model.HAngleTransitArc1Foresight)</span></div>
+							<div class="col"><span class="value">@Model.FormatDMS(Model.HAngleDirectArc2Foresight)</span></div>
+							<div class="col"><span class="value">@Model.FormatDMS(Model.HAngleTransitArc2Foresight)</span></div>
+						</div>
+					</div>
+
+					<hr />
+					<!-- Reduced Row -->
+					<div class="mb-3">
+						<div class="row">
+							<div class="col fw-bold mb-1">Reduced</div>
+							<div class="col"><span class="value">@Model.FormatDMS(Model.HAngleDirectReducedArc1)</span></div>
+							<div class="col"><span class="value">@Model.FormatDMS(Model.HAngleTransitReducedArc1)</span></div>
+							<div class="col"><span class="value">@Model.FormatDMS(Model.HAngleDirectReducedArc2)</span></div>
+							<div class="col"><span class="value">@Model.FormatDMS(Model.HAngleTransitReducedArc2)</span></div>
+						</div>
+					</div>
+
+					<hr />
+					<!-- Mean Row -->
+					<div>
+						<div class="row">
+							<div class="col fw-bold mb-1">Mean</div>
+							<div class="col"></div>
+							<div class="col"><span class="value">@Model.FormatDMS(Model.HAngleMeanArc1)</span></div>
+							<div class="col"></div>
+							<div class="col"><span class="value">@Model.FormatDMS(Model.HAngleMeanArc2)</span></div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!--Observations Block-->
+		<div class="row">
+			<div class="col-md-6 d-flex flex-column">
+				<div class="ms-4 me-2">
+					<div class="card shadow-sm border-0 mb-4">
+						<div class="card-header bg-primary-subtle fw-bold fs-5 border-bottom">
+							Observations
+						</div>
+						<div class="card-body p-3 report-card">
+							<div class="row">
+								<div class="col fw-bold">Horizonal Angles Mean</div>
+								<div class="col"><span class="value">Forward</span></div>
+								<div class="col"><span class="value">Return</span></div>
+							</div>
+							<div class="row mb-3">
+								<div class="col"></div>
+								<div class="col"><span class="value">@Model.FormatDMS(Model.HAngleMeanFinal)</span></div>
+								<div class="col"><span class="value">@Model.FormatDMS(Model.HAngleMeanFinalReturn)</span></div>
+							</div>
+							<div class="row">
+								<div class="col fw-bold">Bearings</div>
+								<div class="col"><span>Stn</span><span> to </span><span class="text-primary">B/S</span></div>
+								<div class="col"><span class="text-primary">B/S</span><span> to </span><span>Stn</span></div>
+							</div>
+							<div class="row mb-3">
+								<div class="col fw-bold"></div>
+								<div class="col"><span class="value">@Model.FormatDMS(Model.HAngleDirectArc1Backsight)</span></div>
+								<div class="col"><span class="value">@Model.FormatDMS(Model.BackBearingReturn)</span></div>
+							</div>
+							<div class="row">
+								<div class="col fw-bold"></div>
+								<div class="col"><span>Stn</span><span> to </span><span class="text-success">F/S</span></div>
+								<div class="col"><span class="text-success">F/S</span><span> to </span><span>Stn</span></div>
+							</div>
+							<div class="row">
+								<div class="col fw-bold"></div>
+								<div class="col"><span class="value">@Model.FormatDMS(Model.ForwardBearing)</span></div>
+								<div class="col"><span class="value">@Model.FormatDMS(Model.ForwardBearingReturn)</span></div>
+							</div>
+						</div>
+					</div>
+
+					<!--Vertical Angles Foresight-->
+					<div class="card shadow-sm border-0 mb-4">
+						<div class="card-header bg-primary-subtle fw-bold fs-5 border-bottom">
+							Foresight (@Model.ForeSightPeg)
+						</div>
+						<div class="card-body p-3 report-card">
+
+							<!--Vertical Angle Arc 1-->
+							<div class="row">
+								<div class="col text-muted">arc1</div>
+								<div class="col"><span class="value">@Model.FormatDMS(Model.VAngleDirectArc1Foresight)</span></div>
+								<div class="col"><span class="value">@Model.FormatDMS(Model.VAngleTransitArc1Foresight)</span></div>
+							</div>
+
+							<div class="row mb-3">
+								<div class="col text-muted"></div>
+								<div class="col text-muted"></div>
+								<div class="col"><span class="value">@Model.FormatDMS(Model.VAngleForesightMeanArc1)</span></div>
+							</div>
+							<!--Vertical Angle Arc 2-->
+							<div class="row">
+								<div class="col text-muted">arc2</div>
+								<div class="col"><span class="value">@Model.FormatDMS(Model.VAngleDirectArc2Foresight)</span></div>
+								<div class="col"><span class="value">@Model.FormatDMS(Model.VAngleTransitArc2Foresight)</span></div>
+							</div>
+
+							<div class="row mb-1">
+								<div class="col text-muted"></div>
+								<div class="col"></div>
+								<div class="col"><span class="value">@Model.FormatDMS(Model.VAngleForesightMeanArc2)</span></div>
+							</div>
+							<hr />
+							<div class="row mb-1">
+								<div class="col fw-bold">Mean</div>
+								<div class="col"></div>
+								<div class="col"><span class="value">@Model.FormatDMS(Model.VAngleForesightMeanFinal)</span></div>	
+							</div>
+							<hr />
+							<div class="row mb-1">
+								<div class="col text-muted">SD</div>
+								<div class="col"><span class="value">@Model.SlopeDistanceForesight.ToString("F3")m</span></div>
+								<div class="col"><span class="value">TH</span></div>
+								<div class="col"><span class="value">@Model.TargetHeightForesight.ToString("F3")m</span></div>
+							</div>
+							<div class="row mb-1">
+								<div class="col text-muted">HD</div>
+								<div class="col"><span class="value">@Model.HorizontalDistanceForesight.ToString("F3")m</span></div>
+								<div class="col"><span class="value">VD</span></div>
+								<div class="col"><span class="value">@Model.VerticalDifferenceForesight.ToString("F3")m</span></div>
+							</div>
+							<div class="row mb-1">
+								<div class="col text-muted">ED</div>
+								<div class="col"><span class="value">@Model.DeltaZ.ToString("F3")m</span></div>
+								<div class="col"><span class="value"></span></div>
+								<div class="col"><span class="value"></span></div>
+							</div>
+						</div>
+					</div>
+
+				</div>
+			</div>
+
+			<!--Back Check Block-->
+			<div class="col-md-6">
+				<div class="me-4 ms-2">
+					<div class="card shadow-sm border-0 mb-4">
+						<div class="card-header bg-primary-subtle fw-bold fs-5 border-bottom">
+							Back Check
+						</div>
+
+
+						<div class="card-body p-3 report-card">
+							<div class="row">
+								<div class="col fw-bold mb-2">Vertical Angles Backsight</div>
+							</div>
+							<!--Back Check Arc 1-->
+							<div class="row">
+								<div class="col text-muted">arc1</div>
+								<div class="col"><span class="value">@Model.FormatDMS(Model.VAngleDirectArc1Backsight)</span></div>
+								<div class="col"><span class="value">@Model.FormatDMS(Model.VAngleTransitArc1Backsight)</span></div>
+							</div>
+							<div>
+								<div class="row mb-3">
+									<div class="col text-muted"></div>
+									<div class="col text-muted"></div>
+									<div class="col"><span class="value">@Model.FormatDMS(Model.VAngleBacksightMeanArc1)</span></div>
+								</div>
+								<!--Back Check Arc 2-->
+								<div class="row">
+									<div class="col text-muted">arc2</div>
+									<div class="col"><span class="value">@Model.FormatDMS(Model.VAngleDirectArc2Backsight)</span></div>
+									<div class="col"><span class="value">@Model.FormatDMS(Model.VAngleTransitArc2Backsight)</span></div>
+								</div>
+
+								<div class="row mb-3">
+									<div class="col text-muted"></div>
+									<div class="col"></div>
+									<div class="col"><span class="value">@Model.FormatDMS(Model.VAngleBacksightMeanArc2)</span></div>
+								</div>
+								<hr />
+								<div class="row mb-3">
+									<div class="col fw-bold">Mean</div>
+									<div class="col"></div>
+									<div class="col"><span class="value">@Model.FormatDMS(Model.VAngleBacksightMeanFinal)</span></div>	
+								</div>
+								<hr />
+								<!--Back Check Distances-->
+								<div class="row mb-3 ms-3">
+									<div class="col text-muted">Slope Distance</div>
+									<div class="col"><span class="value">@Model.SlopeDistanceBacksight.ToString("F3")m</span></div>
+								</div>
+								<div class="row mb-3 ms-3">
+									<div class="col text-muted">Horizontal Distance</div>
+									<div class="col"><span class="value">@Model.HorizontalDistanceBacksight.ToString("F3")m</span></div>
+								</div>
+								<div class="row mb-3 ms-3">
+									<div class="col text-muted">Backsight Horizontal Distance</div>
+									<div class="col"><span class="value">@Model.BackCheckHorizontalDistance.ToString("F3")m</span></div>
+								</div>
+								<div class="row mb-3 ms-3 fw-bold">
+									<div class="col">Deviation HD</div>
+									<div class="col"><span class="value">@Model.BackCheckHorizontalDifference.ToString("F3")m</span></div>
+								</div>
+								<div class="row mb-3 ms-3">
+									<div class="col text-muted">Instrument Height</div>
+									<div class="col"><span class="value">@Model.InstrumentHeight.ToString("F3")m</span></div>
+								</div>
+								<div class="row mb-3 ms-3">
+									<div class="col text-muted">Target Height</div>
+									<div class="col"><span class="value">@Model.TargetHeightBacksight.ToString("F3")m</span></div>
+								</div>
+								<div class="row mb-3 ms-3">
+									<div class="col text-muted">Vertical Difference</div>
+									<div class="col"><span class="value">@Model.VerticalDifferenceBacksight.ToString("F3")m</span></div>
+								</div>
+								<div class="row mb-3 ms-3">
+									<div class="col text-muted">Backsight Elevation Difference</div>
+									<div class="col"><span class="value">@Model.BackCheckPegElevations.ToString("F3")m</span></div>
+								</div>
+								<div class="row mb-3 ms-3 fw-bold">
+									<div class="col">Deviation ED</div>
+									<div class="col"><span class="value">@Model.BackCheckVerticalError.ToString("F3")m</span></div>
+								</div>	
+							</div>
+						</div>
+						
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="mx-5 mb-4">
+			<div class="card shadow-sm border-0">
+				<div class="text-center fw-bold py-2 rounded
+                                        @(Model.PegFailed ? "bg-danger-subtle text-danger" : "bg-success-subtle text-success")">
+					@(Model.PegFailed ? "Failed" : "Passed")
+				</div>
+			</div>
+		</div>
+
+		<div class="mx-4">
+			<div class="card shadow-sm border-0">
+				<div class="card-header row fw-bold fs-5">
+					<div class="col">@Model.StationPeg</div>
+					<div class="col">@Model.StationPegY.ToString("F3")</div>
+					<div class="col">@Model.StationPegX.ToString("F3")</div>
+					<div class="col">@Model.StationPegZ.ToString("F3")</div>
+				</div>
+			</div>
+		</div>
+
+
+		<div class="mx-4">
+			<div class="card shadow-sm border-0">
+				<div class="card-header row fs-5 border-bottom">
+					<div class="col">Deltas</div>
+					<div class="col">@Model.DeltaY.ToString("F3")</div>
+					<div class="col">@Model.DeltaX.ToString("F3")</div>
+					<div class="col">@Model.DeltaZ.ToString("F3")</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="mx-4">
+			<div class="card shadow-sm border-0 mb-4 ">
+				<div class="card-header row @(Model.PegFailed ? "bg-danger-subtle text-danger" : "bg-primary text-light") fw-bold fs-5 border-bottom">
+					<div class="col">@Model.ForeSightPeg</div>
+					<div class="col">@Model.NewPegY.ToString("F3")</div>
+					<div class="col">@Model.NewPegX.ToString("F3")</div>
+					<div class="col">@Model.NewPegZ.ToString("F3")</div>
+				</div>
+			</div>
+		</div>
+
+	</div>
+</div>
+
+<div class="mt-3">
+	<a class="btn btn-secondary" asp-controller="RawSurveyData" asp-action="Index">Back</a>
+</div>
