@@ -42,35 +42,35 @@ namespace PegsBase.Services.PegCalc.Implementations
                 vm.HAngleDirectReducedArc2 = arc2.Direct;
                 vm.HAngleTransitReducedArc2 = arc2.Transit;
 
-                meanHorizontalFinal = (DMSToDec(arc1.Mean) + DMSToDec(arc2.Mean)) / 2;
+                meanHorizontalFinal = DegToDMS((DMSToDec(arc1.Mean) + DMSToDec(arc2.Mean)) / 2);
             }
 
             vm.HAngleMeanArc1 = meanHorizontalArc1;
             vm.HAngleMeanArc2 = meanHorizontalArc2;
 
-            vm.HAngleMeanFinal = DegToDMS(meanHorizontalFinal);//not rounding the 00.5*****
-            vm.HAngleMeanFinalReturn = DegToDMS(360 - meanHorizontalFinal);
+            vm.HAngleMeanFinal = meanHorizontalFinal;
+            vm.HAngleMeanFinalReturn = DegToDMS(360 - DMSToDec(meanHorizontalFinal));
 
             // Bearings
             decimal backBearing = vm.HAngleDirectArc1Backsight;
+            
             decimal backBearingReturn = (backBearing > 180) 
                 ? DegToDMS(DMSToDec(backBearing) - 180) 
                 : DegToDMS(DMSToDec(backBearing) + 180);
             vm.BackBearingReturn = Math.Round(backBearingReturn,6);
 
-            decimal forwardBearing = DegToDMS(
-                DMSToDec(backBearing) + 
-                meanHorizontalFinal);
+            decimal forwardBearing = DMSToDec(backBearing) + DMSToDec(meanHorizontalFinal);
 
-            if (forwardBearing > 360) forwardBearing -= 360; //***Check for accuracy
+            if (forwardBearing > 360) forwardBearing -= 360;
 
-            vm.ForwardBearing = Math.Round(forwardBearing, 6);
+            vm.ForwardBearing = DecToDMS(Math.Round(forwardBearing, 6));
+
             decimal forwardBearingReturn = (forwardBearing > 180)
-                ? DegToDMS(DMSToDec(forwardBearing) - 180)
-                : DegToDMS(DMSToDec(forwardBearing) + 180);
+                ? DegToDMS(forwardBearing) - 180
+                : DegToDMS(forwardBearing) + 180;
             vm.ForwardBearingReturn = Math.Round(forwardBearingReturn, 6);
 
-            // Vertical angles & reductions //******Arc 2 add to parser******
+            // Vertical angles & reductions
             // Backsight VA
             decimal backsightVAReducedArc1 = 90 - DMSToDec(vm.VAngleDirectArc1Backsight);
             decimal backsightVATransitReducedArc1 = DMSToDec(vm.VAngleTransitArc1Backsight) - 270;
@@ -150,13 +150,14 @@ namespace PegsBase.Services.PegCalc.Implementations
             vm.BackCheckVerticalError = Math.Round(verticalToBack - elevDiff, 5);
             vm.DeltaZ = Math.Round(verticalToFront, 5);
 
-            // Final coords
+            // Final Coords
             decimal forwardRad = forwardBearing * (decimal)Math.PI / 180;
             decimal dY = hdFS * (decimal)Math.Sin((double)forwardRad);
             decimal dX = hdFS * (decimal)Math.Cos((double)forwardRad);
 
             vm.DeltaY = Math.Round(dY, 5);
             vm.DeltaX = Math.Round(dX, 5);
+
             vm.NewPegX = Math.Round(setup.XCoord + dX, 5);
             vm.NewPegY = Math.Round(setup.YCoord + dY, 5);
             vm.NewPegZ = Math.Round(setup.ZCoord + verticalToFront, 5);

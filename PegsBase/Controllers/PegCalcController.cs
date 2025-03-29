@@ -107,7 +107,7 @@ namespace PegsBase.Controllers
                 Locality = "Test Pit 1",
                 Surveyor = "T. Surveyor",
                 SurveyDate = new DateOnly(2025,02,22),
-                PegFailed = true
+                PegFailed = false
             };
 
             var setupPeg = await _db.PegRegister.FirstOrDefaultAsync(p => p.PegName == "861");
