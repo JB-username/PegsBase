@@ -173,7 +173,54 @@ namespace PegsBase.Controllers
                 VAngleTransitArc2Backsight = rawData.VAngleTransitArc2Backsight,
                 VAngleTransitArc2Foresight = rawData.VAngleTransitArc2Foresight,
 
-                PegFailed = rawData.PegFailed
+                PegFailed = rawData.PegFailed,
+
+                HorizontalDistanceBacksight = rawData.HorizontalDistanceBacksight,
+                HorizontalDistanceForesight = rawData.HorizontalDistanceForesight,
+                VerticalDifferenceBacksight = rawData.VerticalDifferenceBacksight,
+                VerticalDifferenceForesight = rawData.VerticalDifferenceForesight,
+                BackCheckHorizontalDistance = rawData.BackCheckHorizontalDistance,
+                BackCheckHorizontalDifference = rawData.BackCheckHorizontalDifference,
+                BackCheckPegElevations = rawData.BackCheckPegElevations,
+                BackCheckVerticalError = rawData.BackCheckVerticalError,
+
+                HAngleDirectReducedArc1 = rawData.HAngleDirectReducedArc1,
+                HAngleDirectReducedArc2 = rawData.HAngleDirectReducedArc2,
+                HAngleTransitReducedArc1 = rawData.HAngleTransitReducedArc1,
+                HAngleTransitReducedArc2 = rawData.HAngleTransitReducedArc2,
+
+                HAngleMeanArc1 = rawData.HAngleMeanArc1,
+                HAngleMeanArc2 = rawData.HAngleMeanArc2,
+                HAngleMeanFinal = rawData.HAngleMeanFinal,
+                HAngleMeanFinalReturn = rawData.HAngleMeanFinalReturn,
+
+                VAngleBacksightMeanArc1 = rawData.VAngleBacksightMeanArc1,
+                VAngleBacksightMeanArc2 = rawData.VAngleBacksightMeanArc2,
+                VAngleBacksightMeanFinal = rawData.VAngleBacksightMeanFinal,
+
+                VAngleForesightMeanArc1 = rawData.VAngleForesightMeanArc1,
+                VAngleForesightMeanArc2 = rawData.VAngleForesightMeanArc2,
+                VAngleForesightMeanFinal = rawData.VAngleForesightMeanFinal,
+
+                BackBearingReturn = rawData.BackBearingReturn,
+                ForwardBearing = rawData.ForwardBearing,
+                ForwardBearingReturn = rawData.ForwardBearingReturn,
+
+                StationPegX = rawData.StationPegX,
+                StationPegY = rawData.StationPegY,
+                StationPegZ = rawData.StationPegZ,
+
+                BacksightPegX = rawData.BacksightPegX,
+                BacksightPegY = rawData.BacksightPegY,
+                BacksightPegZ = rawData.BacksightPegZ,
+
+                NewPegX = rawData.NewPegX,
+                NewPegY = rawData.NewPegY,
+                NewPegZ = rawData.NewPegZ,
+
+                DeltaX = rawData.DeltaX,
+                DeltaY = rawData.DeltaY,
+                DeltaZ = rawData.DeltaZ
 
             };
 

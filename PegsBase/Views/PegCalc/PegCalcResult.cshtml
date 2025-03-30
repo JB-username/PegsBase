@@ -499,7 +499,49 @@
 
 	@Html.HiddenFor(m => m.PegFailed)
 
-	@* Add any other required hidden fields *@
+	@Html.HiddenFor(m => m.HorizontalDistanceBacksight)
+	@Html.HiddenFor(m => m.HorizontalDistanceForesight)
+	@Html.HiddenFor(m => m.VerticalDifferenceBacksight)
+	@Html.HiddenFor(m => m.VerticalDifferenceForesight)
+	@Html.HiddenFor(m => m.BackCheckHorizontalDistance)
+	@Html.HiddenFor(m => m.BackCheckHorizontalDifference)
+	@Html.HiddenFor(m => m.BackCheckPegElevations)
+	@Html.HiddenFor(m => m.BackCheckVerticalError)
+
+	@Html.HiddenFor(m => m.HAngleDirectReducedArc1)
+	@Html.HiddenFor(m => m.HAngleTransitReducedArc1)
+	@Html.HiddenFor(m => m.HAngleDirectReducedArc2)
+	@Html.HiddenFor(m => m.HAngleTransitReducedArc2)
+
+	@Html.HiddenFor(m => m.HAngleMeanArc1)
+	@Html.HiddenFor(m => m.HAngleMeanArc2)
+	@Html.HiddenFor(m => m.HAngleMeanFinal)
+	@Html.HiddenFor(m => m.HAngleMeanFinalReturn)
+
+	@Html.HiddenFor(m => m.VAngleBacksightMeanArc1)
+	@Html.HiddenFor(m => m.VAngleBacksightMeanArc2)
+	@Html.HiddenFor(m => m.VAngleBacksightMeanFinal)
+
+	@Html.HiddenFor(m => m.VAngleForesightMeanArc1)
+	@Html.HiddenFor(m => m.VAngleForesightMeanArc2)
+	@Html.HiddenFor(m => m.VAngleForesightMeanFinal)
+
+	@Html.HiddenFor(m => m.BackBearingReturn)
+	@Html.HiddenFor(m => m.ForwardBearing)
+	@Html.HiddenFor(m => m.ForwardBearingReturn)
+
+	@Html.HiddenFor(m => m.StationPegX)
+	@Html.HiddenFor(m => m.StationPegY)
+	@Html.HiddenFor(m => m.StationPegZ)
+
+	@Html.HiddenFor(m => m.BacksightPegX)
+	@Html.HiddenFor(m => m.BacksightPegY)
+	@Html.HiddenFor(m => m.BacksightPegZ)
+
+	@Html.HiddenFor(m => m.DeltaX)
+	@Html.HiddenFor(m => m.DeltaY)
+	@Html.HiddenFor(m => m.DeltaZ)
+
 
 	<div class="mt-4">
 		<button type="submit" class="btn btn-primary">Save to Database</button>

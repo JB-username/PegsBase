@@ -502,27 +502,106 @@ namespace PegsBase.Controllers
                 var rawData = await _dbContext.RawSurveyData
                     .FirstOrDefaultAsync(r => r.ForeSightPeg == peg.PegName);
 
-                var station = await _dbContext.PegRegister
-                    .FirstOrDefaultAsync(p => p.PegName == rawData.StationPeg);
+                if (rawData == null)
+                    return View("BasicPegView", peg); // fallback if raw missing
 
-                var backsight = await _dbContext.PegRegister
-                    .FirstOrDefaultAsync(p => p.PegName == rawData.BackSightPeg);
+                var viewModel = new PegCalcViewModel
+                {
+                    ForeSightPeg = rawData.ForeSightPeg,
+                    StationPeg = rawData.StationPeg,
+                    BackSightPeg = rawData.BackSightPeg,
 
-                if (rawData == null || station == null || backsight == null)
-                    return View("BasicPegView", peg); // fallback if anything is missing
+                    TargetHeightBacksight = rawData.TargetHeightBacksight,
+                    TargetHeightForesight = rawData.TargetHeightForesight,
+                    InstrumentHeight = rawData.InstrumentHeight,
+                    SlopeDistanceBacksight = rawData.SlopeDistanceBacksight,
+                    SlopeDistanceForesight = rawData.SlopeDistanceForesight,
 
-                // Use your shared calculation service
-                var viewModel = _pegCalcService.RunCalculationFromRawData(rawData, station, backsight);
+                    HorizontalDistanceBacksight = rawData.HorizontalDistanceBacksight,
+                    HorizontalDistanceForesight = rawData.HorizontalDistanceForesight,
 
-                return View("PegCalcResultViewOnly", viewModel); // A read-only version of PegCalcResult
+                    VerticalDifferenceBacksight = rawData.VerticalDifferenceBacksight,
+                    VerticalDifferenceForesight = rawData.VerticalDifferenceForesight,
+
+                    BackCheckHorizontalDistance = rawData.BackCheckHorizontalDistance,
+                    BackCheckHorizontalDifference = rawData.BackCheckHorizontalDifference,
+
+                    BackCheckPegElevations = rawData.BackCheckPegElevations,
+                    BackCheckVerticalError = rawData.BackCheckVerticalError,
+
+                    HAngleDirectArc1Backsight = rawData.HAngleDirectArc1Backsight,
+                    HAngleDirectArc1Foresight = rawData.HAngleDirectArc1Foresight,
+                    HAngleTransitArc1Backsight = rawData.HAngleTransitArc1Backsight,
+                    HAngleTransitArc1Foresight = rawData.HAngleTransitArc1Foresight,
+
+                    HAngleDirectArc2Backsight = rawData.HAngleDirectArc2Backsight,
+                    HAngleDirectArc2Foresight = rawData.HAngleDirectArc2Foresight,
+                    HAngleTransitArc2Backsight = rawData.HAngleTransitArc2Backsight,
+                    HAngleTransitArc2Foresight = rawData.HAngleTransitArc2Foresight,
+
+                    VAngleDirectArc1Backsight = rawData.VAngleDirectArc1Backsight,
+                    VAngleDirectArc1Foresight = rawData.VAngleDirectArc1Foresight,
+                    VAngleTransitArc1Backsight = rawData.VAngleTransitArc1Backsight,
+                    VAngleTransitArc1Foresight = rawData.VAngleTransitArc1Foresight,
+
+                    VAngleDirectArc2Backsight = rawData.VAngleDirectArc2Backsight,
+                    VAngleDirectArc2Foresight = rawData.VAngleDirectArc2Foresight,
+                    VAngleTransitArc2Backsight = rawData.VAngleTransitArc2Backsight,
+                    VAngleTransitArc2Foresight = rawData.VAngleTransitArc2Foresight,
+
+                    HAngleDirectReducedArc1 =rawData.HAngleDirectReducedArc1,
+                    HAngleTransitReducedArc1 = rawData.HAngleTransitReducedArc1,
+                    HAngleDirectReducedArc2 =rawData.HAngleDirectReducedArc2,
+                    HAngleTransitReducedArc2 =rawData.HAngleTransitReducedArc2,
+
+                    HAngleMeanArc1 =rawData.HAngleMeanArc1,
+                    HAngleMeanArc2 =rawData.HAngleMeanArc2,
+                    HAngleMeanFinal = rawData.HAngleMeanFinal,
+                    HAngleMeanFinalReturn = rawData.HAngleMeanFinalReturn,
+
+                    VAngleBacksightMeanArc1 = rawData.VAngleBacksightMeanArc1,
+                    VAngleBacksightMeanArc2 = rawData.VAngleBacksightMeanArc2,
+                    VAngleBacksightMeanFinal = rawData.VAngleBacksightMeanFinal,
+
+                    VAngleForesightMeanArc1 = rawData.VAngleForesightMeanArc1,
+                    VAngleForesightMeanArc2 = rawData.VAngleForesightMeanArc2,
+                    VAngleForesightMeanFinal = rawData.VAngleForesightMeanFinal,
+
+                    BackBearingReturn = rawData.BackBearingReturn,
+                    ForwardBearing = rawData.ForwardBearing,
+                    ForwardBearingReturn = rawData.ForwardBearingReturn,
+
+                    BacksightPegX = rawData.BacksightPegX,
+                    BacksightPegY = rawData.BacksightPegY,
+                    BacksightPegZ = rawData.BacksightPegZ,
+
+                    StationPegX = rawData.StationPegX,
+                    StationPegY = rawData.StationPegY,
+                    StationPegZ = rawData.StationPegZ,
+
+                    NewPegX = rawData.NewPegX,
+                    NewPegY = rawData.NewPegY,
+                    NewPegZ = rawData.NewPegZ,
+
+                    DeltaX = rawData.DeltaX,
+                    DeltaY = rawData.DeltaY,
+                    DeltaZ = rawData.DeltaZ,
+
+                    // Metadata
+                    Surveyor = rawData.Surveyor,
+                    SurveyDate = rawData.SurveyDate,
+                    Locality = rawData.Locality,
+                    Level = peg.Level,
+                    PointType = peg.PointType,
+                    PegFailed = rawData.PegFailed
+                };
+
+                return View("PegCalcResultViewOnly", viewModel);
             }
             else
             {
                 return View("BasicPegView", peg);
             }
         }
-
-
-
     }
 }

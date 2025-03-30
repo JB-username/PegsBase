@@ -87,14 +87,12 @@ namespace PegsBase.Models.ViewModels
         public decimal VAngleForesightMeanFinal { get; set; }
 
         //Bearing Values
-        public decimal BackBearing { get; set; }
         public decimal BackBearingReturn { get; set; }
         public decimal ForwardBearing { get; set; }
         public decimal ForwardBearingReturn { get; set; }
 
         //Peg Status
         public bool PegFailed { get; set; }
-        public bool PegStatus { get; set; }
        
         //Coordinates
         public decimal StationPegX {  get; set; }

@@ -9,7 +9,12 @@
 <form asp-action="UploadDat" enctype="multipart/form-data" method="post">
     <div class="mb-3">
         <label asp-for="CoordinateFile" class="form-label"></label>
-        <input asp-for="CoordinateFile" class="form-control" type="file" accept=".dat" required />
+        <input asp-for="CoordinateFile"
+               class="form-control"
+               type="file"
+               accept=".dat,application/octet-stream"
+               required />
+
         <span asp-validation-for="CoordinateFile" class="text-danger"></span>
     </div>
 
