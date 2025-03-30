@@ -29,15 +29,17 @@ namespace PegsBase.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> UploadPegCalc(IFormFile file, [FromServices] IRawSurveyDataDatFileParser parser)
+        public async Task<IActionResult> UploadPegCalc(
+                 RawSurveyDataUploadViewModel model,
+                 [FromServices] IRawSurveyDataDatFileParser parser)
         {
-            if (file == null || file.Length == 0)
+            if (model.File == null || model.File.Length == 0)
             {
                 TempData["Error"] = "Please upload a valid .dat file.";
                 return RedirectToAction("UploadPegCalc");
             }
 
-            var parsedList = await parser.ParseRawSurveyFileAsync(file);
+            var parsedList = await parser.ParseRawSurveyFileAsync(model.File);
 
             if (parsedList == null || parsedList.Count == 0)
             {
@@ -52,6 +54,7 @@ namespace PegsBase.Controllers
 
             return RedirectToAction("Calculate");
         }
+
 
 
         [HttpGet]
@@ -100,7 +103,7 @@ namespace PegsBase.Controllers
         [HttpPost]
         public async Task<IActionResult> SavePegCalc(PegCalcViewModel rawData)
         {
-            
+
             if (!ModelState.IsValid)
             {
                 return View("PegCalcResult", rawData);
@@ -132,9 +135,9 @@ namespace PegsBase.Controllers
                     PegFailed = rawData.PegFailed,
                     HasPegCalc = true,
                     FromPeg = rawData.StationPeg,
-                };                  
+                };
 
-                _db.PegRegister.Add(pegRegister);   
+                _db.PegRegister.Add(pegRegister);
             }
 
             var raw = new RawSurveyData
@@ -226,7 +229,7 @@ namespace PegsBase.Controllers
 
             var existingRaw = await _db.RawSurveyData
                     .FirstOrDefaultAsync(
-                r => r.ForeSightPeg == 
+                r => r.ForeSightPeg ==
                 rawData.ForeSightPeg);
 
             if (existingRaw == null)
@@ -267,7 +270,7 @@ namespace PegsBase.Controllers
 
                 Locality = "Test Pit 1",
                 Surveyor = "T. Surveyor",
-                SurveyDate = new DateOnly(2025,02,22),
+                SurveyDate = new DateOnly(2025, 02, 22),
                 PegFailed = false
             };
 

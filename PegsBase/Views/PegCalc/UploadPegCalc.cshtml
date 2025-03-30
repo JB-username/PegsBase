@@ -1,4 +1,6 @@
-﻿@{
+﻿@model PegsBase.Models.ViewModels.RawSurveyDataUploadViewModel
+
+@{
     ViewData["Title"] = "Upload Survey Data";
 }
 
@@ -13,10 +15,11 @@
 
 <form asp-action="UploadPegCalc" enctype="multipart/form-data" method="post">
     <div class="mb-3">
-        <label for="file" class="form-label">Choose DAT File</label>
-        <input class="form-control" type="file" name="file" accept=".dat,application/octet-stream" required />
-
+        <label asp-for="File" class="form-label">Choose DAT File</label>
+        <input asp-for="File" class="form-control" type="file" accept=".dat,application/octet-stream" required />
+        <span asp-validation-for="File" class="text-danger"></span>
     </div>
+
     <div class="row mt-lg-5">
         <div class="col-md-6">
             <button class="btn btn-primary" type="submit">Calculate Peg</button>
