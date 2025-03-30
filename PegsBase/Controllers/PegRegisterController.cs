@@ -6,8 +6,10 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using PegsBase.Data;
 using PegsBase.Models;
 using PegsBase.Models.Enums;
+using PegsBase.Models.ViewModels;
 using PegsBase.Services.Parsing;
 using PegsBase.Services.Parsing.Interfaces;
+using PegsBase.Services.PegCalc.Interfaces;
 using System.Text;
 
 namespace PegsBase.Controllers
@@ -17,15 +19,18 @@ namespace PegsBase.Controllers
         private readonly ApplicationDbContext _dbContext;
         private readonly IPegFileParser _pegFileParser;
         private readonly ICoordinateDatParserService _coordinateDatParserService;
+        private readonly IPegCalcService _pegCalcService;
 
         public PegRegisterController(
             ApplicationDbContext db, 
             IPegFileParser pegFileParser,
-            ICoordinateDatParserService coordinateDatParserService)
+            ICoordinateDatParserService coordinateDatParserService,
+            IPegCalcService pegCalcService)
         {
             _dbContext = db;
             _pegFileParser = pegFileParser;
             _coordinateDatParserService = coordinateDatParserService;
+            _pegCalcService = pegCalcService;
         }
 
         public IActionResult Index(SurveyPointType? filter, string sortOrder)
@@ -484,6 +489,40 @@ namespace PegsBase.Controllers
 
             return RedirectToAction("Index", "PegRegister");
         }
+
+        public async Task<IActionResult> ViewPeg(int id)
+        {
+            var peg = await _dbContext.PegRegister.FirstOrDefaultAsync(p => p.Id == id);
+
+            if (peg == null)
+                return NotFound();
+
+            if (peg.HasPegCalc)
+            {
+                var rawData = await _dbContext.RawSurveyData
+                    .FirstOrDefaultAsync(r => r.ForeSightPeg == peg.PegName);
+
+                var station = await _dbContext.PegRegister
+                    .FirstOrDefaultAsync(p => p.PegName == rawData.StationPeg);
+
+                var backsight = await _dbContext.PegRegister
+                    .FirstOrDefaultAsync(p => p.PegName == rawData.BackSightPeg);
+
+                if (rawData == null || station == null || backsight == null)
+                    return View("BasicPegView", peg); // fallback if anything is missing
+
+                // Use your shared calculation service
+                var viewModel = _pegCalcService.RunCalculationFromRawData(rawData, station, backsight);
+
+                return View("PegCalcResultViewOnly", viewModel); // A read-only version of PegCalcResult
+            }
+            else
+            {
+                return View("BasicPegView", peg);
+            }
+        }
+
+
 
     }
 }

@@ -1,0 +1,96 @@
+﻿@model IEnumerable<PegsBase.Models.RawSurveyData>
+
+@{
+    ViewBag.Title = "Raw Survey Data";
+}
+
+<h2 class="mb-3">Raw Survey Data</h2>
+
+<table class="table table-bordered table-sm table-striped">
+    <thead class="table-light">
+        <tr>
+            <th>Surveyor</th>
+            <th>Survey Date</th>
+            <th>Locality</th>
+            <th>Station</th>
+            <th>Backsight</th>
+            <th>Foresight</th>
+            <th>IH</th>
+            <th>TH BS</th>
+            <th>TH FS</th>
+            <th>SD BS</th>
+            <th>SD FS</th>
+            <th>ΔH1 BS</th>
+            <th>ΔH1 FS</th>
+            <th>TRN H1 BS</th>
+            <th>TRN H1 FS</th>
+            <th>ΔH2 BS</th>
+            <th>ΔH2 FS</th>
+            <th>TRN H2 BS</th>
+            <th>TRN H2 FS</th>
+            <th>ΔV1 BS</th>
+            <th>ΔV1 FS</th>
+            <th>TRN V1 BS</th>
+            <th>TRN V1 FS</th>
+            <th>ΔV2 BS</th>
+            <th>ΔV2 FS</th>
+            <th>TRN V2 BS</th>
+            <th>TRN V2 FS</th>
+            <th>Peg Failed</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.Surveyor</td>
+                <td>@item.SurveyDate.ToString("yyyy-MM-dd")</td>
+                <td>@item.Locality</td>
+                <td>@item.StationPeg</td>
+                <td>@item.BackSightPeg</td>
+                <td>@item.ForeSightPeg</td>
+
+                <td>@item.InstrumentHeight</td>
+                <td>@item.TargetHeightBacksight</td>
+                <td>@item.TargetHeightForesight</td>
+                <td>@item.SlopeDistanceBacksight</td>
+                <td>@item.SlopeDistanceForesight</td>
+
+                <td>@item.HAngleDirectArc1Backsight</td>
+                <td>@item.HAngleDirectArc1Foresight</td>
+                <td>@item.HAngleTransitArc1Backsight</td>
+                <td>@item.HAngleTransitArc1Foresight</td>
+
+                <td>@item.HAngleDirectArc2Backsight</td>
+                <td>@item.HAngleDirectArc2Foresight</td>
+                <td>@item.HAngleTransitArc2Backsight</td>
+                <td>@item.HAngleTransitArc2Foresight</td>
+
+                <td>@item.VAngleDirectArc1Backsight</td>
+                <td>@item.VAngleDirectArc1Foresight</td>
+                <td>@item.VAngleTransitArc1Backsight</td>
+                <td>@item.VAngleTransitArc1Foresight</td>
+
+                <td>@item.VAngleDirectArc2Backsight</td>
+                <td>@item.VAngleDirectArc2Foresight</td>
+                <td>@item.VAngleTransitArc2Backsight</td>
+                <td>@item.VAngleTransitArc2Foresight</td>
+
+                <td>@(item.PegFailed ? "Yes" : "No")</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<form asp-action="DeleteAll" method="post" onsubmit="return confirm('Are you sure you want to delete ALL raw survey data?');">
+    @Html.AntiForgeryToken()
+    <button type="submit" class="btn btn-danger">🗑️ Delete All Raw Survey Data</button>
+</form>
+
+@if (TempData["Message"] != null)
+{
+    <div class="alert alert-success mt-3">
+        @TempData["Message"]
+    </div>
+}
+

@@ -23,5 +23,8 @@ namespace PegsBase.Models
         public DateOnly SurveyDate { get; set; }
         [Required (ErrorMessage = "Must be of type: Peg, Control or Beacon")]
         public SurveyPointType PointType { get; set; }
+        public bool PegFailed { get; set; }
+        public bool HasPegCalc { get; set; }
+        public string? FromPeg { get; set; }
     }
 }

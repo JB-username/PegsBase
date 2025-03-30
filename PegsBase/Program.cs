@@ -18,6 +18,7 @@ namespace PegsBase
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container. *Dependency Injection
+            builder.Services.AddSession();
             builder.Services.AddControllersWithViews();
             builder.Services.AddDbContext<ApplicationDbContext>(
                 options => options.UseNpgsql(
@@ -47,6 +48,9 @@ namespace PegsBase
 
             app.UseHttpsRedirection();
             app.UseRouting();
+
+            app.UseStaticFiles();
+            app.UseSession();
 
             app.UseAuthorization();
 

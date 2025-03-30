@@ -173,6 +173,46 @@ namespace PegsBase.Services.PegCalc.Implementations
             return vm;
         }
 
+        #region Calculate from database
+        public PegCalcViewModel RunCalculationFromRawData(RawSurveyData rawData, PegRegister stationPeg, PegRegister backsightPeg)
+        {
+            // Your existing calc logic goes here (bearing, distance, coordinate calc, etc.)
+
+            var viewModel = new PegCalcViewModel
+            {
+                // Assign all values needed for display
+                StationPeg = rawData.StationPeg,
+                BackSightPeg = rawData.BackSightPeg,
+                ForeSightPeg = rawData.ForeSightPeg,
+
+                InstrumentHeight = rawData.InstrumentHeight,
+                SlopeDistanceBacksight = rawData.SlopeDistanceBacksight,
+                SlopeDistanceForesight = rawData.SlopeDistanceForesight,
+
+                // Angle fields
+                HAngleDirectArc1Backsight = rawData.HAngleDirectArc1Backsight,
+                // ...
+
+                // Metadata
+                Surveyor = rawData.Surveyor,
+                Locality = rawData.Locality,
+                SurveyDate = rawData.SurveyDate,
+                PointType = stationPeg.PointType,
+                Level = stationPeg.Level,
+                PegFailed = rawData.PegFailed,
+
+                // Final calculated coordinates
+                //NewPegX = /* your X calc result */,
+                //NewPegY = /* your Y calc result */,
+                //NewPegZ = /* your Z calc result */
+    };
+
+            return viewModel;
+        }
+
+        #endregion
+
+
         #region Helpers
         private (
             decimal BacksightDir, 

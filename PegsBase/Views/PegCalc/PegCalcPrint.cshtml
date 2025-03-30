@@ -1,12 +1,5 @@
-﻿@using PegsBase.Models.Enums;
-@model PegsBase.Models.ViewModels.PegCalcViewModel
-
-@{
-	ViewData["Title"] = "Peg Calculation Result";
-}
-
-@section Styles {
-	<style>
+﻿@section Styles {
+    <style>
 
 		.a4-preview {
 			width: 210mm;
@@ -19,21 +12,11 @@
 			overflow: hidden;
 		}
 
-		@@media print {
+        @@media print {
 
-			body * {
-				visibility: hidden;
-			}
-
-			*,
-			*::before,
-			*::after {
-				box-sizing: border-box;
-			}
-
-			.text-muted {
-				color: #333 !important;
-			}
+            body * {
+                visibility: hidden;
+            }
 
 			.a4-page {
 				width: 210mm;
@@ -46,37 +29,32 @@
 				overflow: hidden;
 			}
 
-			.print-area, .print-area * {
-				visibility: visible;
-			}
+            .print-area, .print-area * {
+                visibility: visible;
+            }
 
-			.print-area {
-				position: absolute;
-				top: 0;
-				left: 0;
-				width: 100%;
-
-			}
-
-			.d-print-none, nav, footer, header {
-				display: none !important;
-			}
-		}
-	</style>
+            .print-area {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+            }
+        }
+    </style>
 }
 
-<div class="a4-page">
-	<div id="print-section" class="print-area a4-page card ">
+<div class="a4-preview">
+<div id="print-section"  class="print-area card a4-page -pmt-lg-5">
 		<div class="card-body">
-			<div class="row mt-1 ">
+			<div class="row mt-3 mx-3">
 				<div class="mb-3 col-6">
-					<strong>Survey Date:</strong> @Model.SurveyDate.ToString("yyyy/MM/dd")  <br />
-					<strong>Surveyor: </strong><span id="displaySurveyor">@Model.Surveyor</span>  <br />
-					<strong>Locality: </strong><span id="displayLocality">@Model.Locality</span> <br />
+					<strong>Survey Date:</strong> @Model.SurveyDate <br />
+					<strong>Surveyor:</strong> @Model.Surveyor <br />
+					<strong>Locality:</strong> @Model.Locality <br />
 				</div>
 				<div class="mb-3 col-6">
 					<div class="row">
-						<h2 class="mb-3 text-info-emphasis text-end"><strong>@Model.ForeSightPeg</strong></h2>
+						<h2 class="mb-3 text-primary text-end"><strong>@Model.ForeSightPeg</strong></h2>
 					</div>
 					<div class="row">
 						<p class="fs-6 small text-muted text-end"><small>Generated With PegsBase</small></p>
@@ -239,21 +217,18 @@
 								<div class="row mb-1">
 									<div class="col text-muted">SD</div>
 									<div class="col"><span class="value">@Model.SlopeDistanceForesight.ToString("F3")m</span></div>
-									<div class="col"></div>
 									<div class="col"><span class="value">TH</span></div>
 									<div class="col"><span class="value">@Model.TargetHeightForesight.ToString("F3")m</span></div>
 								</div>
 								<div class="row mb-1">
 									<div class="col text-muted">HD</div>
 									<div class="col"><span class="value">@Model.HorizontalDistanceForesight.ToString("F3")m</span></div>
-									<div class="col"></div>
 									<div class="col"><span class="value">VD</span></div>
 									<div class="col"><span class="value">@Model.VerticalDifferenceForesight.ToString("F3")m</span></div>
 								</div>
 								<div class="row mb-1">
 									<div class="col text-muted">ED</div>
 									<div class="col"><span class="value">@Model.DeltaZ.ToString("F3")m</span></div>
-									<div class="col"></div>
 									<div class="col"><span class="value"></span></div>
 									<div class="col"><span class="value"></span></div>
 								</div>
@@ -272,7 +247,7 @@
 							</div>
 
 
-							<div class="card-body report-card">
+							<div class="card-body p-3 report-card">
 								<div class="row">
 									<div class="col fw-bold mb-2">Vertical Angles Backsight</div>
 								</div>
@@ -308,54 +283,52 @@
 									</div>
 									<hr />
 									<!--Back Check Distances-->
-									<div class="row mb-2">
-										<div class="col-8 text-muted">Slope Distance</div>
-										<div class="col-4"><span class="value">@Model.SlopeDistanceBacksight.ToString("F3")m</span></div>
+									<div class="row mb-3 ms-3">
+										<div class="col text-muted">Slope Distance</div>
+										<div class="col"><span class="value">@Model.SlopeDistanceBacksight.ToString("F3")m</span></div>
 									</div>
-									<div class="row mb-2">
-										<div class="col-8 text-muted">Horizontal Distance</div>
-										<div class="col-4"><span class="value">@Model.HorizontalDistanceBacksight.ToString("F3")m</span></div>
+									<div class="row mb-3 ms-3">
+										<div class="col text-muted">Horizontal Distance</div>
+										<div class="col"><span class="value">@Model.HorizontalDistanceBacksight.ToString("F3")m</span></div>
 									</div>
-									<div class="row mb-2">
-										<div class="col-8 text-muted"><span class="value">Backcheck Horizontal Distance</span></div>
-										<div class="col-4"><span class="value">@Model.BackCheckHorizontalDistance.ToString("F3")m</span></div>
+									<div class="row mb-3 ms-3">
+										<div class="col text-muted">Backcheck HD</div>
+										<div class="col"><span class="value">@Model.BackCheckHorizontalDistance.ToString("F3")m</span></div>
 									</div>
-
-									<div class="row mb-2 fw-bold">
-										<div class="col-8">Deviation HD</div>
-										<div class="col-4"><span class="value">@Model.BackCheckHorizontalDifference.ToString("F3")m</span></div>
+									<div class="row mb-3 ms-3 fw-bold">
+										<div class="col">Deviation HD</div>
+										<div class="col"><span class="value">@Model.BackCheckHorizontalDifference.ToString("F3")m</span></div>
 									</div>
-									<hr />
-									<div class="row mb-2">
-										<div class="col-8 text-muted">Instrument Height</div>
-										<div class="col-4"><span class="value">@Model.InstrumentHeight.ToString("F3")m</span></div>
+									<div class="row mb-3 ms-3">
+										<div class="col text-muted">Instrument Height</div>
+										<div class="col"><span class="value">@Model.InstrumentHeight.ToString("F3")m</span></div>
 									</div>
-									<div class="row mb-2">
-										<div class="col-8 text-muted">Target Height</div>
-										<div class="col-4"><span class="value">@Model.TargetHeightBacksight.ToString("F3")m</span></div>
+									<div class="row mb-3 ms-3">
+										<div class="col text-muted">Target Height</div>
+										<div class="col"><span class="value">@Model.TargetHeightBacksight.ToString("F3")m</span></div>
 									</div>
-									<div class="row mb-2">
-										<div class="col-8 text-muted">Vertical Difference</div>
-										<div class="col-4"><span class="value">@Model.VerticalDifferenceBacksight.ToString("F3")m</span></div>
+									<div class="row mb-3 ms-3">
+										<div class="col text-muted">Vertical Difference</div>
+										<div class="col"><span class="value">@Model.VerticalDifferenceBacksight.ToString("F3")m</span></div>
 									</div>
-									<div class="row mb-2">
-										<div class="col-8 text-muted">Backcheck VD</div>
-										<div class="col-4"><span class="value">@Model.BackCheckPegElevations.ToString("F3")m</span></div>
+									<div class="row mb-3 ms-3">
+										<div class="col text-muted">Backcheck ED</div>
+										<div class="col"><span class="value">@Model.BackCheckPegElevations.ToString("F3")m</span></div>
 									</div>
-									<hr />
-									<div class="row mb-2 fw-bold">
-										<div class="col-8">Deviation VD</div>
-										<div class="col-4"><span class="value">@Model.BackCheckVerticalError.ToString("F3")m</span></div>
+									<div class="row mb-3 ms-3 fw-bold">
+										<div class="col">Deviation ED</div>
+										<div class="col"><span class="value">@Model.BackCheckVerticalError.ToString("F3")m</span></div>
 									</div>
 								</div>
 							</div>
+
 						</div>
 					</div>
 				</div>
 			</div>
 
 			<div class="mx-lg-5 mb-4">
-				<div class="card mx-lg-5 shadow-sm rounded-2">
+				<div class="card shadow-sm rounded-2">
 					<div class="text-center fw-bold py-2 rounded
                                         @(Model.PegFailed ? "bg-danger-subtle text-danger" : "bg-success-subtle text-success")">
 						@(Model.PegFailed ? "Failed" : "Passed")
@@ -363,7 +336,7 @@
 				</div>
 			</div>
 
-			<div class="mx-2">
+			<div class="mx-4">
 				<div class="card shadow-sm border-0">
 					<div class="card-header row fw-bold fs-5">
 						<div class="col">@Model.StationPeg</div>
@@ -375,10 +348,10 @@
 			</div>
 
 
-			<div class="mx-2">
-				<div class="card shadow-sm rounded-2 border-0">
-					<div class="card-header row rounded-2 fs-5 border-bottom">
-						<div class="col">Δ</div>
+			<div class="mx-4">
+				<div class="card shadow-sm border-0">
+					<div class="card-header row fs-5 border-bottom">
+						<div class="col">Deltas</div>
 						<div class="col">@Model.DeltaY.ToString("F3")</div>
 						<div class="col">@Model.DeltaX.ToString("F3")</div>
 						<div class="col">@Model.DeltaZ.ToString("F3")</div>
@@ -386,8 +359,8 @@
 				</div>
 			</div>
 
-			<div class="mx-2">
-				<div class="card shadow-sm border-0 mb-2 ">
+			<div class="mx-4">
+				<div class="card shadow-sm border-0 mb-4 ">
 					<div class="card-header row @(Model.PegFailed ? "bg-danger-subtle text-danger" : "bg-primary text-light") fw-bold fs-5 border-bottom">
 						<div class="col">@Model.ForeSightPeg</div>
 						<div class="col">@Model.NewPegY.ToString("F3")</div>
@@ -400,142 +373,8 @@
 	</div>
 </div>
 
-<form asp-action="SavePegCalc" method="post">
-	<div class="card mt-5">
-		<div class="card-header bg-warning">
-			<h5><span class="mb-0 fw-bold text-light">Peg Metadata</span>
-				<span class="mb-0 text-light">(optional)</span>
-			</h5>
-		</div>
-		<div class="card-body">
-			<div class="row">
-				<div class="col-md-6">
-					<h6>Metadata Entry</h6>
-
-					<div class="form-group">
-						<label>Level</label>
-						<input type="text" id="inputLevel" class="form-control" />
-					</div>
-
-					<div class="form-group">
-						<label>Surveyor</label>
-						<input type="text" id="inputSurveyor" class="form-control" />
-					</div>
-
-					<div class="form-group">
-						<label>Locality</label>
-						<input type="text" id="inputLocality" class="form-control" />
-					</div>
-
-					<div class="form-group">
-						<label>Survey Point Type</label>
-						<select id="inputPointType" class="form-control">
-							<option value="Peg">Peg</option>
-							<option value="Control">Control</option>
-							<option value="Beacon">Beacon</option>
-						</select>
-					</div>
-				</div>
-
-				<div class="col-md-6">
-					<h6>Live Preview</h6>
-					<p><strong>Level:</strong> <span id="previewLevel">@Model.Level</span></p>
-					<p><strong>Surveyor:</strong> <span id="previewSurveyor">@Model.Surveyor</span></p>
-					<p><strong>Locality:</strong> <span id="previewLocality">@Model.Locality</span></p>
-					<p><strong>Point Type:</strong> <span id="previewPointType">@Model.PointType</span></p>
-				</div>
-			</div>
-		</div>
-	</div>
-
-	<hr />
-
-	@* Hidden form fields for submission *@
-	<input type="hidden" name="Level" id="hiddenLevel" />
-	<input type="hidden" name="Surveyor" id="hiddenSurveyor" />
-	<input type="hidden" name="Locality" id="hiddenLocality" />
-	<input type="hidden" name="PointType" id="hiddenPointType" />
-
-
-	@Html.HiddenFor(m => m.NewPegX)
-	@Html.HiddenFor(m => m.NewPegY)
-	@Html.HiddenFor(m => m.NewPegZ)
-
-	@Html.HiddenFor(m => m.Surveyor, new { id = "hiddenSurveyor" })
-	@Html.HiddenFor(m => m.SurveyDate)
-	@Html.HiddenFor(m => m.Locality, new { id = "hiddenLocality" })
-	@Html.HiddenFor(m => m.Level, new { id = "hiddenLevel" })
-	@Html.HiddenFor(m => m.PointType, new { id = "hiddenPointType" })
-
-	@Html.HiddenFor(m => m.ForeSightPeg)
-	@Html.HiddenFor(m => m.StationPeg)
-	@Html.HiddenFor(m => m.BackSightPeg)
-
-	@Html.HiddenFor(m => m.InstrumentHeight)
-	@Html.HiddenFor(m => m.TargetHeightBacksight)
-	@Html.HiddenFor(m => m.TargetHeightForesight)
-	@Html.HiddenFor(m => m.SlopeDistanceBacksight)
-	@Html.HiddenFor(m => m.SlopeDistanceForesight)
-
-	@Html.HiddenFor(m => m.HAngleDirectArc1Backsight)
-	@Html.HiddenFor(m => m.HAngleDirectArc1Foresight)
-	@Html.HiddenFor(m => m.HAngleTransitArc1Backsight)
-	@Html.HiddenFor(m => m.HAngleTransitArc1Foresight)
-
-	@Html.HiddenFor(m => m.HAngleDirectArc2Backsight)
-	@Html.HiddenFor(m => m.HAngleDirectArc2Foresight)
-	@Html.HiddenFor(m => m.HAngleTransitArc2Backsight)
-	@Html.HiddenFor(m => m.HAngleTransitArc2Foresight)
-
-	@Html.HiddenFor(m => m.VAngleDirectArc1Backsight)
-	@Html.HiddenFor(m => m.VAngleDirectArc1Foresight)
-	@Html.HiddenFor(m => m.VAngleTransitArc1Backsight)
-	@Html.HiddenFor(m => m.VAngleTransitArc1Foresight)
-
-	@Html.HiddenFor(m => m.VAngleDirectArc2Backsight)
-	@Html.HiddenFor(m => m.VAngleDirectArc2Foresight)
-	@Html.HiddenFor(m => m.VAngleTransitArc2Backsight)
-	@Html.HiddenFor(m => m.VAngleTransitArc2Foresight)
-
-	@Html.HiddenFor(m => m.PegFailed)
-
-	@* Add any other required hidden fields *@
-
-	<div class="mt-4">
-		<button type="submit" class="btn btn-primary">Save to Database</button>
-		<button type="button" class="btn btn-secondary" onclick="window.print();">Print</button>
-	</div>
-</form>
-
-
-@section Scripts {
-	<script>
-		function updatePreview(fieldId, previewId, hiddenId) {
-			const value = document.getElementById(fieldId).value;
-			document.getElementById(previewId).textContent = value;
-			document.getElementById(hiddenId).value = value;
-		}
-
-		document.getElementById('inputLevel').addEventListener('input', function () {
-			updatePreview('inputLevel', 'previewLevel', 'hiddenLevel');
-		});
-
-		document.getElementById('inputSurveyor').addEventListener('input', function () {
-			updatePreview('inputSurveyor', 'previewSurveyor', 'hiddenSurveyor');
-			document.getElementById('displaySurveyor').textContent = this.value;
-		});
-
-		document.getElementById('inputLocality').addEventListener('input', function () {
-			updatePreview('inputLocality', 'previewLocality', 'hiddenLocality');
-			document.getElementById('displayLocality').textContent = this.value;
-		});
-
-		document.getElementById('inputPointType').addEventListener('change', function () {
-			updatePreview('inputPointType', 'previewPointType', 'hiddenPointType');
-		});
-
-		// Trigger update from dropdown on page load
-		document.getElementById('inputPointType').dispatchEvent(new Event('change'));
-
-	</script>
-}
+@* <script> *@
+@*     window.onload = function () { *@
+@*         window.print(); *@
+@*     }; *@
+@* </script> *@

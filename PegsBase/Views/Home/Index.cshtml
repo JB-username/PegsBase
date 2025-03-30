@@ -9,11 +9,11 @@
 
 <div class="row">
     <div class="container mt-4">
-        <h2 class="text-center">Survey Management</h2>
+        
 
         <div class="row mt-4">
             <!-- Peg Register Card -->
-            <div class="col-md-4">
+            <div class="col-md-4 mb-2">
                 <div class="card shadow">
                     <div class="card-header bg-primary text-white">
                         <h5 class="mb-0">Peg Register</h5>
@@ -39,7 +39,7 @@
             </div>
 
             <!-- Survey Notes Card -->
-            <div class="col-md-4">
+            <div class="col-md-4 mb-2">
                 <div class="card shadow">
                     <div class="card-header bg-success text-white">
                         <h5 class="mb-0">Survey Notes</h5>
@@ -56,7 +56,7 @@
             </div>
 
             <!-- Survey Calcs Card -->
-            <div class="col-md-4">
+            <div class="col-md-4 mb-2">
                 <div class="card shadow">
                     <div class="card-header text-light" style="background-color: #725daf">
                         <h5 class="mb-0">Survey Calculations</h5>
@@ -70,8 +70,8 @@
                             <a asp-controller="PegCalc"
                                asp-action="UploadPegCalc"
                                class="btn btn-outline-purple">Upload Survey Data</a>
-                            <a asp-controller="PegCalc"
-                               asp-action="ViewRawSurveyData"
+                            <a asp-controller="RawSurveyData"
+                               asp-action="Index"
                                class="btn btn-outline-purple">View Raw Survey Data</a>
                         </div>
                     </div>
@@ -83,7 +83,7 @@
 
 <!-- Job Requests Card -->
 <div class="row mt-lg-4">
-    <div class="col-md-4">
+    <div class="col-md-4 mb-2">
         <div class="card shadow">
             <div class="card-header bg-info text-light">
                 <h5 class="mb-0">Job Requests</h5>
@@ -100,7 +100,7 @@
     </div>
 
     <!-- Mine Plans Card -->
-    <div class="col-md-4">
+    <div class="col-md-4 mb-5">
         <div class="card shadow">
             <div class="card-header bg-warning text-light">
                 <h5 class="mb-0">Mine Plans</h5>

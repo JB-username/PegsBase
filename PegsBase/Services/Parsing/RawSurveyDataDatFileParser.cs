@@ -33,7 +33,8 @@ namespace PegsBase.Services.Parsing
                     switch (values[0])
                     {
                         case "SURVEYOR":
-                            surveyor = values[1];
+                            //surveyor = values[1];
+                            surveyor = line.Substring("SURVEYOR".Length).Trim();
                             break;
 
                         case "DATE":

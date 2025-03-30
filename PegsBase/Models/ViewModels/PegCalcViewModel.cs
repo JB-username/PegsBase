@@ -1,4 +1,5 @@
-﻿using System;
+﻿using PegsBase.Models.Enums;
+using System;
 using System.ComponentModel.DataAnnotations;
 
 namespace PegsBase.Models.ViewModels
@@ -11,6 +12,9 @@ namespace PegsBase.Models.ViewModels
         public string? Surveyor { get; set; }
         public DateOnly SurveyDate { get; set; }
         public string? Locality { get; set; }
+        public int Level { get; set; }
+        public decimal GradeElevation { get; set; }
+        public SurveyPointType PointType { get; set; }
 
         //Pegs Used
         public string? StationPeg { get; set; }

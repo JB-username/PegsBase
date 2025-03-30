@@ -20,36 +20,36 @@ namespace PegsBase.Models
         public decimal InstrumentHeight { get; set; }
         public decimal TargetHeightBacksight { get; set; }
         public decimal TargetHeightForesight { get; set; }
-        public decimal SlopeDistance1Backsight { get; set; }
-        public decimal SlopeDistance1Foresight { get; set; }
-        public decimal SlopeDistance2Backsight { get; set; }
-        public decimal SlopeDistance2Foresight { get; set; }
+        public decimal SlopeDistanceBacksight { get; set; }
+        public decimal SlopeDistanceForesight { get; set; }
 
         //Horizontal Angle Measurements
         //Arc 1
-        public decimal HorizontalAngle1Backsight { get; set; }
-        public decimal HorizontalAngle1Foresight { get; set; }
-        public decimal HorizontalTransit1Backsight { get; set; }
-        public decimal HorizontalTransit1Foresight { get; set; }
+        public decimal HAngleDirectArc1Backsight { get; set; }
+        public decimal HAngleDirectArc1Foresight { get; set; }
+        public decimal HAngleTransitArc1Backsight { get; set; }
+        public decimal HAngleTransitArc1Foresight { get; set; }
 
         //Arc2
-        public decimal HorizontalAngle2Backsight { get; set; }
-        public decimal HorizontalAngle2Foresight { get; set; }
-        public decimal HorizontalTransit2Backsight { get; set; }
-        public decimal HorizontalTransit2Foresight { get; set; }
-        
+        public decimal HAngleDirectArc2Backsight { get; set; }
+        public decimal HAngleDirectArc2Foresight { get; set; }
+        public decimal HAngleTransitArc2Backsight { get; set; }
+        public decimal HAngleTransitArc2Foresight { get; set; }
+
+
+
         //Vertical Angle Measurements
         //Arc 1
-        public decimal VerticalAngle1Backsight { get; set; }
-        public decimal VerticalAngle1Foresight { get; set; }
-        public decimal VerticalTransit1Backsight { get; set; }
-        public decimal VerticalTransit1Foresight { get; set; }
+        public decimal VAngleDirectArc1Backsight { get; set; }
+        public decimal VAngleDirectArc1Foresight { get; set; }
+        public decimal VAngleTransitArc1Backsight { get; set; }
+        public decimal VAngleTransitArc1Foresight { get; set; }
 
         //Arc2
-        public decimal VerticalAngle2Backsight { get; set; }
-        public decimal VerticalAngle2Foresight { get; set; }
-        public decimal VerticalTransit2Backsight { get; set; }
-        public decimal VerticalTransit2Foresight { get; set; }
+        public decimal VAngleDirectArc2Backsight { get; set; }
+        public decimal VAngleDirectArc2Foresight { get; set; }
+        public decimal VAngleTransitArc2Backsight { get; set; }
+        public decimal VAngleTransitArc2Foresight { get; set; }
 
         //Peg Status
         public bool PegFailed {  get; set; }
