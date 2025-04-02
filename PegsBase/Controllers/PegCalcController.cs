@@ -133,12 +133,21 @@ namespace PegsBase.Controllers
                     ZCoord = rawData.NewPegZ,
                     SurveyDate = rawData.SurveyDate,
                     PegFailed = rawData.PegFailed,
+
                     HasPegCalc = true,
                     FromPeg = rawData.StationPeg,
                 };
 
                 _db.PegRegister.Add(pegRegister);
             }
+            else
+            {
+                // Update the existing peg
+                pegRegister.HasPegCalc = true;
+                // (Optional) Update any other fields you might want to refresh
+            };
+            
+            
 
             var raw = new RawSurveyData
             {
