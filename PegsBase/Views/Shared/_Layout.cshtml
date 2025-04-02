@@ -1,4 +1,6 @@
-﻿<!DOCTYPE html>
+﻿@using PegsBase.Models.Settings;
+
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -10,8 +12,10 @@
     <link rel="stylesheet" href="~/PegsBase.styles.css" asp-append-version="true" />
 
     @RenderSection("Styles", required: false)
+    @inject Microsoft.Extensions.Options.IOptions<ClientSettings> ClientOptions
 </head>
-<body data-bs-theme="light">
+
+<body data-bs-theme="light">    
     <header>
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-primary border-bottom box-shadow mb-3">
             <div class="container-fluid">
@@ -48,10 +52,15 @@
         </main>
     </div>
 
-    <footer class="border-top bg-primary footer text-light"> 
-        <div class="container text-center">
-            &copy; 2025 - PegsBase - Ampelon Digital - Rietberg
+    <footer class="border-top bg-primary footer text-light">
+        <div class="container d-flex justify-content-between align-items-center py-2">
+            <div>
+                &copy; 2025 - PegsBase - Ampelon Digital
             </div>
+            <div>
+                <img src="@ClientOptions.Value.LogoPath" alt="@ClientOptions.Value.ClientName Logo" style="height: 28px;" />
+            </div>
+        </div>
     </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>

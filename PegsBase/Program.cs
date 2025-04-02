@@ -6,6 +6,7 @@ using PegsBase.Services.Parsing;
 using PegsBase.Services.Parsing.Interfaces;
 using PegsBase.Services.PegCalc.Implementations;
 using PegsBase.Services.PegCalc.Interfaces;
+using PegsBase.Models.Settings;
 using System.Data.Common;
 using System.Globalization;
 
@@ -18,8 +19,18 @@ namespace PegsBase
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container. *Dependency Injection
+            builder.Configuration
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.json", optional: false)
+                .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true)
+                .AddEnvironmentVariables();
+
+            builder.Services.Configure<ClientSettings>(
+                builder.Configuration.GetSection("ClientSettings"));
+
             builder.Services.AddSession();
             builder.Services.AddControllersWithViews();
+
             builder.Services.AddDbContext<ApplicationDbContext>(
                 options => options.UseNpgsql(
                     builder.Configuration.GetConnectionString(
