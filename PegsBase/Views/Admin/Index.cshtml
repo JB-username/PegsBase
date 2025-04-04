@@ -1,0 +1,63 @@
+﻿@{
+    ViewData["Title"] = "Admin Dashboard";
+}
+
+<h2>Send Invite</h2>
+
+<form asp-controller="Admin" asp-action="SendInvite" method="post">
+    @Html.AntiForgeryToken()
+    <div class="form-group">
+        <label for="email">Email to invite:</label>
+        <input type="email" class="form-control" name="email" required />
+    </div>
+
+    <div class="form-group mt-2">
+        <label>Assign Role</label>
+        <select name="role" class="form-select" required>
+            <option value="">-- Select a role --</option>
+            <option value="Surveyor">Surveyor</option>
+            <option value="MineSurveyor">Chief Surveyor</option>
+            <option value="MineOverseer">Mine Overseer</option>
+            <option value="MineManager">Mine Manager</option>
+            <option value="Mrm">MRM</option>
+        </select>
+    </div>
+
+
+    <button type="submit" class="btn btn-primary mt-2">Send Invite</button>
+</form>
+
+<h2 class="mt-4">Whitelisted Emails</h2>
+
+<form asp-action="AddWhitelistedEmail" method="post" class="d-flex gap-2">
+    <input name="email" type="email" class="form-control" placeholder="Add email..." required />
+    <button class="btn btn-success">Add</button>
+</form>
+
+<table class="table mt-3">
+    <thead>
+        <tr><th>Email</th><th>Action</th></tr>
+    </thead>
+    <tbody>
+        @foreach (var entry in Model.WhitelistedEmails)
+        {
+            <tr>
+                <td>@entry.Email</td>
+                <td>
+                    <form asp-action="RemoveWhitelistedEmail" method="post" asp-route-id="@entry.Id">
+                        <button class="btn btn-danger btn-sm">Remove</button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+
+@if (ViewBag.InviteLink != null)
+{
+    <div class="alert alert-success mt-4">
+        <strong>Invite sent to:</strong> @ViewBag.Email <br />
+        <strong>Invite link:</strong> <a href="@ViewBag.InviteLink" target="_blank">@ViewBag.InviteLink</a>
+    </div>
+}

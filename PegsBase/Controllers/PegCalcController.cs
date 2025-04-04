@@ -1,8 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using PegsBase.Data;
 using PegsBase.Models;
+using PegsBase.Models.Constants;
 using PegsBase.Models.Enums;
 using PegsBase.Models.ViewModels;
 using PegsBase.Services.Parsing.Interfaces;
@@ -12,6 +14,7 @@ using System.Threading.Tasks;
 
 namespace PegsBase.Controllers
 {
+    [Authorize]
     public class PegCalcController : Controller
     {
         private readonly ApplicationDbContext _db;
@@ -23,6 +26,11 @@ namespace PegsBase.Controllers
             _pegCalcService = pegCalcService;
         }
 
+        [Authorize(Roles =
+            Roles.Master + "," +
+            Roles.MineSurveyor + "," +
+            Roles.SurveyAnalyst + "," +
+            Roles.Surveyor)]
         public IActionResult UploadPegCalc()
         {
             return View();

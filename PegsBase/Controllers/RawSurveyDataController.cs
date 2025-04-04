@@ -1,11 +1,13 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using PegsBase.Data;
 using System;
 
 namespace PegsBase.Controllers
 {
+    [Authorize]
     public class RawSurveyDataController : Controller
     {
         private readonly ApplicationDbContext _db;

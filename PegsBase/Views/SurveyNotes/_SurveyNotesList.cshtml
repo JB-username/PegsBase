@@ -1,0 +1,50 @@
+﻿@model PegsBase.Models.ViewModels.SurveyNotesListViewModel;
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Title</th>
+            <th>Locality</th>
+            <th>Level</th>
+            <th>Type</th>
+            <th>Status</th>
+            <th>Uploaded</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var note in Model.Notes)
+        {
+            <tr>
+                <td>@note.Title</td>
+                <td>@note.Locality</td>
+                <td>@note.Level</td>
+                <td>@note.NoteType</td>
+                <td>@(note.IsSigned ? "Signed" : "In Progress")</td>
+                <td>@note.UploadedAt.ToShortDateString()</td>
+                <td>
+                    <a href="@Url.Content(note.FilePath)" class="btn btn-sm btn-primary" target="_blank">Download</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@{
+    int totalPages = (int)Math.Ceiling(Model.Total / (double)Model.PageSize);
+}
+
+@if (totalPages > 1)
+{
+    <nav>
+        <ul class="pagination">
+            @for (int i = 1; i <= totalPages; i++)
+            {
+                <li class="page-item @(i == Model.Page ? "active" : "")">
+                    <a class="page-link" href="javascript:void(0);" onclick="loadNotes(@i)">@i</a>
+                </li>
+            }
+        </ul>
+    </nav>
+}
+
