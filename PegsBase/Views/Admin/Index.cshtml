@@ -2,6 +2,15 @@
     ViewData["Title"] = "Admin Dashboard";
 }
 
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success">@TempData["Success"]</div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
+
 <h2>Send Invite</h2>
 
 <form asp-controller="Admin" asp-action="SendInvite" method="post">

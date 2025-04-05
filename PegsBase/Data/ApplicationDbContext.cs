@@ -17,8 +17,6 @@ namespace PegsBase.Data
         public DbSet<Invite> Invites { get; set; }
         public DbSet<SurveyNote> SurveyNotes { get; set; }
         public DbSet<WhitelistedEmails> WhitelistedEmails { get; set; }
-
-
     }
 }
 

@@ -11,21 +11,24 @@ using System.Net.Mail;
 
 namespace PegsBase.Controllers
 {
-    [Authorize(Roles = Roles.Master)]
+    [Authorize]
     public class AdminController : Controller
     {
         private readonly ApplicationDbContext _dbContext;
         private readonly IEmailSender _emailSender;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly RoleManager<IdentityRole> _roleManager;
 
         public AdminController(
             ApplicationDbContext dbContext, 
             IEmailSender emailSender,
-            UserManager<ApplicationUser> user)
+            UserManager<ApplicationUser> user,
+            RoleManager<IdentityRole> roleManager)
         {
             _dbContext = dbContext;
             _emailSender = emailSender;
             _userManager = user;
+            _roleManager = roleManager;
         }
 
         public async Task<IActionResult> Index()
@@ -126,6 +129,79 @@ namespace PegsBase.Controllers
             }
 
             return RedirectToAction("Index");
+        }
+
+        [Authorize(Roles = "Admin" + "," + "Master")] // or your admin role
+        public async Task<IActionResult> Users()
+        {
+            var users = await _userManager.Users.ToListAsync();
+            var roles = await _roleManager.Roles.Select(r => r.Name).ToListAsync();
+
+            var userList = new List<AdminUserRow>();
+
+            foreach (var u in users)
+            {
+                userList.Add(new AdminUserRow
+                {
+                    Id = u.Id,
+                    Email = u.Email,
+                    FirstName = u.FirstName,
+                    LastName = u.LastName,
+                    Roles = await _userManager.GetRolesAsync(u),
+                    CompanyId = u.CompanyId,
+                    JobTitle = u.JobTitle
+                });
+            }
+
+            var model = new AdminUsersViewModel
+            {
+                Users = userList,
+                AvailableRoles = roles
+            };
+
+            return View(model);
+        }
+
+
+        [Authorize(Roles = "Admin" + "," + "Master")]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdateUserRole(string userId, string role)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            var currentRoles = await _userManager.GetRolesAsync(user);
+
+            await _userManager.RemoveFromRolesAsync(user, currentRoles);
+            await _userManager.AddToRoleAsync(user, role);
+
+            TempData["Success"] = $"Updated {user.Email} to role {role}";
+            return RedirectToAction("Users");
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdateUserInfo(AdminUserRow updatedUser)
+        {
+            var user = await _userManager.FindByIdAsync(updatedUser.Id);
+
+            if (user == null)
+            {
+                TempData["Error"] = "User not found.";
+                return RedirectToAction("Users");
+            }
+
+            user.FirstName = updatedUser.FirstName;
+            user.LastName = updatedUser.LastName;
+            user.CompanyId = updatedUser.CompanyId;
+            user.JobTitle = updatedUser.JobTitle;
+
+            var result = await _userManager.UpdateAsync(user);
+
+            TempData[result.Succeeded ? "Success" : "Error"] = result.Succeeded
+                ? "User info updated."
+                : string.Join(" ", result.Errors.Select(e => e.Description));
+
+            return RedirectToAction("Users");
         }
 
     }

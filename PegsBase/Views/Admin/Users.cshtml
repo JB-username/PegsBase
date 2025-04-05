@@ -1,0 +1,72 @@
+﻿@model PegsBase.Models.Identity.AdminUsersViewModel
+@{
+	ViewData["Title"] = "User Management";
+}
+
+<h2>User Management</h2>
+
+@if (TempData["Success"] != null)
+{
+	<div class="alert alert-success">@TempData["Success"]</div>
+}
+@if (TempData["Error"] != null)
+{
+	<div class="alert alert-danger">@TempData["Error"]</div>
+}
+
+<table class="table table-bordered mt-4">
+	<thead class="table-light">
+		<tr>
+			<th>Email</th>
+			<th>First Name</th>
+			<th>Last Name</th>
+			<th>Company</th>
+			<th>Job Title</th>
+			<th>Update Role</th>
+			<th>Actions</th>
+		</tr>
+	</thead>
+	<tbody>
+		@foreach (var user in Model.Users)
+		{
+			<tr>
+				<form asp-action="UpdateUserInfo" method="post" class="align-middle">
+					<input type="hidden" name="Id" value="@user.Id" />
+
+				<td>@user.Email</td>
+
+				<td>
+					<input name="FirstName" class="form-control form-control-sm" value="@user.FirstName" />
+				</td>
+
+				<td>
+					<input name="LastName" class="form-control form-control-sm" value="@user.LastName" />
+				</td>
+
+				<td>
+					<input name="CompanyId" class="form-control form-control-sm" value="@user.CompanyId" />
+				</td>
+
+				<td>
+					<input name="JobTitle" class="form-control form-control-sm" value="@user.JobTitle" />
+				</td>
+
+				<td>
+					<select name="Role" class="form-select form-select-sm">
+						@foreach (var role in Model.AvailableRoles)
+						{
+							<option value="@role" selected="@user.Roles.Contains(role)">
+								@role
+							</option>
+						}
+					</select>
+				</td>
+				<td>
+					<button type="submit" class="btn btn-sm btn-success">Save</button>
+				</td>
+				</form>
+			</tr>
+
+		}
+	</tbody>
+</table>
