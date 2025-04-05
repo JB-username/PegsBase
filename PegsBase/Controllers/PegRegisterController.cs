@@ -1,10 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.Json;
 using Newtonsoft.Json;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using PegsBase.Data;
 using PegsBase.Models;
+using PegsBase.Models.Constants;
 using PegsBase.Models.Enums;
 using PegsBase.Models.ViewModels;
 using PegsBase.Services.Parsing;
@@ -14,6 +16,7 @@ using System.Text;
 
 namespace PegsBase.Controllers
 {
+    [Authorize]
     public class PegRegisterController : Controller
     {
         private readonly ApplicationDbContext _dbContext;
@@ -33,6 +36,12 @@ namespace PegsBase.Controllers
             _pegCalcService = pegCalcService;
         }
 
+        [Authorize(Roles =
+            Roles.Master + "," +
+            Roles.Mrm + "," + 
+            Roles.MineSurveyor + "," +
+            Roles.SurveyAnalyst + "," +
+            Roles.Surveyor)]
         public IActionResult Index(SurveyPointType? filter, string sortOrder)
         {
             var objPegsList = _dbContext.PegRegister.AsQueryable();
@@ -64,11 +73,21 @@ namespace PegsBase.Controllers
             return View(objPegsList.ToList());
         }
 
+        [Authorize(Roles =
+            Roles.Master + "," +
+            Roles.MineSurveyor + "," +
+            Roles.SurveyAnalyst + "," +
+            Roles.Surveyor)]
         public IActionResult Create()
         {
             return View();
         }
 
+        [Authorize(Roles =
+            Roles.Master + "," +
+            Roles.MineSurveyor + "," +
+            Roles.SurveyAnalyst + "," +
+            Roles.Surveyor)]
         [HttpPost]
         public IActionResult Create(PegRegister obj)
         {
@@ -89,6 +108,10 @@ namespace PegsBase.Controllers
             return View(obj);
         }
 
+        [Authorize(Roles =
+            Roles.Master + "," +
+            Roles.MineSurveyor + "," +
+            Roles.SurveyAnalyst)]
         [HttpGet]
         public IActionResult Edit(int? id)
         {
@@ -107,6 +130,10 @@ namespace PegsBase.Controllers
             return View(pegEntry);
         }
 
+        [Authorize(Roles =
+            Roles.Master + "," +
+            Roles.MineSurveyor + "," + 
+            Roles.SurveyAnalyst)]
         [HttpPost]
         public IActionResult Edit(PegRegister obj)
         {
@@ -127,6 +154,10 @@ namespace PegsBase.Controllers
             return View(obj);
         }
 
+        [Authorize(Roles =
+            Roles.Master + "," +
+            Roles.MineSurveyor + "," +
+            Roles.SurveyAnalyst)]
         [HttpGet]
         public IActionResult Delete(int? id, SurveyPointType? filter)
         {
@@ -150,6 +181,10 @@ namespace PegsBase.Controllers
             return View(pegEntry);
         }
 
+        [Authorize(Roles =
+            Roles.Master + "," +
+            Roles.MineSurveyor + "," +
+            Roles.SurveyAnalyst)]
         [HttpPost]
         public IActionResult DeletePost(int? id)
         {
@@ -169,6 +204,10 @@ namespace PegsBase.Controllers
             
         }
 
+        [Authorize(Roles =
+            Roles.Master + "," +
+            Roles.MineSurveyor + "," +
+            Roles.SurveyAnalyst)]
         [HttpPost]
         public IActionResult DeleteSelected(List<int> selectedIds)
         {
@@ -189,7 +228,11 @@ namespace PegsBase.Controllers
             return RedirectToAction("Index");
         }
 
-
+        [Authorize(Roles =
+            Roles.Master + "," +
+            Roles.MineSurveyor + "," +
+            Roles.SurveyAnalyst + "," +
+            Roles.Surveyor)]
         [HttpPost]
         public IActionResult ExportSelectedToCsv(List<int> selectedIds)
         {
@@ -223,6 +266,11 @@ namespace PegsBase.Controllers
             return File(fileBytes, "text/csv", fileName);
         }
 
+        [Authorize(Roles =
+            Roles.Master + "," +
+            Roles.MineSurveyor + "," +
+            Roles.SurveyAnalyst + "," +
+            Roles.Surveyor)]
         [HttpPost]
         public IActionResult ExportSelectedToDxf(List<int> selectedIds)
         {
@@ -315,12 +363,22 @@ namespace PegsBase.Controllers
             return File(Encoding.UTF8.GetBytes(sb.ToString()), "application/dxf", "SelectedPegs.dxf");
         }
 
+        [Authorize(Roles =
+            Roles.Master + "," +
+            Roles.MineSurveyor + "," +
+            Roles.SurveyAnalyst + "," +
+            Roles.Surveyor)]
         [HttpGet]
         public IActionResult Upload()
         {
             return View();
         }
 
+        [Authorize(Roles =
+            Roles.Master + "," +
+            Roles.MineSurveyor + "," +
+            Roles.SurveyAnalyst + "," +
+            Roles.Surveyor)]
         [HttpPost]
         public IActionResult Upload(IFormFile file)
         {
@@ -338,6 +396,12 @@ namespace PegsBase.Controllers
             return RedirectToAction("Preview");
         }
 
+        [Authorize(Roles =
+            Roles.Master + "," +
+            Roles.Mrm + "," +
+            Roles.MineSurveyor + "," +
+            Roles.SurveyAnalyst + "," +
+            Roles.Surveyor)]
         [HttpGet]
         public IActionResult Preview()
         {
@@ -348,6 +412,11 @@ namespace PegsBase.Controllers
             return View(pegs);
         }
 
+        [Authorize(Roles =
+            Roles.Master + "," +
+            Roles.MineSurveyor + "," +
+            Roles.SurveyAnalyst + "," +
+            Roles.Surveyor)]
         [HttpPost]
         public IActionResult ConfirmImport(string pegs)
         {
@@ -378,6 +447,11 @@ namespace PegsBase.Controllers
             }
         }
 
+        [Authorize(Roles =
+            Roles.Master + "," +
+            Roles.MineSurveyor + "," +
+            Roles.SurveyAnalyst + "," +
+            Roles.Surveyor)]
         public IActionResult DownloadTemplate()
         {
             var csv = "PegName,XCoord,YCoord,ZCoord,GradeElevation,Locality,Level,Surveyor,SurveyDate,PointType\n";
@@ -385,6 +459,12 @@ namespace PegsBase.Controllers
             return File(bytes, "text/csv", "PegTemplate.csv");
         }
 
+        [Authorize(Roles =
+            Roles.Master + "," +
+            Roles.Mrm + "," +
+            Roles.MineSurveyor + "," +
+            Roles.SurveyAnalyst + "," +
+            Roles.Surveyor)]
         [HttpPost]
         public IActionResult PrintSelected(List<int> selectedIds)
         {
@@ -401,12 +481,22 @@ namespace PegsBase.Controllers
             return View("PrintView", pegs); // Pass data to a dedicated print view
         }
 
+        [Authorize(Roles =
+            Roles.Master + "," +
+            Roles.MineSurveyor + "," +
+            Roles.SurveyAnalyst + "," +
+            Roles.Surveyor)]
         [HttpGet]
         public IActionResult UploadDat()
         {
             return View(new CoordinateUploadViewModel());
         }
 
+        [Authorize(Roles =
+            Roles.Master + "," +
+            Roles.MineSurveyor + "," +
+            Roles.SurveyAnalyst + "," +
+            Roles.Surveyor)]
         [HttpPost]
         public async Task<IActionResult> UploadDat(CoordinateUploadViewModel model)
         {
@@ -490,6 +580,12 @@ namespace PegsBase.Controllers
             return RedirectToAction("Index", "PegRegister");
         }
 
+        [Authorize(Roles =
+            Roles.Master + "," +
+            Roles.Admin + "," +
+            Roles.MineSurveyor + "," +
+            Roles.SurveyAnalyst + "," +
+            Roles.Surveyor)]
         public async Task<IActionResult> ViewPeg(int id)
         {
             var peg = await _dbContext.PegRegister.FirstOrDefaultAsync(p => p.Id == id);

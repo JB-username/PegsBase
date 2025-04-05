@@ -1,0 +1,43 @@
+﻿@model PegsBase.Models.ViewModels.SurveyNoteUploadViewModel
+
+@{
+    ViewData["Title"] = "Upload Survey Note";
+}
+
+<h2>Upload Survey Note</h2>
+
+<form asp-action="Upload" asp-controller="SurveyNotes" method="post" enctype="multipart/form-data">
+    <div class="form-group">
+        <label asp-for="Title"></label>
+        <input asp-for="Title" class="form-control" required />
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Level"></label>
+        <input asp-for="Level" class="form-control" required />
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Surveyor"></label>
+        <input asp-for="Surveyor" class="form-control" required />
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Locality"></label>
+        <input asp-for="Locality" class="form-control" />
+    </div>
+
+    <div class="form-group">
+        <label asp-for="IsSigned"></label>
+        <input asp-for="IsSigned" type="checkbox" class="form-check-input" />
+        <span class="ml-2">Only enable for fully signed note</span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="File"></label>
+        <input asp-for="File" type="file" accept="application/pdf" class="form-control" required />
+    </div>
+
+    <button type="submit" class="btn btn-primary mt-3">Upload Note</button>
+</form>
+

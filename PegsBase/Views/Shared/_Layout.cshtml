@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/PegsBase.styles.css" asp-append-version="true" />
-
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
     @RenderSection("Styles", required: false)
     @inject Microsoft.Extensions.Options.IOptions<ClientSettings> ClientOptions
 </head>
@@ -36,12 +36,12 @@
                             <a class="nav-link text-light" asp-area="" asp-controller="PegRegister" asp-action="Index">Peg Register</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-light" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy Policy</a>
+                            <a class="nav-link text-light" asp-area="" asp-controller="SurveyNotes" asp-action="Index">Survey Notes</a>
+                        </li>
+                        <li class="nav-item">
+                            <button id="darkModeToggle" class="btn btn-sm btn-outline-secondary">🌙</button>
                         </li>
                     </ul>
-                </div>
-                <div>
-                    <button id="darkModeToggle" class="btn btn-sm btn-outline-secondary">🌙</button>
                 </div>
             </div>
         </nav>
@@ -52,10 +52,13 @@
         </main>
     </div>
 
-    <footer class="border-top bg-primary footer text-light">
+    <footer class="border-top bg-primary mt-5 footer text-light">
         <div class="container d-flex justify-content-between align-items-center py-2">
             <div>
-                &copy; 2025 - PegsBase - Ampelon Digital
+                <img src="~/images/Ampelon Digital White.png" alt="Ampelon Digital" style="height: 28px;" />
+            </div>
+            <div>
+                &copy; 2025 - PegsBase
             </div>
             <div>
                 <img src="@ClientOptions.Value.LogoPath" alt="@ClientOptions.Value.ClientName Logo" style="height: 28px;" />
@@ -65,6 +68,7 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+
     @await RenderSectionAsync("Scripts", required: false)
 
     <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1100">
@@ -116,7 +120,6 @@
             });
         });
     </script>
-
 
 </body>
 </html>

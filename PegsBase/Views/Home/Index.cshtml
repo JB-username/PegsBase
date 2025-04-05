@@ -1,123 +1,153 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿@using PegsBase.Models.Constants;
+
+@{
+	ViewData["Title"] = "Home Page";
 }
 
 <div class="container mt-5 mb-3 text-center">
-    <h1>Home</h1>
+	<h1>Home</h1>
 
 </div>
 
 <div class="row">
-    <div class="container mt-4">
-        
+	<div class="container mt-4">
+		<div class="row mt-4">
+			<!-- Peg Register Card -->
+			<div class="col-md-4 mb-2">
+				<div class="card shadow">
+					<div class="card-header bg-primary text-white">
+						<h5 class="mb-0">Peg Register</h5>
+					</div>
+					<div class="card-body text-center">
+						<p>View survey pegs by type.</p>
+						<div class="d-grid gap-2">
+							<a asp-controller="PegRegister"
+							   asp-action="Index"
+							   asp-route-filter="Peg"
+							   class="btn btn-outline-primary">Pegs</a>
+							<a asp-controller="PegRegister"
+							   asp-action="Index"
+							   asp-route-filter="Control"
+							   class="btn btn-outline-primary">Controls</a>
+							<a asp-controller="PegRegister"
+							   asp-action="Index"
+							   asp-route-filter="Beacon"
+							   class="btn btn-outline-primary">Beacons</a>
+						</div>
+					</div>
+				</div>
+			</div>
 
-        <div class="row mt-4">
-            <!-- Peg Register Card -->
-            <div class="col-md-4 mb-2">
-                <div class="card shadow">
-                    <div class="card-header bg-primary text-white">
-                        <h5 class="mb-0">Peg Register</h5>
-                    </div>
-                    <div class="card-body text-center">
-                        <p>View survey pegs by type.</p>
-                        <div class="d-grid gap-2">
-                            <a asp-controller="PegRegister" 
-                               asp-action="Index" 
-                               asp-route-filter="Peg" 
-                               class="btn btn-outline-primary">Pegs</a>
-                            <a asp-controller="PegRegister" 
-                               asp-action="Index" 
-                               asp-route-filter="Control" 
-                               class="btn btn-outline-primary">Controls</a>
-                            <a asp-controller="PegRegister" 
-                               asp-action="Index" 
-                               asp-route-filter="Beacon" 
-                               class="btn btn-outline-primary">Beacons</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
+			@if (RoleGroups.SurveyDepartment.Any(role => User.IsInRole(role)))
+			{
+				<!-- Survey Calcs Card -->
+				<div class="col-md-4 mb-2">
+					<div class="card shadow">
+						<div class="card-header bg-success text-light">
+							<h5 class="mb-0">Survey Calculations</h5>
+						</div>
+						<div class="card-body text-center">
+							<p>Calculate new pegs from survey data.</p>
+							<div class="d-grid gap-2">
+								<a asp-controller="PegRegister"
+								   asp-action="UploadDat"
+								   class="btn btn-outline-success">Upload Coordinate File</a>
+								<a asp-controller="PegCalc"
+								   asp-action="UploadPegCalc"
+								   class="btn btn-outline-success">Upload Survey Data</a>
+								<a asp-controller="RawSurveyData"
+								   asp-action="Index"
+								   class="btn btn-outline-success">View Raw Survey Data</a>
+							</div>
+						</div>
+					</div>
+				</div>
+			}
 
-            <!-- Survey Calcs Card -->
-            <div class="col-md-4 mb-2">
-                <div class="card shadow">
-                    <div class="card-header bg-success text-light">
-                        <h5 class="mb-0">Survey Calculations</h5>
-                    </div>
-                    <div class="card-body text-center">
-                        <p>Calculate new pegs from survey data.</p>
-                        <div class="d-grid gap-2">
-                            <a asp-controller="PegRegister"
-                               asp-action="UploadDat"
-                               class="btn btn-outline-success">Upload Coordinate File</a>
-                            <a asp-controller="PegCalc"
-                               asp-action="UploadPegCalc"
-                               class="btn btn-outline-success">Upload Survey Data</a>
-                            <a asp-controller="RawSurveyData"
-                               asp-action="Index"
-                               class="btn btn-outline-success">View Raw Survey Data</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Survey Notes Card -->
-            <div class="col-md-4 mb-2">
-                <div class="card shadow">
-                    <div class="card-header text-white" style="background-color: #725daf">
-                        <h5 class="mb-0">Survey Notes</h5>
-                    </div>
-                    <div class="card-body text-center">
-                        <p>View and manage survey notes.</p>
-                        <div class="d-grid gap-2">
-                            <a class="btn btn-outline-purple">Survey Notes</a>
-                            <a class="btn btn-outline-purple">Holing Notes</a>
-                            <a class="btn btn-outline-purple">Add Note</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+			<!-- Survey Notes Card -->
+			<div class="col-md-4 mb-2">
+				<div class="card shadow">
+					<div class="card-header text-white" style="background-color: #725daf">
+						<h5 class="mb-0">Survey Notes</h5>
+					</div>
+					<div class="card-body text-center">
+						<p>View and manage survey notes.</p>
+						<div class="d-grid gap-2">
+							<a asp-controller="SurveyNotes"
+							   asp-action="Index"
+							   class="btn btn-outline-purple">View Notes</a>
+							<a asp-controller="SurveyNotes"
+							   asp-action="Upload"
+							   class="btn btn-outline-purple">Upload Note</a>
+							<a class="btn btn-outline-purple">Manage Notes</a>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
 </div>
 
 <!-- Job Requests Card -->
 <div class="row mt-lg-4">
-    <div class="col-md-4 mb-2">
-        <div class="card shadow">
-            <div class="card-header bg-info text-light">
-                <h5 class="mb-0">Job Requests</h5>
-            </div>
-            <div class="card-body text-center">
-                <p>Create a new job request.</p>
-                <div class="d-grid gap-2">
-                    <a class="btn btn-outline-info">New Job</a>
-                    <a class="btn btn-outline-info">View Jobs</a>
-                    <a class="btn btn-outline-info">Edit Jobs</a>
-                </div>
-            </div>
-        </div>
-    </div>
+	<div class="col-md-4 mb-2">
+		<div class="card shadow">
+			<div class="card-header bg-info text-light">
+				<h5 class="mb-0">Job Requests</h5>
+			</div>
+			<div class="card-body text-center">
+				<p>Create a new job request.</p>
+				<div class="d-grid gap-2">
+					<a class="btn btn-outline-info">New Job</a>
+					<a class="btn btn-outline-info">View Jobs</a>
+					<a class="btn btn-outline-info">Edit Jobs</a>
+				</div>
+			</div>
+		</div>
+	</div>
 
-    <!-- Mine Plans Card -->
-    <div class="col-md-4 mb-5">
-        <div class="card shadow">
-            <div class="card-header bg-warning text-light">
-                <h5 class="mb-0">Mine Plans</h5>
-            </div>
-            <div class="card-body text-center">
-                <p>Access mine layouts and geological plans.</p>
-                <div class="d-grid gap-2">
-                    <a class="btn btn-outline-warning">MO Plans</a>
-                    <a class="btn btn-outline-warning">Legal Plans</a>
-                    <a class="btn btn-outline-warning">Upload Plan</a>
-                </div>
-            </div>
-        </div>
-    </div>
+	<!-- Mine Plans Card -->
+	<div class="col-md-4 mb-5">
+		<div class="card shadow">
+			<div class="card-header bg-warning text-light">
+				<h5 class="mb-0">Mine Plans</h5>
+			</div>
+			<div class="card-body text-center">
+				<p>Access mine layouts and geological plans.</p>
+				<div class="d-grid gap-2">
+					<a class="btn btn-outline-warning">MO Plans</a>
+					<a class="btn btn-outline-warning">Legal Plans</a>
+					<a class="btn btn-outline-warning">Upload Plan</a>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	@if (User.IsInRole("Master"))
+	{
+		<!-- Admin Card -->
+		<div class="col-md-4 mb-5">
+			<div class="card shadow">
+				<div class="card-header bg-info text-light">
+					<h5 class="mb-0">Admin</h5>
+				</div>
+				<div class="card-body text-center">
+					<p>Send Invites and Manage Users.</p>
+					<div class="d-grid gap-2">
+						<a asp-controller="Admin"
+						   asp-action="Index"
+						   class="btn btn-outline-info">Send Invite</a>
+						<a asp-controller="Admin"
+						   asp-action="Users"
+						   class="btn btn-outline-info">Users</a>
+					</div>
+				</div>
+			</div>
+		</div>
+	}
 </div>
 
 @* define stuff like javascripts in this section below *@
-@section Scripts{
+@section Scripts {
 
 }

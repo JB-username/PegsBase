@@ -1,12 +1,20 @@
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
+using Microsoft.AspNetCore.Mvc.Authorization;
+using Microsoft.CodeAnalysis.Emit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Npgsql.EntityFrameworkCore.PostgreSQL;
 using PegsBase.Data;
+using PegsBase.Models.Identity;
+using PegsBase.Models.Settings;
+using PegsBase.Services.Emails;
+using PegsBase.Services.Identity;
 using PegsBase.Services.Parsing;
 using PegsBase.Services.Parsing.Interfaces;
 using PegsBase.Services.PegCalc.Implementations;
 using PegsBase.Services.PegCalc.Interfaces;
-using PegsBase.Models.Settings;
 using System.Data.Common;
 using System.Globalization;
 
@@ -25,11 +33,21 @@ namespace PegsBase
                 .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true)
                 .AddEnvironmentVariables();
 
-            builder.Services.Configure<ClientSettings>(
+            builder.Services.Configure<ApplicationUser>(
                 builder.Configuration.GetSection("ClientSettings"));
+
+            builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
+            {
+                options.SignIn.RequireConfirmedAccount = false;
+            })
+              .AddRoles<IdentityRole>()
+              .AddEntityFrameworkStores<ApplicationDbContext>();
 
             builder.Services.AddSession();
             builder.Services.AddControllersWithViews();
+            builder.Services.AddRazorPages();
+            builder.Services.AddTransient<IEmailSender, EmailSender>();
+
 
             builder.Services.AddDbContext<ApplicationDbContext>(
                 options => options.UseNpgsql(
@@ -40,7 +58,7 @@ namespace PegsBase
             builder.Services.AddScoped<ICoordinateDatParserService, CoordinateDatParserService>();
             builder.Services.AddScoped<IPegCalcService, PegCalcService>();
             builder.Services.AddScoped<IRawSurveyDataDatFileParser, RawSurveyDataDatFileParser>();
-
+            builder.Services.AddTransient<IEmailSender, EmailSender>();
 
             var cultureInfo = new CultureInfo("en-US");
             CultureInfo.DefaultThreadCurrentCulture = cultureInfo;
@@ -57,6 +75,13 @@ namespace PegsBase
                 app.UseHsts();
             }
 
+            using (var scope = app.Services.CreateScope())
+            {
+                var services = scope.ServiceProvider;
+                RoleSeeder.SeedRolesAsync(services).Wait();
+                UserSeeder.SeedUsersAsync(services).Wait();
+            }
+
             app.UseHttpsRedirection();
             app.UseRouting();
 
@@ -66,6 +91,7 @@ namespace PegsBase
             app.UseAuthorization();
 
             app.MapStaticAssets();
+            app.MapRazorPages();
 
             app.MapControllerRoute(
                 name: "default",
