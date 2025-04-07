@@ -1,102 +1,155 @@
 ﻿@model PegsBase.Models.ViewModels.SurveyNotesListViewModel
 @using PegsBase.Models.Enums
+@using PegsBase.Models.Constants
 
 @{
-    ViewData["Title"] = "Survey Notes";
+	ViewData["Title"] = "Survey Notes";
 }
 
 
 <h2>Survey Notes</h2>
 
 <form method="get" class="mb-3">
-    <div class="row mb-2">
-        <div class="col-md-3">
-            <input type="text" name="search" value="@Model.FilterSearch" class="form-control" placeholder="Search by title..." />
-        </div>
-        <div class="col-md-2">
-            <select name="type" class="form-select">
-                <option value="">All Types</option>
-                <option value="0" selected="@(Model.FilterType == SurveyNoteType.SurveyNote)">Survey Note</option>
-                <option value="1" selected="@(Model.FilterType == SurveyNoteType.HolingNote)">Holing Note</option>
-            </select>
-        </div>
-        <div class="col-md-2">
-            <input type="text" name="level" value="@Model.FilterLevel" class="form-control" placeholder="Level..." />
-        </div>
+	<div class="row mb-2">
+		<div class="col-md-3">
+			<input type="text" name="search" value="@Model.FilterSearch" class="form-control" placeholder="Search by title..." />
+		</div>
+		<div class="col-md-2">
+			<select name="type" class="form-select">
+				<option value="">All Types</option>
+				<option value="0" selected="@(Model.FilterType == SurveyNoteType.SurveyNote)">Survey Note</option>
+				<option value="1" selected="@(Model.FilterType == SurveyNoteType.HolingNote)">Holing Note</option>
+			</select>
+		</div>
+		<div class="col-md-2">
+			<input type="text" name="level" value="@Model.FilterLevel" class="form-control" placeholder="Level..." />
+		</div>
 
-        <div class="col-md-2">
-            <select name="status" class="form-select">
-                <option value="">All Status</option>
-                <option value="true" selected="@(Model.FilterIsSigned == true)">Signed</option>
-                <option value="false" selected="@(Model.FilterIsSigned == false)">In Progress</option>
-            </select>
-        </div>
-        <div class="col-md-2">
-            <button type="submit" class="btn btn-primary w-100">Filter</button>
-        </div>
-    </div>
+		<div class="col-md-2">
+			<select name="status" class="form-select">
+				<option value="">All Status</option>
+				<option value="true" selected="@(Model.FilterIsSigned == true)">Signed</option>
+				<option value="false" selected="@(Model.FilterIsSigned == false)">In Progress</option>
+			</select>
+		</div>
+		<div class="col-md-2">
+			<button type="submit" class="btn btn-primary w-100">Filter</button>
+		</div>
+	</div>
 </form>
 
 <table class="table table-bordered">
-    <thead>
-        <tr>
-            <th>Preview</th>
-            <th>Note Number</th>
-            <th>Locality</th>
-            <th>Level</th>
-            <th>Type</th>
-            <th>Status</th>
-            <th>Uploaded</th>
-            <th>Action</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var note in Model.Notes)
-        {
-            <tr>
-                <td>
-                    <img src="~/@(string.IsNullOrEmpty(note.ThumbnailPath)
-                                 ? "images/placeholder-thumbnail.png"
-                                 : note.ThumbnailPath)"
-                     alt="Thumbnail"
-                     width="80"
-                     height="113"
-                     class="img-thumbnail" />
-            </td>
-                <td>@note.Title</td>
-                <td>@note.Locality</td>
-                <td>@note.Level</td>
-                <td>@note.NoteType</td>
-                <td>@(note.IsSigned ? "Signed" : "In Progress")</td>
-                <td>@note.UploadedAt.ToString("yyyy/MM/dd")</td>
-                <td>
-                    <a href="@Url.Content(note.FilePath)" class="btn btn-sm btn-primary" target="_blank">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-download" viewBox="0 0 16 16">
-                            <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5" />
-                            <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708z" />
-                        </svg>
-                    </a>
-                </td>
-            </tr>
-        }
-    </tbody>
+	<thead>
+		<tr>
+			<th>Preview</th>
+			<th>Note Number</th>
+			<th>Locality</th>
+			<th>Level</th>
+			<th>Type</th>
+			<th>Status</th>
+			<th>Uploaded</th>
+			<th>Action</th>
+		</tr>
+	</thead>
+	<tbody>
+		@foreach (var note in Model.Notes)
+		{
+			<tr>
+				<td>
+					<!-- Clickable thumbnail -->
+					<img src="~/@(string.IsNullOrEmpty(note.ThumbnailPath)
+												  		 ? "images/placeholder-thumbnail.png"
+														 : note.ThumbnailPath)"
+					 alt="Thumbnail"
+					 style="cursor:pointer; max-width: 80px; height: auto;"
+					 class="img-thumbnail"
+					 data-bs-toggle="modal"
+					 data-bs-target="#thumbnailModal_@note.Id" />
+
+					<!-- Modal for large preview -->
+					<div class="modal fade" id="thumbnailModal_@note.Id" tabindex="-1" aria-labelledby="thumbnailModalLabel_@note.Id" aria-hidden="true">
+						<div class="modal-dialog modal-dialog-centered modal-lg">
+							<div class="modal-content">
+								<div class="modal-header">
+									<h5 class="modal-title" id="thumbnailModalLabel_@note.Id">Preview: @note.Title</h5>
+									<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+								</div>
+								<div class="modal-body text-center">
+									<img src="~/@(string.IsNullOrEmpty(note.ThumbnailPath)
+													  						 ? "images/placeholder-thumbnail.png"
+																			 : note.ThumbnailPath)"
+									 alt="Thumbnail Full"
+									 class="img-fluid rounded shadow"
+									 style="max-height: 80vh;" />
+							</div>
+						</div>
+					</div>
+				</div>
+			</td>
+			<td>@note.Title</td>
+			<td>@note.Locality</td>
+			<td>@note.Level</td>
+			<td>@note.NoteType</td>
+			<td>@(note.IsSigned ? "Signed" : "In Progress")</td>
+			<td>@note.UploadedAt.ToString("yyyy/MM/dd")</td>
+			<td>
+				<a href="@Url.Content(note.FilePath)" class="btn btn-sm btn-primary" target="_blank">
+					<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-download" viewBox="0 0 16 16">
+						<path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5" />
+						<path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708z" />
+					</svg>
+				</a>
+				@if (RoleGroups.SurveyManagers.Any(role => User.IsInRole(role)))
+					{
+						<a asp-controller="SurveyNotes"
+						   asp-action="Edit"
+						   asp-route-id="@note.Id"
+						   class="btn btn-primary btn-sm">
+							<svg xmlns="http://www.w3.org/2000/svg"
+								 width="16"
+								 height="16"
+								 fill="currentColor"
+								 class="bi bi-pen"
+								 viewBox="0 0 16 16">
+								<path d="m13.498.795.149-.149a1.207 1.207 0 1 1 1.707 1.708l-.149.148a1.5 1.5 0 0 1-.059 2.059L4.854 14.854a.5.5 0 0 1-.233.131l-4 1a.5.5 0 0 1-.606-.606l1-4a.5.5 0 0 1 .131-.232l9.642-9.642a.5.5 0 0 0-.642.056L6.854 4.854a.5.5 0 1 1-.708-.708L9.44.854A1.5 1.5 0 0 1 11.5.796a1.5 1.5 0 0 1 1.998-.001m-.644.766a.5.5 0 0 0-.707 0L1.95 11.756l-.764 3.057 3.057-.764L14.44 3.854a.5.5 0 0 0 0-.708z" />
+							</svg>
+						</a>
+						<a asp-controller="SurveyNotes"
+						   asp-action="Delete"
+						   asp-route-id="@note.Id"
+						   class="btn btn-danger btn-sm">
+							<svg xmlns="http://www.w3.org/2000/svg"
+								 width="16"
+								 height="16"
+								 fill="currentColor"
+								 class="bi bi-trash"
+								 viewBox="0 0 16 16">
+								<path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z" />
+								<path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z" />
+							</svg>
+						</a>
+					}
+				</td>
+			</tr>
+		}
+	</tbody>
 </table>
 
 @{
-    int totalPages = (int)Math.Ceiling(Model.Total / (double)Model.PageSize);
+	int totalPages = (int)Math.Ceiling(Model.Total / (double)Model.PageSize);
 }
 
 @if (totalPages > 1)
 {
-    <nav>
-        <ul class="pagination">
-            @for (int i = 1; i <= totalPages; i++)
-            {
-                <li class="page-item @(i == Model.Page ? "active" : "")">
-                    <a class="page-link"
-                       href="?search=@Model.Search&type=@((int?)Model.FilterType)&page=@i">@i</a>
-                </li>
-            }
-        </ul>
-    </nav>
+	<nav>
+		<ul class="pagination">
+			@for (int i = 1; i <= totalPages; i++)
+			{
+				<li class="page-item @(i == Model.Page ? "active" : "")">
+					<a class="page-link"
+					   href="?search=@Model.Search&type=@((int?)Model.FilterType)&page=@i">@i</a>
+				</li>
+			}
+		</ul>
+	</nav>
 }

@@ -1,0 +1,56 @@
+﻿@using PegsBase.Models.Enums
+
+@model PegsBase.Models.MinePlans.MinePlan
+
+@{
+    ViewData["Title"] = "Edit Mine Plan";
+}
+
+<h2>Edit Mine Plan</h2>
+
+<form asp-action="Edit" method="post">
+    <input type="hidden" asp-for="Id" />
+
+    <div class="form-group mb-3">
+        <label asp-for="PlanName"></label>
+        <input asp-for="PlanName" class="form-control" />
+    </div>
+
+    <div class="form-group mb-3">
+        <label asp-for="Level"></label>
+        <input asp-for="Level" class="form-control" />
+    </div>
+
+    <div class="form-group mb-3">
+        <label asp-for="Locality"></label>
+        <input asp-for="Locality" class="form-control" />
+    </div>
+
+    <div class="form-group mb-3">
+        <label asp-for="Scale"></label>
+        <input asp-for="Scale" class="form-control" type="number" />
+    </div>
+
+    <div class="form-group mb-3">
+        <label asp-for="PlanType">Plan Type</label>
+        <select asp-for="PlanType" class="form-select" asp-items="Html.GetEnumSelectList<MinePlanType>()"></select>
+    </div>
+
+    <div class="form-group form-check mb-3">
+        <input asp-for="IsSigned" class="form-check-input" />
+        <label asp-for="IsSigned" class="form-check-label">Signed</label>
+    </div>
+
+    <div class="form-group form-check mb-3">
+        <input asp-for="IsSuperseded" class="form-check-input" />
+        <label asp-for="IsSuperseded" class="form-check-label">Superseded</label>
+    </div>
+
+    <div class="form-group mb-3">
+        <label asp-for="SupersededReference"></label>
+        <input asp-for="SupersededReference" class="form-control" />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Save</button>
+    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+</form>

@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using PegsBase.Models.Enums;
+using System.ComponentModel.DataAnnotations;
 
 namespace PegsBase.Models.ViewModels
 {
@@ -15,5 +16,10 @@ namespace PegsBase.Models.ViewModels
 
         [Required]
         public IFormFile File { get; set; }
+
+        [Required]
+        [Display(Name = "Note Type")]
+        public SurveyNoteType NoteType { get; set; }
+
     }
 }

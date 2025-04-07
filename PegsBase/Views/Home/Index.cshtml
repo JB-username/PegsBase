@@ -79,7 +79,6 @@
 							<a asp-controller="SurveyNotes"
 							   asp-action="Upload"
 							   class="btn btn-outline-purple">Upload Note</a>
-							<a class="btn btn-outline-purple">Manage Notes</a>
 						</div>
 					</div>
 				</div>
@@ -115,9 +114,12 @@
 			<div class="card-body text-center">
 				<p>Access mine layouts and geological plans.</p>
 				<div class="d-grid gap-2">
-					<a class="btn btn-outline-warning">MO Plans</a>
-					<a class="btn btn-outline-warning">Legal Plans</a>
-					<a class="btn btn-outline-warning">Upload Plan</a>
+					<a asp-controller="MinePlans"
+					   asp-action="Index"
+					   class="btn btn-outline-purple">View Plans</a>
+					<a asp-controller="MinePlans"
+					   asp-action="Upload"
+					   class="btn btn-outline-purple">Upload Plan</a>
 				</div>
 			</div>
 		</div>

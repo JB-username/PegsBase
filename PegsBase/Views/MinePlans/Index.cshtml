@@ -1,0 +1,106 @@
+﻿@model MinePlanListViewModel
+@using PegsBase.Models.Enums
+
+@{
+    ViewData["Title"] = "Mine Plans";
+}
+
+<h2>Mine Plans</h2>
+
+<form method="get" class="mb-3">
+    <div class="row mb-2">
+        <div class="col-md-3">
+            <input type="text" name="search" value="@Model.FilterSearch" class="form-control" placeholder="Search by plan name..." />
+        </div>
+        <div class="col-md-2">
+            <select name="type" class="form-select">
+                <option value="">All Types</option>
+                @foreach (var type in Enum.GetValues(typeof(MinePlanType)))
+                {
+                    <option value="@((int)type)" selected="@(Model.FilterType == (MinePlanType)type)">@type</option>
+                }
+            </select>
+        </div>
+        <div class="col-md-2">
+            <input type="text" name="level" value="@Model.FilterLevel" class="form-control" placeholder="Level..." />
+        </div>
+        <div class="col-md-2">
+            <select name="status" class="form-select">
+                <option value="">All Status</option>
+                <option value="true" selected="@(Model.FilterIsSigned == true)">Signed</option>
+                <option value="false" selected="@(Model.FilterIsSigned == false)">In Progress</option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <select name="superseded" class="form-select">
+                <option value="">All Superseded</option>
+                <option value="true" selected="@(Model.FilterIsSuperseded == true)">Superseded</option>
+                <option value="false" selected="@(Model.FilterIsSuperseded == false)">Active</option>
+            </select>
+        </div>
+        <div class="col-md-1">
+            <button type="submit" class="btn btn-primary w-100">Filter</button>
+        </div>
+    </div>
+</form>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Preview</th>
+            <th>Name</th>
+            <th>Locality</th>
+            <th>Level</th>
+            <th>Type</th>
+            <th>Scale</th>
+            <th>Status</th>
+            <th>Superseded</th>
+            <th>Uploaded</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var plan in Model.Plans)
+        {
+            <tr>
+                <td>
+                    <img src="~/@(plan.ThumbnailPath ?? "images/placeholder-thumbnail.png")"
+                         alt="Thumbnail"
+                         style="max-width: 80px; height: auto;"
+                         class="img-thumbnail" />
+                </td>
+                <td>@plan.PlanName</td>
+                <td>@plan.Locality</td>
+                <td>@plan.Level</td>
+                <td>@plan.PlanType</td>
+                <td>@plan.Scale</td>
+                <td>@(plan.IsSigned ? "Signed" : "In Progress")</td>
+                <td>@(plan.IsSuperseded ? "Yes" : "No")</td>
+                <td>@plan.UploadedAt.ToString("yyyy/MM/dd")</td>
+                <td>
+                    <a href="@Url.Content(plan.FilePath)" target="_blank" class="btn btn-sm btn-primary">View</a>
+                    <a asp-action="Edit" asp-route-id="@plan.Id" class="btn btn-sm btn-info">Edit</a>
+                    <a asp-action="Delete" asp-route-id="@plan.Id" class="btn btn-sm btn-danger">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@{
+    int totalPages = (int)Math.Ceiling(Model.Total / (double)Model.PageSize);
+}
+
+@if (totalPages > 1)
+{
+    <nav>
+        <ul class="pagination">
+            @for (int i = 1; i <= totalPages; i++)
+            {
+                <li class="page-item @(i == Model.Page ? "active" : "")">
+                    <a class="page-link" href="?page=@i">@i</a>
+                </li>
+            }
+        </ul>
+    </nav>
+}

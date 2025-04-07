@@ -37,7 +37,6 @@ namespace PegsBase.Controllers
                 query = query.Where(n => n.IsSigned == true);
             }
 
-
             if (!string.IsNullOrWhiteSpace(search))
             {
                 var keywords = search
@@ -45,11 +44,12 @@ namespace PegsBase.Controllers
 
                 foreach (var keyword in keywords)
                 {
-                    var temp = keyword.ToLower();
-                    query = query.Where(n => n.Title.ToLower().Contains(temp));
+                    query = query.Where(n => 
+                    EF.Functions.ILike(n.Title, $"%{keyword}%") ||
+                    EF.Functions.ILike(n.Locality, $"%{keyword}%") ||
+                    EF.Functions.ILike(n.Level, $"%{keyword}%"));
                 }
             }
-
 
             if (type.HasValue)
                 query = query.Where(n => n.NoteType == type.Value);
@@ -146,34 +146,34 @@ namespace PegsBase.Controllers
             var thumbnailPath = Path.Combine(thumbnailFolder, thumbnailFileName);
             var relativeThumbnailPath = Path.Combine("SurveyNotes", "Thumbnails", folder, thumbnailFileName);
 
-#if DEBUG
+            #if DEBUG
             // Use a placeholder image in dev mode
             var placeholder = Path.Combine(_env.WebRootPath, "images", "placeholder-thumbnail.png");
             System.IO.File.Copy(placeholder, thumbnailPath, overwrite: true);
-#else
-    // If in production, generate using pdftoppm
-    try
-    {
-        var process = new Process
-        {
-            StartInfo = new ProcessStartInfo
-            {
-                FileName = "pdftoppm",
-                Arguments = $"-jpeg -f 1 -singlefile \"{filePath}\" \"{Path.Combine(thumbnailFolder, Path.GetFileNameWithoutExtension(fileName))}\"",
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                UseShellExecute = false,
-                CreateNoWindow = true
-            }
-        };
-        process.Start();
-        await process.WaitForExitAsync();
-    }
-    catch (Exception ex)
-    {
+            #else
+             // If in production, generate using pdftoppm
+                try
+                {
+                    var process = new Process
+                    {
+                        StartInfo = new ProcessStartInfo
+                        {
+                            FileName = "pdftoppm",
+                            Arguments = $"-jpeg -f 1 -singlefile \"{filePath}\" \"{Path.Combine(thumbnailFolder, Path.GetFileNameWithoutExtension(fileName))}\"",
+                            RedirectStandardOutput = true,
+                            RedirectStandardError = true,
+                            UseShellExecute = false,
+                            CreateNoWindow = true
+                        }
+                    };
+                    process.Start();
+                    await process.WaitForExitAsync();
+                }
+                catch (Exception ex)
+                {
         
-    }
-#endif
+                }
+            #endif
 
             var note = new SurveyNote
             {
@@ -185,12 +185,144 @@ namespace PegsBase.Controllers
                 UploadedAt = DateTime.UtcNow,
                 IsSigned = model.IsSigned,
                 IsVerified = false,
+                NoteType = model.NoteType,
                 ThumbnailPath = relativeThumbnailPath
             };
 
             _dbContext.SurveyNotes.Add(note);
             await _dbContext.SaveChangesAsync();
 
+            return RedirectToAction("Index");
+        }
+
+        [Authorize(Roles =
+            Roles.Master + "," +
+            Roles.MineSurveyor + "," +
+            Roles.SurveyAnalyst)]
+        [HttpGet]
+        public IActionResult Edit(int? id)
+        {
+            if (id == null || id == 0)
+            {
+                return NotFound();
+            }
+
+            SurveyNote? surveyNote = _dbContext.SurveyNotes.Find(id);
+
+            if (surveyNote == null)
+            {
+                return NotFound();
+            }
+
+            return View(surveyNote);
+        }
+
+        [Authorize(Roles =
+            Roles.Master + "," +
+            Roles.MineSurveyor + "," +
+            Roles.SurveyAnalyst)]
+        [HttpPost]
+        public async Task<IActionResult> Edit(SurveyNote obj)
+        {
+            if (!ModelState.IsValid)
+            {
+                var errors = string.Join(" | ",
+                    ModelState
+                        .Where(x => x.Value.Errors.Count > 0)
+                        .Select(x => $"{x.Key}: {x.Value.Errors[0].ErrorMessage}")
+                );
+                TempData["Debug"] = $"ModelState invalid: {errors}";
+                return View(obj);
+            }
+
+            var existingNote = await _dbContext.SurveyNotes.FirstOrDefaultAsync(n => n.Id == obj.Id);
+
+            if (existingNote == null)
+            {
+                TempData["Debug"] = "Note not found";
+                return NotFound();
+            }
+
+            existingNote.Title = obj.Title;
+            existingNote.Level = obj.Level;
+            existingNote.Locality = obj.Locality;
+            existingNote.NoteType = obj.NoteType;
+            existingNote.UploadedBy = obj.UploadedBy;
+            existingNote.UploadedAt = obj.UploadedAt;
+            existingNote.IsAbandoned = obj.IsAbandoned;
+            existingNote.AbandonmentReason = obj.AbandonmentReason;
+            existingNote.IsSigned = obj.IsSigned;
+            existingNote.UploadedAt = DateTime.SpecifyKind(obj.UploadedAt, DateTimeKind.Utc);
+
+            await _dbContext.SaveChangesAsync();
+            TempData["Success"] = "Note updated successfully.";
+            return RedirectToAction("Index");
+        }
+
+
+
+        [Authorize(Roles =
+            Roles.Master + "," +
+            Roles.MineSurveyor + "," +
+            Roles.SurveyAnalyst)]
+        [HttpGet]
+        public IActionResult Delete(int? id)
+        {
+            if (id == null || id == 0)
+            {
+                return NotFound();
+            }
+
+            SurveyNote? pegEntry = _dbContext.SurveyNotes.Find(id);
+
+            if (pegEntry == null)
+            {
+                return NotFound();
+            }
+
+            return View(pegEntry);
+        }
+
+        [Authorize(Roles =
+            Roles.Master + "," +
+            Roles.MineSurveyor + "," +
+            Roles.SurveyAnalyst)]
+        [Authorize(Roles = Roles.Master + "," + Roles.MineSurveyor + "," + Roles.SurveyAnalyst)]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeletePost(int? id)
+        {
+            if (id == null)
+            {
+                TempData["Error"] = "Invalid note ID.";
+                return RedirectToAction("Index");
+            }
+
+            var note = await _dbContext.SurveyNotes.FirstOrDefaultAsync(n => n.Id == id);
+            if (note == null)
+            {
+                TempData["Error"] = "Survey note not found.";
+                return RedirectToAction("Index");
+            }
+
+            // Delete the PDF file
+            var filePath = Path.Combine(_env.WebRootPath, note.FilePath ?? "");
+            if (System.IO.File.Exists(filePath))
+            {
+                System.IO.File.Delete(filePath);
+            }
+
+            // Delete the thumbnail file
+            var thumbnailPath = Path.Combine(_env.WebRootPath, note.ThumbnailPath ?? "");
+            if (System.IO.File.Exists(thumbnailPath))
+            {
+                System.IO.File.Delete(thumbnailPath);
+            }
+
+            _dbContext.SurveyNotes.Remove(note);
+            await _dbContext.SaveChangesAsync();
+
+            TempData["Success"] = $"Note '{note.Title}' deleted successfully.";
             return RedirectToAction("Index");
         }
 

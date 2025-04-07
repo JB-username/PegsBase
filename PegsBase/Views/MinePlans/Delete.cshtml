@@ -1,0 +1,17 @@
+﻿@model PegsBase.Models.MinePlans.MinePlan
+
+@{
+    ViewData["Title"] = "Delete Mine Plan";
+}
+
+<h2>Delete Mine Plan</h2>
+
+<div class="alert alert-warning">
+    <p>Are you sure you want to delete the mine plan: <strong>@Model.PlanName</strong>?</p>
+</div>
+
+<form asp-action="DeleteConfirmed" method="post">
+    <input type="hidden" asp-for="Id" />
+    <button type="submit" class="btn btn-danger">Yes, delete it</button>
+    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+</form>

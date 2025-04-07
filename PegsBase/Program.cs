@@ -29,16 +29,16 @@ namespace PegsBase
             // Add services to the container. *Dependency Injection
             builder.Configuration
                 .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("appsettings.json", optional: false)
-                .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true)
+                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true)
                 .AddEnvironmentVariables();
 
-            builder.Services.Configure<ApplicationUser>(
+            builder.Services.Configure<ClientSettings>(
                 builder.Configuration.GetSection("ClientSettings"));
 
             builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
             {
-                options.SignIn.RequireConfirmedAccount = false;
+                options.SignIn.RequireConfirmedAccount = true;
             })
               .AddRoles<IdentityRole>()
               .AddEntityFrameworkStores<ApplicationDbContext>();
@@ -47,7 +47,6 @@ namespace PegsBase
             builder.Services.AddControllersWithViews();
             builder.Services.AddRazorPages();
             builder.Services.AddTransient<IEmailSender, EmailSender>();
-
 
             builder.Services.AddDbContext<ApplicationDbContext>(
                 options => options.UseNpgsql(

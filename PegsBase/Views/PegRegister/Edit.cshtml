@@ -68,7 +68,8 @@
 									<input class="form-check-input" type="radio"
 										   asp-for="PointType"
 										   value="@((int)type)"
-										   id="PointType_@type" />
+										   id="PointType_@type"
+										   checked="@(Model.PointType == type)" />/>
 									<label class="form-check-label" for="PointType_@type">
 										@type.ToString()
 									</label>

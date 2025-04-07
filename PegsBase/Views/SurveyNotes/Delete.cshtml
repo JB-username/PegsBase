@@ -1,0 +1,33 @@
+﻿@model SurveyNote
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success">@TempData["Success"]</div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h3>Confirm Delete</h3>
+                </div>
+                <div class="card-body">
+                    <p>Are you sure you want to delete the note titled:</p>
+                    <h5 class="text-danger">@Model.Title</h5>
+                    <p><strong>Level:</strong> @Model.Level</p>
+                    <p><strong>Uploaded By:</strong> @Model.UploadedBy</p>
+                    <p><strong>Uploaded At:</strong> @Model.UploadedAt.ToShortDateString()</p>
+
+                    <form asp-action="DeletePost" method="post">
+                        <input type="hidden" asp-for="Id" />
+                        <button type="submit" class="btn btn-danger">Yes, Delete</button>
+                        <a asp-action="Index" class="btn btn-secondary ms-2">Cancel</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,69 @@
+﻿@model MinePlanUploadViewModel
+@using PegsBase.Models.Enums
+
+@{
+    ViewData["Title"] = "Upload Mine Plan";
+}
+
+<h2>Upload Mine Plan</h2>
+
+<form asp-action="Upload" asp-controller="MinePlans" method="post" enctype="multipart/form-data">
+    <div class="form-group mb-3">
+        <label asp-for="PlanName"></label>
+        <input asp-for="PlanName" class="form-control" required />
+        <span asp-validation-for="PlanName" class="text-danger"></span>
+    </div>
+
+    <div class="form-group mb-3">
+        <label asp-for="Level"></label>
+        <input asp-for="Level" class="form-control" required />
+        <span asp-validation-for="Level" class="text-danger"></span>
+    </div>
+
+    <div class="form-group mb-3">
+        <label asp-for="Locality"></label>
+        <input asp-for="Locality" class="form-control" required />
+        <span asp-validation-for="Locality" class="text-danger"></span>
+    </div>
+
+    <div class="form-group mb-3">
+        <label asp-for="Scale"></label>
+        <input asp-for="Scale" class="form-control" type="number" />
+        <span asp-validation-for="Scale" class="text-danger"></span>
+    </div>
+
+    <div class="form-group mb-3">
+        <label asp-for="PlanType">Plan Type</label>
+        @foreach (MinePlanType type in Enum.GetValues(typeof(MinePlanType)))
+        {
+            <div class="form-check">
+                <input class="form-check-input" type="radio"
+                       asp-for="PlanType"
+                       value="@((int)type)"
+                       id="PlanType_@type" />
+                <label class="form-check-label" for="PlanType_@type">
+                    @type.ToString()
+                </label>
+            </div>
+        }
+        <span asp-validation-for="PlanType" class="text-danger"></span>
+    </div>
+
+    <div class="form-group form-check mb-3">
+        <input asp-for="IsSigned" class="form-check-input" />
+        <label asp-for="IsSigned" class="form-check-label">Mark as signed</label>
+    </div>
+
+    <div class="form-group mb-3">
+        <label asp-for="File"></label>
+        <input asp-for="File" type="file" accept="application/pdf" class="form-control" required />
+        <span asp-validation-for="File" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Upload Plan</button>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
+

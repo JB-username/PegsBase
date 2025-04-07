@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using PegsBase.Data;
@@ -11,9 +12,11 @@ using PegsBase.Data;
 namespace PegsBase.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250407110209_ChangeSurveyNoteAbandonReasonToString")]
+    partial class ChangeSurveyNoteAbandonReasonToString
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -294,114 +297,6 @@ namespace PegsBase.Migrations
                     b.ToTable("WhitelistedEmails");
                 });
 
-            modelBuilder.Entity("PegsBase.Models.JobRequests.JobRequest", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("AssignedToId")
-                        .HasColumnType("text");
-
-                    b.Property<string>("AssignedToUserId")
-                        .HasColumnType("text");
-
-                    b.Property<DateTime?>("ClosedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("CreatedById")
-                        .HasColumnType("text");
-
-                    b.Property<string>("CreatedByUserId")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("DeclineReason")
-                        .HasColumnType("text");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("Subject")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("TargetDepartment")
-                        .HasColumnType("text");
-
-                    b.Property<string>("TargetSection")
-                        .HasColumnType("text");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AssignedToId");
-
-                    b.HasIndex("CreatedById");
-
-                    b.ToTable("JobRequests");
-                });
-
-            modelBuilder.Entity("PegsBase.Models.MinePlans.MinePlan", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("FilePath")
-                        .HasColumnType("text");
-
-                    b.Property<bool>("IsSigned")
-                        .HasColumnType("boolean");
-
-                    b.Property<bool>("IsSuperseded")
-                        .HasColumnType("boolean");
-
-                    b.Property<string>("Level")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Locality")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("PlanName")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<int>("PlanType")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("Scale")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("SupersededReference")
-                        .HasColumnType("text");
-
-                    b.Property<string>("ThumbnailPath")
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("UploadedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("MinePlans");
-                });
-
             modelBuilder.Entity("PegsBase.Models.PegRegister", b =>
                 {
                     b.Property<int>("Id")
@@ -679,6 +574,7 @@ namespace PegsBase.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("FilePath")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<bool>("IsAbandoned")
@@ -702,6 +598,7 @@ namespace PegsBase.Migrations
                         .HasColumnType("integer");
 
                     b.Property<string>("ThumbnailPath")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Title")
@@ -769,21 +666,6 @@ namespace PegsBase.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("PegsBase.Models.JobRequests.JobRequest", b =>
-                {
-                    b.HasOne("PegsBase.Models.Identity.ApplicationUser", "AssignedTo")
-                        .WithMany()
-                        .HasForeignKey("AssignedToId");
-
-                    b.HasOne("PegsBase.Models.Identity.ApplicationUser", "CreatedBy")
-                        .WithMany()
-                        .HasForeignKey("CreatedById");
-
-                    b.Navigation("AssignedTo");
-
-                    b.Navigation("CreatedBy");
                 });
 #pragma warning restore 612, 618
         }

@@ -168,6 +168,9 @@ namespace PegsBase.Areas.Identity.Pages.Account
                 {
                     _logger.LogInformation("User created a new account with password.");
 
+                    //user.EmailConfirmed = true;
+                    //await _userManager.UpdateAsync(user);
+
                     // ✅ 3. Mark invite as used
                     invite.IsUsed = true;
                     _dbContext.Invites.Update(invite);

@@ -2,6 +2,8 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using PegsBase.Models.Identity;
+using PegsBase.Models.MinePlans;
+using PegsBase.Models.JobRequests;
 
 namespace PegsBase.Data
 {
@@ -17,6 +19,8 @@ namespace PegsBase.Data
         public DbSet<Invite> Invites { get; set; }
         public DbSet<SurveyNote> SurveyNotes { get; set; }
         public DbSet<WhitelistedEmails> WhitelistedEmails { get; set; }
+        public DbSet<MinePlan> MinePlans { get; set; }
+        public DbSet<JobRequest> JobRequests { get; set; }
     }
 }
 
