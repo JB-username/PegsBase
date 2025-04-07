@@ -6,6 +6,8 @@ namespace PegsBase.Models.Identity
     {
         public string? CompanyId { get; set; }
         public string? JobTitle { get; set; }
+        public string? Department {  get; set; }
+        public string? Section { get; set; }
 
         public string? FirstName { get; set; }
         public string? LastName { get; set; }

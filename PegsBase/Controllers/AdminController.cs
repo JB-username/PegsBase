@@ -149,7 +149,9 @@ namespace PegsBase.Controllers
                     LastName = u.LastName,
                     Roles = await _userManager.GetRolesAsync(u),
                     CompanyId = u.CompanyId,
-                    JobTitle = u.JobTitle
+                    JobTitle = u.JobTitle,
+                    Department = u.Department,
+                    Section = u.Section
                 });
             }
 

@@ -1,0 +1,65 @@
+﻿@model List<JobRequest>
+@using PegsBase.Models.JobRequests
+@using PegsBase.Models.Identity
+
+@{
+	ViewData["Title"] = "All Job Requests";
+}
+
+<h2>All Job Requests</h2>
+
+<table class="table table-bordered table-striped">
+	<thead>
+		<tr>
+			<th>Created</th>
+			<th>Subject</th>
+			<th>From</th>
+			<th>To</th>
+			<th>Status</th>
+			<th>Actions</th>
+		</tr>
+	</thead>
+	<tbody>
+		@foreach (var job in Model)
+		{
+			<tr>
+				<td>@job.CreatedAt.ToString("yyyy-MM-dd HH:mm")</td>
+				<td>@job.Subject</td>
+				@(job.CreatedBy != null
+							? $"{job.CreatedBy.FirstName} {job.CreatedBy.LastName}".Trim()
+							: job.CreatedBy?.Email)
+
+			<td>
+				@if (!string.IsNullOrEmpty(job.AssignedToUserId))
+					{
+						@(job.AssignedTo != null
+										? $"{job.AssignedTo.FirstName} {job.AssignedTo.LastName}".Trim()
+										: job.AssignedTo?.Email)
+
+								}
+					else if (!string.IsNullOrEmpty(job.TargetDepartment))
+					{
+						<span>
+							@job.TargetDepartment @if (!string.IsNullOrEmpty(job.TargetSection)) {
+							<text>/ @job.TargetSection</text>
+						}
+					</span>
+				}
+								else
+				{
+					<span class="text-muted">Unassigned</span>
+				}
+			</td>
+			<td>@job.Status</td>
+			<td>
+				<a asp-action="Details" asp-route-id="@job.Id" class="btn btn-sm btn-info">View</a>
+				@if (job.CreatedByUserId == User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value)
+				{
+					<a asp-action="Edit" asp-route-id="@job.Id" class="btn btn-sm btn-primary">Edit</a>
+					<a asp-action="Delete" asp-route-id="@job.Id" class="btn btn-sm btn-danger">Delete</a>
+				}
+			</td>
+		</tr>
+				}
+	</tbody>
+</table>
