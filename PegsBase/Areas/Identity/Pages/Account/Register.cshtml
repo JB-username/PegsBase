@@ -13,6 +13,11 @@
 
             <h2>Create a new account.</h2>
             <hr />
+            <div class="form-group">
+                <label>Your invite token</label>
+                <input type="text" class="form-control text-muted" value="@Model.Input.Token" readonly />
+            </div>
+            <hr />
             <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
             <div class="form-floating mb-3">
                 @* <input asp-for="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="name@example.com" /> *@
@@ -25,10 +30,6 @@
                 <input asp-for="Input.Password" class="form-control" autocomplete="new-password" aria-required="true" placeholder="password" />
                 <label asp-for="Input.Password">Password</label>
                 <span asp-validation-for="Input.Password" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label>Your invite token</label>
-                <input type="text" class="form-control" value="@Model.Input.Token" readonly />
             </div>
             <div class="form-floating mb-3">
                 <input asp-for="Input.ConfirmPassword" class="form-control" autocomplete="new-password" aria-required="true" placeholder="password" />

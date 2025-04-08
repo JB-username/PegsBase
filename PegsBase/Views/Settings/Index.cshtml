@@ -1,0 +1,32 @@
+﻿@model PegsBase.Models.Settings.ImportSettings
+@{
+    ViewBag.Title = "Import Settings";
+}
+<h2>Import Settings</h2>
+
+<form asp-action="Index" method="post">
+    <div>
+        <label>
+            <input type="checkbox" asp-for="SwapXY" />
+            Swap X and Y Coordinates
+        </label>
+    </div>
+    <div>
+        <label>
+            <input type="checkbox" asp-for="InvertX" />
+            Invert X Sign (+/-)
+        </label>
+    </div>
+    <div>
+        <label>
+            <input type="checkbox" asp-for="InvertY" />
+            Invert Y Sign (+/-)
+        </label>
+    </div>
+    <button type="submit">Save Settings</button>
+</form>
+
+@if (ViewBag.Message != null)
+{
+    <p>@ViewBag.Message</p>
+}

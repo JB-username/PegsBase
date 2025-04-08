@@ -15,6 +15,7 @@ using PegsBase.Services.Parsing;
 using PegsBase.Services.Parsing.Interfaces;
 using PegsBase.Services.PegCalc.Implementations;
 using PegsBase.Services.PegCalc.Interfaces;
+using PegsBase.Services.Settings;
 using System.Data.Common;
 using System.Globalization;
 
@@ -42,6 +43,8 @@ namespace PegsBase
             })
               .AddRoles<IdentityRole>()
               .AddEntityFrameworkStores<ApplicationDbContext>();
+
+            builder.Services.AddSingleton<IImportSettingsService, ImportSettingsService>();
 
             builder.Services.AddSession();
             builder.Services.AddControllersWithViews();
