@@ -1,0 +1,65 @@
+﻿@model List<PegsBase.Models.Entities.Locality>
+@using Microsoft.AspNetCore.Mvc.Rendering
+
+@{
+	ViewData["Title"] = "Manage Localities";
+	var levels = (SelectList)ViewBag.Levels;
+}
+
+<h2 class="mb-4">Manage Localities</h2>
+
+<!-- Create New Locality Inline -->
+<form asp-action="CreateInline" method="post" class="row g-2 mb-4 align-items-end">
+	<div class="col-md-6">
+		<label for="name" class="form-label">Locality Name</label>
+		<input type="text" name="name" class="form-control" placeholder="Enter name..." required />
+	</div>
+	<div class="col-md-4">
+		<label for="levelId" class="form-label">Level</label>
+		<select name="levelId" class="form-select" asp-items="levels" required>
+			<option value="">Select Level</option>
+		</select>
+	</div>
+	<div class="col-md-2">
+		<button type="submit" class="btn btn-primary w-100">Add Locality</button>
+	</div>
+</form>
+
+<!-- Locality Table -->
+<table class="table table-striped align-middle">
+	<thead>
+		<tr>
+			<th>Name</th>
+			<th>Level</th>
+			<th style="width: 180px;">Actions</th>
+		</tr>
+	</thead>
+	<tbody>
+		@foreach (var locality in Model)
+		{
+			<tr>
+				<td colspan="2">
+					<form asp-action="EditInline" method="post" class="d-flex gap-2 align-items-center">
+						<input type="hidden" name="id" value="@locality.Id" />
+
+						<input type="text" name="name" value="@locality.Name" class="form-control" required />
+
+						<select name="levelId" class="form-select" asp-for="@locality.LevelId" asp-items="levels" required>
+							<option value="">Select Level</option>
+						</select>
+
+						<button type="submit" class="btn btn-sm btn-success">Save</button>
+					</form>
+				</td>
+				<td>
+					<form asp-action="Delete" method="post" class="d-flex align-items-center">
+						<input type="hidden" name="id" value="@locality.Id" />
+						<button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Delete this locality?')">Delete</button>
+					</form>
+				</td>
+			</tr>
+		}
+	</tbody>
+
+
+</table>

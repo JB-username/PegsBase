@@ -158,6 +158,45 @@ namespace PegsBase.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("PegsBase.Models.Entities.Level", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Levels");
+                });
+
+            modelBuilder.Entity("PegsBase.Models.Entities.Locality", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("LevelId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("LevelId");
+
+                    b.ToTable("Localities");
+                });
+
             modelBuilder.Entity("PegsBase.Models.Identity.ApplicationUser", b =>
                 {
                     b.Property<string>("Id")
@@ -211,6 +250,9 @@ namespace PegsBase.Migrations
                         .HasMaxLength(256)
                         .HasColumnType("character varying(256)");
 
+                    b.Property<string>("NormalizedFullName")
+                        .HasColumnType("text");
+
                     b.Property<string>("NormalizedUserName")
                         .HasMaxLength(256)
                         .HasColumnType("character varying(256)");
@@ -236,6 +278,9 @@ namespace PegsBase.Migrations
                     b.Property<bool>("TwoFactorEnabled")
                         .HasColumnType("boolean");
 
+                    b.Property<int?>("UserGroupId")
+                        .HasColumnType("integer");
+
                     b.Property<string>("UserName")
                         .HasMaxLength(256)
                         .HasColumnType("character varying(256)");
@@ -248,6 +293,8 @@ namespace PegsBase.Migrations
                     b.HasIndex("NormalizedUserName")
                         .IsUnique()
                         .HasDatabaseName("UserNameIndex");
+
+                    b.HasIndex("UserGroupId");
 
                     b.ToTable("AspNetUsers", (string)null);
                 });
@@ -281,6 +328,23 @@ namespace PegsBase.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Invites");
+                });
+
+            modelBuilder.Entity("PegsBase.Models.Identity.UserGroup", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("UserGroups");
                 });
 
             modelBuilder.Entity("PegsBase.Models.Identity.WhitelistedEmails", b =>
@@ -376,13 +440,15 @@ namespace PegsBase.Migrations
                     b.Property<bool>("IsSuperseded")
                         .HasColumnType("boolean");
 
-                    b.Property<string>("Level")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.Property<int>("LevelId")
+                        .HasColumnType("integer");
 
                     b.Property<string>("Locality")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<int?>("LocalityId")
+                        .HasColumnType("integer");
 
                     b.Property<string>("PlanName")
                         .IsRequired()
@@ -405,6 +471,8 @@ namespace PegsBase.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("LevelId");
+
                     b.ToTable("MinePlans");
                 });
 
@@ -425,13 +493,11 @@ namespace PegsBase.Migrations
                     b.Property<bool>("HasPegCalc")
                         .HasColumnType("boolean");
 
-                    b.Property<int>("Level")
+                    b.Property<int>("LevelId")
                         .HasColumnType("integer");
 
-                    b.Property<string>("Locality")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
+                    b.Property<int>("LocalityId")
+                        .HasColumnType("integer");
 
                     b.Property<bool>("PegFailed")
                         .HasColumnType("boolean");
@@ -446,10 +512,11 @@ namespace PegsBase.Migrations
                     b.Property<DateOnly>("SurveyDate")
                         .HasColumnType("date");
 
-                    b.Property<string>("Surveyor")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
+                    b.Property<string>("SurveyorId")
+                        .HasColumnType("text");
+
+                    b.Property<string>("SurveyorNameText")
+                        .HasColumnType("text");
 
                     b.Property<decimal>("XCoord")
                         .HasColumnType("numeric");
@@ -461,6 +528,12 @@ namespace PegsBase.Migrations
                         .HasColumnType("numeric");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("LevelId");
+
+                    b.HasIndex("LocalityId");
+
+                    b.HasIndex("SurveyorId");
 
                     b.ToTable("PegRegister");
                 });
@@ -696,13 +769,11 @@ namespace PegsBase.Migrations
                     b.Property<bool>("IsVerified")
                         .HasColumnType("boolean");
 
-                    b.Property<string>("Level")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.Property<int>("LevelId")
+                        .HasColumnType("integer");
 
-                    b.Property<string>("Locality")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.Property<int>("LocalityId")
+                        .HasColumnType("integer");
 
                     b.Property<int>("NoteType")
                         .HasColumnType("integer");
@@ -717,11 +788,17 @@ namespace PegsBase.Migrations
                     b.Property<DateTime>("UploadedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("UploadedBy")
+                    b.Property<string>("UploadedById")
                         .IsRequired()
                         .HasColumnType("text");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("LevelId");
+
+                    b.HasIndex("LocalityId");
+
+                    b.HasIndex("UploadedById");
 
                     b.ToTable("SurveyNotes");
                 });
@@ -777,6 +854,24 @@ namespace PegsBase.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("PegsBase.Models.Entities.Locality", b =>
+                {
+                    b.HasOne("PegsBase.Models.Entities.Level", "Level")
+                        .WithMany("Localities")
+                        .HasForeignKey("LevelId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Level");
+                });
+
+            modelBuilder.Entity("PegsBase.Models.Identity.ApplicationUser", b =>
+                {
+                    b.HasOne("PegsBase.Models.Identity.UserGroup", null)
+                        .WithMany("Users")
+                        .HasForeignKey("UserGroupId");
+                });
+
             modelBuilder.Entity("PegsBase.Models.JobRequests.JobRequest", b =>
                 {
                     b.HasOne("PegsBase.Models.Identity.ApplicationUser", "AssignedTo")
@@ -790,6 +885,88 @@ namespace PegsBase.Migrations
                     b.Navigation("AssignedTo");
 
                     b.Navigation("CreatedBy");
+                });
+
+            modelBuilder.Entity("PegsBase.Models.MinePlans.MinePlan", b =>
+                {
+                    b.HasOne("PegsBase.Models.Entities.Level", "Level")
+                        .WithMany("MinePlans")
+                        .HasForeignKey("LevelId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Level");
+                });
+
+            modelBuilder.Entity("PegsBase.Models.PegRegister", b =>
+                {
+                    b.HasOne("PegsBase.Models.Entities.Level", "Level")
+                        .WithMany()
+                        .HasForeignKey("LevelId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("PegsBase.Models.Entities.Locality", "Locality")
+                        .WithMany("Pegs")
+                        .HasForeignKey("LocalityId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("PegsBase.Models.Identity.ApplicationUser", "Surveyor")
+                        .WithMany()
+                        .HasForeignKey("SurveyorId");
+
+                    b.Navigation("Level");
+
+                    b.Navigation("Locality");
+
+                    b.Navigation("Surveyor");
+                });
+
+            modelBuilder.Entity("PegsBase.Models.SurveyNote", b =>
+                {
+                    b.HasOne("PegsBase.Models.Entities.Level", "Level")
+                        .WithMany()
+                        .HasForeignKey("LevelId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("PegsBase.Models.Entities.Locality", "Locality")
+                        .WithMany("SurveyNotes")
+                        .HasForeignKey("LocalityId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("PegsBase.Models.Identity.ApplicationUser", "UploadedBy")
+                        .WithMany()
+                        .HasForeignKey("UploadedById")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Level");
+
+                    b.Navigation("Locality");
+
+                    b.Navigation("UploadedBy");
+                });
+
+            modelBuilder.Entity("PegsBase.Models.Entities.Level", b =>
+                {
+                    b.Navigation("Localities");
+
+                    b.Navigation("MinePlans");
+                });
+
+            modelBuilder.Entity("PegsBase.Models.Entities.Locality", b =>
+                {
+                    b.Navigation("Pegs");
+
+                    b.Navigation("SurveyNotes");
+                });
+
+            modelBuilder.Entity("PegsBase.Models.Identity.UserGroup", b =>
+                {
+                    b.Navigation("Users");
                 });
 #pragma warning restore 612, 618
         }

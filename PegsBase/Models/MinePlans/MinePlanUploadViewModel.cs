@@ -7,11 +7,9 @@ public class MinePlanUploadViewModel
     [Required]
     public string PlanName { get; set; }
 
-    [Required]
-    public string Level { get; set; }
+    public int LevelId { get; set; }
 
-    [Required]
-    public string Locality { get; set; }
+    public int? LocalityId { get; set; }
 
     public int Scale { get; set; }
 

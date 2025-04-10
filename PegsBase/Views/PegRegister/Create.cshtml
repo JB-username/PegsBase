@@ -1,6 +1,6 @@
 ﻿@using PegsBase.Models.Enums;
 
-@model PegRegister
+@model PegsBase.Models.PegRegister
 
 <div class="container mt-4"> 
 	<div class="row">
@@ -11,22 +11,25 @@
 				</div>
 				<div class="card-body">
 					<form asp-action="Create" method="post">
-						@* <div asp-validation-summary="All" class="text-danger"></div> *@
+						@Html.AntiForgeryToken()
+						<div asp-validation-summary="All" class="text-danger"></div>
 						<div class="form-group mb-3">
 							<label asp-for="PegName" class="form-label">Peg Number</label>
-							<input asp-for="PegName" class="form-control" placeholder="Enter peg number"/>
+							<input asp-for="PegName" class="form-control" placeholder="Enter peg number" />
 							<span asp-validation-for="PegName" class="text-danger"></span>
 						</div>
 						<div class="form-group mb-3">
-							<label asp-for="Level" class="form-label">Level Number</label>
-							<input asp-for="Level" class="form-control" placeholder="Enter level number" />
-							<span asp-validation-for="Level" class="text-danger"></span>
+							<label class="form-label">Level</label>
+							<select asp-for="LevelId" asp-items="ViewBag.Levels" class="form-select"></select>
+							<span asp-validation-for="LevelId" class="text-danger"></span>
 						</div>
+
 						<div class="form-group mb-3">
-							<label asp-for="Locality" class="form-label">Locality</label>
-							<input asp-for="Locality" class="form-control" placeholder="Enter Peg location" />
-							<span asp-validation-for="Locality" class="text-danger"></span>
+							<label class="form-label">Locality</label>
+							<select asp-for="LocalityId" asp-items="ViewBag.Localities" class="form-select"></select>
+							<span asp-validation-for="LocalityId" class="text-danger"></span>
 						</div>
+
 						<div class="form-group mb-3">
 							<label asp-for="YCoord" class="form-label">Y Coord</label>
 							<input asp-for="YCoord" class="form-control" placeholder="Enter Y-Coordinate" />
@@ -48,13 +51,32 @@
 							<span asp-validation-for="GradeElevation" class="text-danger"></span>
 						</div>
 						<div class="form-group mb-3">
-							<label asp-for="Surveyor" class="form-label">Surveyor</label>
-							<input asp-for="Surveyor" class="form-control" placeholder="Enter surveyor name" />
-							<span asp-validation-for="Surveyor" class="text-danger"></span>
+							<label class="form-label">Surveyor</label>
+
+							<!-- Dropdown for registered surveyors -->
+							<select asp-for="SurveyorId" asp-items="ViewBag.Surveyors" class="form-select">
+								<option value="">Select Registered Surveyor</option>
+							</select>
+							<span asp-validation-for="SurveyorId" class="text-danger"></span>
+
+							<div class="form-text">Leave blank to type a name below</div>
+
+							<!-- Free text fallback for historical names -->
+							<input asp-for="SurveyorNameText" class="form-control mt-2" placeholder="Or enter historical surveyor name" />
+							<span asp-validation-for="SurveyorNameText" class="text-danger"></span>
 						</div>
+
+
+						@if (TempData["DebugSurveyor"] != null)
+						{
+							<div class="alert alert-warning">
+								SurveyorId submitted: @TempData["DebugSurveyor"]
+							</div>
+						}
+
 						<div class="form-group mb-3">
 							<label asp-for="SurveyDate" class="form-label">Survey Date</label>
-							<input asp-for="SurveyDate" class="form-control" type="date"/>
+							<input asp-for="SurveyDate" class="form-control" type="date" />
 							<span asp-validation-for="SurveyDate" class="text-danger"></span>
 						</div>
 						<div class="form-group mb-3">

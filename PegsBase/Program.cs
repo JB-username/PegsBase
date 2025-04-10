@@ -60,6 +60,8 @@ namespace PegsBase
             builder.Services.AddScoped<ICoordinateDatParserService, CoordinateDatParserService>();
             builder.Services.AddScoped<IPegCalcService, PegCalcService>();
             builder.Services.AddScoped<IRawSurveyDataDatFileParser, RawSurveyDataDatFileParser>();
+            builder.Services.AddScoped<IMapImportModelsToPegs, MapImportModelsToPegs>();
+            
             builder.Services.AddTransient<IEmailSender, EmailSender>();
 
             var cultureInfo = new CultureInfo("en-US");

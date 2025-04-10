@@ -1,0 +1,61 @@
+﻿@model List<PegRegister>
+
+<form method="post">
+    <div class="table-responsive">
+        <table class="table table-striped table-hover">
+            <thead>
+                <tr>
+                    <th>Peg</th>
+                    <th class="d-none d-sm-table-cell">Level</th>
+                    <th>Locality</th>
+                    <th>Y</th>
+                    <th>X</th>
+                    <th class="d-none d-md-table-cell">Z</th>
+                    <th class="d-none d-lg-table-cell">Grade</th>
+                    <th>Surveyor</th>
+                    <th class="d-none d-sm-table-cell">Date</th>
+                    <th>Actions</th>
+                    <th>Select</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var entry in Model)
+                {
+                    <tr>
+                        <td>@entry.PegName</td>
+                        <td class="d-none d-sm-table-cell">@entry.Level?.Name</td>
+                        <td>@entry.Locality?.Name</td>
+                        <td>@entry.YCoord.ToString("F3")</td>
+                        <td>@entry.XCoord.ToString("F3")</td>
+                        <td class="d-none d-md-table-cell">@entry.ZCoord.ToString("F3")</td>
+                        <td class="d-none d-lg-table-cell">@entry.GradeElevation</td>
+                        <td>@(entry.Surveyor?.DisplayName ?? entry.SurveyorNameText ?? "-")</td>
+
+                        <td class="d-none d-sm-table-cell">@entry.SurveyDate.ToString("yyyy/MM/dd")</td>
+                        <td>
+                            <a asp-action="ViewPeg" asp-route-id="@entry.Id" class="btn btn-sm btn-info">View</a>
+                            <a asp-action="Edit" asp-route-id="@entry.Id" class="btn btn-sm btn-warning">Edit</a>
+                        </td>
+                        <td>
+                            <input class="form-check-input export-check" type="checkbox" name="selectedIds" value="@entry.Id" />
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <div id="exportButtons" class="d-flex mt-3 fade-toggle">
+        <div class="col-md-6 d-flex justify-content-start">
+            <button type="submit" formaction="/PegRegister/DeleteSelected" class="btn btn-danger"
+                    onclick="return confirm('Are you sure you want to delete the selected peg(s)?');">
+                Delete Selected
+            </button>
+        </div>
+        <div class="col-md-6 d-flex justify-content-end gap-2">
+            <button type="submit" formaction="/PegRegister/PrintSelected" class="btn btn-info">Print</button>
+            <button type="submit" formaction="/PegRegister/ExportSelectedToCsv" class="btn btn-success">CSV</button>
+            <button type="submit" formaction="/PegRegister/ExportSelectedToDxf" class="btn btn-primary">DXF</button>
+        </div>
+    </div>
+</form>

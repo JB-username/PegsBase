@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.Json;
 using Newtonsoft.Json;
@@ -8,6 +10,7 @@ using PegsBase.Data;
 using PegsBase.Models;
 using PegsBase.Models.Constants;
 using PegsBase.Models.Enums;
+using PegsBase.Models.Identity;
 using PegsBase.Models.ViewModels;
 using PegsBase.Services.Parsing;
 using PegsBase.Services.Parsing.Interfaces;
@@ -23,17 +26,23 @@ namespace PegsBase.Controllers
         private readonly IPegFileParser _pegFileParser;
         private readonly ICoordinateDatParserService _coordinateDatParserService;
         private readonly IPegCalcService _pegCalcService;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IMapImportModelsToPegs _pegMapper;
 
         public PegRegisterController(
             ApplicationDbContext db, 
             IPegFileParser pegFileParser,
             ICoordinateDatParserService coordinateDatParserService,
-            IPegCalcService pegCalcService)
+            IPegCalcService pegCalcService,
+            UserManager<ApplicationUser> user,
+            IMapImportModelsToPegs mapImportModelsToPeg)
         {
             _dbContext = db;
             _pegFileParser = pegFileParser;
             _coordinateDatParserService = coordinateDatParserService;
             _pegCalcService = pegCalcService;
+            _userManager = user;
+            _pegMapper = mapImportModelsToPeg;
         }
 
         [Authorize(Roles =
@@ -45,8 +54,13 @@ namespace PegsBase.Controllers
         public IActionResult Index(SurveyPointType? filter, string sortOrder)
         {
             var objPegsList = _dbContext.PegRegister.AsQueryable();
+            var pegs = _dbContext.PegRegister
+    .Include(p => p.Level)
+    .Include(p => p.Locality)
+    .Include(p => p.Surveyor) // If surveyor is ApplicationUser
+    .ToList();
 
-            if(filter.HasValue)
+            if (filter.HasValue)
             {
                 objPegsList = objPegsList.Where(p => p.PointType == filter.Value);
             }
@@ -78,9 +92,29 @@ namespace PegsBase.Controllers
             Roles.MineSurveyor + "," +
             Roles.SurveyAnalyst + "," +
             Roles.Surveyor)]
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
-            return View();
+            var users = await _userManager.Users.ToListAsync();
+
+            ViewBag.Levels = await _dbContext.Levels
+                .Select(l => new SelectListItem { Value = l.Id.ToString(), Text = l.Name })
+                .ToListAsync();
+
+            ViewBag.Localities = await _dbContext.Localities
+                .Select(l => new SelectListItem { Value = l.Id.ToString(), Text = l.Name })
+                .ToListAsync();
+
+            ViewBag.Surveyors = users
+                .Select(u => new SelectListItem { Value = u.Id, Text = u.DisplayName })
+                .ToList();
+
+            var peg = new PegRegister
+            {
+                PegName = string.Empty,
+                SurveyDate = DateOnly.FromDateTime(DateTime.Today)
+            };
+
+            return View(peg); // Return just the model (not wrapped in a view model)
         }
 
         [Authorize(Roles =
@@ -89,23 +123,49 @@ namespace PegsBase.Controllers
             Roles.SurveyAnalyst + "," +
             Roles.Surveyor)]
         [HttpPost]
-        public IActionResult Create(PegRegister obj)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create(PegRegister peg)
         {
-            if(obj != null && obj.PegName == null)
+            TempData["DebugSurveyor"] = peg.SurveyorId ?? "(null)";
+
+            if (string.IsNullOrWhiteSpace(peg.SurveyorId) && string.IsNullOrWhiteSpace(peg.SurveyorNameText))
             {
-                ModelState.AddModelError("Title", "Please enter a peg name");
+                ModelState.AddModelError("SurveyorId", "Please select a surveyor or enter a historical name.");
             }
 
-            if (ModelState.IsValid)
+            if (!string.IsNullOrWhiteSpace(peg.SurveyorId))
             {
-                _dbContext.PegRegister.Add(obj);
-                _dbContext.SaveChanges();
-
-                TempData["Success"] = "Peg created successfully.";
-                return RedirectToAction("Index");
+                peg.SurveyorNameText = null;
             }
 
-            return View(obj);
+            if (!ModelState.IsValid)
+            {
+                // Repopulate dropdowns
+                var users = await _userManager.Users.ToListAsync();
+
+                ViewBag.Levels = await _dbContext.Levels
+                    .Select(l => new SelectListItem { Value = l.Id.ToString(), Text = l.Name })
+                    .ToListAsync();
+
+                ViewBag.Localities = await _dbContext.Localities
+                    .Select(l => new SelectListItem { Value = l.Id.ToString(), Text = l.Name })
+                    .ToListAsync();
+
+                ViewBag.Surveyors = users
+                    .Select(u => new SelectListItem
+                    {
+                        Value = u.Id,
+                        Text = u.DisplayName
+                    }).ToList();
+
+                return View(peg);
+            }
+
+            _dbContext.PegRegister.Add(peg);
+            await _dbContext.SaveChangesAsync();
+
+            TempData["Success"] = "Peg created successfully.";
+            return RedirectToAction(nameof(Index));
         }
 
         [Authorize(Roles =
@@ -113,46 +173,79 @@ namespace PegsBase.Controllers
             Roles.MineSurveyor + "," +
             Roles.SurveyAnalyst)]
         [HttpGet]
-        public IActionResult Edit(int? id)
+        public async Task<IActionResult> Edit(int id)
         {
-            if(id == null || id == 0)
-            {
-                return NotFound();
-            }
+            var peg = await _dbContext.PegRegister
+                .Include(p => p.Level)
+                .Include(p => p.Locality)
+                .Include(p => p.Surveyor)
+                .FirstOrDefaultAsync(p => p.Id == id);
 
-            PegRegister? pegEntry = _dbContext.PegRegister.Find(id);
-            
-            if(pegEntry == null)
-            {
-                return NotFound();
-            }
+            if (peg == null) return NotFound();
 
-            return View(pegEntry);
+            var users = await _userManager.Users.ToListAsync();
+
+            ViewBag.Levels = await _dbContext.Levels
+                .Select(l => new SelectListItem
+                {
+                    Value = l.Id.ToString(),
+                    Text = l.Name
+                }).ToListAsync();
+
+            ViewBag.Localities = await _dbContext.Localities
+                .Select(l => new SelectListItem
+                {
+                    Value = l.Id.ToString(),
+                    Text = l.Name
+                }).ToListAsync();
+
+            ViewBag.Surveyors = users
+                .Select(u => new SelectListItem
+                {
+                    Value = u.Id,
+                    Text = u.DisplayName
+                }).ToList();
+
+            return View(peg);
         }
+
 
         [Authorize(Roles =
             Roles.Master + "," +
             Roles.MineSurveyor + "," + 
             Roles.SurveyAnalyst)]
         [HttpPost]
-        public IActionResult Edit(PegRegister obj)
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(PegRegister peg, string? filter)
         {
-            if (obj != null && obj.PegName == null)
+            if (!ModelState.IsValid)
             {
-                ModelState.AddModelError("Title", "Please enter a peg name");
+                // Repopulate dropdowns
+                var users = await _userManager.Users.ToListAsync();
+
+                ViewBag.Levels = await _dbContext.Levels
+                    .Select(l => new SelectListItem { Value = l.Id.ToString(), Text = l.Name })
+                    .ToListAsync();
+
+                ViewBag.Localities = await _dbContext.Localities
+                    .Select(l => new SelectListItem { Value = l.Id.ToString(), Text = l.Name })
+                    .ToListAsync();
+
+                ViewBag.Surveyors = users
+                    .Select(u => new SelectListItem { Value = u.Id, Text = u.DisplayName })
+                    .ToList();
+
+                return View(peg);
             }
 
-            if (ModelState.IsValid)
-            {
-                _dbContext.PegRegister.Update(obj);
-                _dbContext.SaveChanges();
+            _dbContext.PegRegister.Update(peg);
+            await _dbContext.SaveChangesAsync();
 
-                TempData["Success"] = "Peg updated successfully.";
-                return RedirectToAction("Index");
-            }
-
-            return View(obj);
+            TempData["Success"] = "Peg updated successfully.";
+            return RedirectToAction("Index", new { filter });
         }
+
 
         [Authorize(Roles =
             Roles.Master + "," +
@@ -380,7 +473,7 @@ namespace PegsBase.Controllers
             Roles.SurveyAnalyst + "," +
             Roles.Surveyor)]
         [HttpPost]
-        public IActionResult Upload(IFormFile file)
+        public async Task<IActionResult> Upload(IFormFile file)
         {
             if (file == null || file.Length == 0)
             {
@@ -389,12 +482,15 @@ namespace PegsBase.Controllers
             }
 
             using var stream = file.OpenReadStream();
-            var parsedPegs = _pegFileParser.Parse(stream);
+            var importModels = _pegFileParser.Parse(stream); // Still returns PegRegisterImportModel
 
-            TempData["ParsedPegs"] = JsonConvert.SerializeObject(parsedPegs);
+            var mappedPegs = await _pegMapper.MapAsync(importModels);
+
+            TempData["ParsedPegs"] = JsonConvert.SerializeObject(mappedPegs);
 
             return RedirectToAction("Preview");
         }
+
 
         [Authorize(Roles =
             Roles.Master + "," +
@@ -517,6 +613,18 @@ namespace PegsBase.Controllers
                 return View(model);
             }
 
+            ViewBag.Levels = new SelectList(_dbContext.Levels.OrderBy(l => l.Name), "Id", "Name");
+            ViewBag.Localities = new SelectList(_dbContext.Localities.OrderBy(l => l.Name), "Id", "Name");
+            ViewBag.Surveyors = new SelectList(
+                _dbContext.Users
+                    .OrderBy(u => u.LastName)
+                    .Select(u => new {
+                        u.Id,
+                        Name = u.FirstName.Substring(0, 1) + ". " + u.LastName
+                    }),
+                "Id",
+                "Name"
+            );
             TempData["RedirectAfterSaveUrl"] = model.RedirectAfterSaveUrl;
 
             return View("PreviewCoordinate", model);
@@ -554,10 +662,10 @@ namespace PegsBase.Controllers
                     YCoord = preview.YCoord,
                     ZCoord = preview.ZCoord,
                     GradeElevation = preview.GradeElevation,
-                    Surveyor = preview.Surveyor ?? "Unknown",
-                    Locality = preview.Locality ?? "Unknown",
+                    SurveyorId = preview.SurveyorId ?? "system",
+                    LocalityId = preview.LocalityId,
                     SurveyDate = preview.SurveyDate ?? DateOnly.FromDateTime(DateTime.Today),
-                    Level = preview.Level ?? 0,
+                    LevelId = preview.LevelId,
                     PointType = preview.Type.GetValueOrDefault(SurveyPointType.Peg)
                 };
 
@@ -687,7 +795,7 @@ namespace PegsBase.Controllers
                     Surveyor = rawData.Surveyor,
                     SurveyDate = rawData.SurveyDate,
                     Locality = rawData.Locality,
-                    Level = peg.Level,
+                    Level = peg.Level.Id,
                     PointType = peg.PointType,
                     PegFailed = rawData.PegFailed
                 };

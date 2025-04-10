@@ -46,8 +46,8 @@ namespace PegsBase.Controllers
                 {
                     query = query.Where(n => 
                     EF.Functions.ILike(n.Title, $"%{keyword}%") ||
-                    EF.Functions.ILike(n.Locality, $"%{keyword}%") ||
-                    EF.Functions.ILike(n.Level, $"%{keyword}%"));
+                    EF.Functions.ILike(n.Locality.Name, $"%{keyword}%") ||
+                    EF.Functions.ILike(n.Level.Name, $"%{keyword}%"));
                 }
             }
 
@@ -55,7 +55,7 @@ namespace PegsBase.Controllers
                 query = query.Where(n => n.NoteType == type.Value);
 
             if (!string.IsNullOrWhiteSpace(level))
-                query = query.Where(n => n.Level == level);
+                query = query.Where(n => n.Level.Name == level);
 
             if (status.HasValue)
                 query = query.Where(n => n.IsSigned == status.Value);
@@ -150,7 +150,7 @@ namespace PegsBase.Controllers
             // Use a placeholder image in dev mode
             var placeholder = Path.Combine(_env.WebRootPath, "images", "placeholder-thumbnail.png");
             System.IO.File.Copy(placeholder, thumbnailPath, overwrite: true);
-            #else
+#else
              // If in production, generate using pdftoppm
                 try
                 {
@@ -173,14 +173,14 @@ namespace PegsBase.Controllers
                 {
         
                 }
-            #endif
+#endif
 
             var note = new SurveyNote
             {
                 Title = model.Title,
-                UploadedBy = model.Surveyor,
-                Level = model.Level,
-                Locality = model.Locality,
+                UploadedById = model.SurveyorId,           // ✅ string FK to ApplicationUser.Id
+                LevelId = model.LevelId,             // ✅ int FK to Level
+                LocalityId = model.LocalityId,       // ✅ int FK to Locality
                 FilePath = Path.Combine("SurveyNotes", folder, fileName),
                 UploadedAt = DateTime.UtcNow,
                 IsSigned = model.IsSigned,

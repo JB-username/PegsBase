@@ -128,10 +128,10 @@ namespace PegsBase.Controllers
             {
                 pegRegister = new PegRegister
                 {
-                    Level = rawData.Level,
-                    Locality = rawData.Locality,
+                    LevelId = rawData.Level,
+                    LocalityId = rawData.LocalityId,
                     GradeElevation = rawData.GradeElevation,
-                    Surveyor = rawData.Surveyor,
+                    SurveyorId = rawData.Surveyor,
 
                     PointType = rawData.PointType,
 

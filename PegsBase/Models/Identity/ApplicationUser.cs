@@ -11,10 +11,29 @@ namespace PegsBase.Models.Identity
 
         public string? FirstName { get; set; }
         public string? LastName { get; set; }
+        public string? NormalizedFullName { get; set; }
+
 
         public string? ProfilePictureUrl { get; set; } // store image URL or relative path
         public DateTime? LastLoginAt { get; set; }
         public int LoginCount { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public string DisplayName =>
+    $"{(string.IsNullOrWhiteSpace(FirstName) ? "" : FirstName[0] + ".")} {LastName}";
+
+        public void GenerateNormalizedName()
+        {
+            NormalizedFullName = Normalize($"{FirstName} {LastName}");
+        }
+
+        private static string Normalize(string name)
+        {
+            return name?
+                .Replace(".", "")
+                .Replace(" ", "")
+                .ToUpperInvariant()
+                .Trim();
+        }
+
     }
 }

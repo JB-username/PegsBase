@@ -2,6 +2,12 @@
 {
     public static class RoleGroups
     {
+        public static readonly string[] Admins =
+        {
+            Roles.Admin,
+            Roles.Master
+        };
+
         public static readonly string[] SurveyManagers =
         {
             Roles.Master,

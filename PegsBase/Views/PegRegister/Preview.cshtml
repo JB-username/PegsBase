@@ -25,13 +25,13 @@
             {
                 <tr>
                     <td>@peg.PegName</td>
-                    <td>@peg.Level</td>
-                    <td>@peg.Locality</td>
+                    <td>@peg.Level?.Name</td>
+                    <td>@peg.Locality?.Name</td>
                     <td>@peg.YCoord</td>
                     <td>@peg.XCoord</td>
                     <td>@peg.ZCoord</td>
                     <td>@peg.GradeElevation</td>
-                    <td>@peg.Surveyor</td>
+                    <td>@(peg.Surveyor?.DisplayName ?? peg.SurveyorNameText ?? "-")</td>
                     <td>@peg.SurveyDate.ToShortDateString()</td>
                     <td>@peg.PointType</td>
                 </tr>

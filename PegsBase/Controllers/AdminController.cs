@@ -196,6 +196,9 @@ namespace PegsBase.Controllers
             user.LastName = updatedUser.LastName;
             user.CompanyId = updatedUser.CompanyId;
             user.JobTitle = updatedUser.JobTitle;
+            user.Department = updatedUser.Department;
+            user.Section = updatedUser.Section;
+            user.GenerateNormalizedName();
 
             var result = await _userManager.UpdateAsync(user);
 

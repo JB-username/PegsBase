@@ -11,7 +11,9 @@ namespace PegsBase.Models.ViewModels
         public int Id { get; set; }
         public string? Surveyor { get; set; }
         public DateOnly SurveyDate { get; set; }
+        public int LocalityId { get; set; }
         public string? Locality { get; set; }
+        public int LevelId { get; set; }
         public int Level { get; set; }
         public decimal GradeElevation { get; set; }
         public SurveyPointType PointType { get; set; }

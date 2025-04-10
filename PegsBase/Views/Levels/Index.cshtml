@@ -1,0 +1,41 @@
+﻿@model List<PegsBase.Models.Entities.Level>
+
+@{
+	ViewData["Title"] = "Manage Levels";
+}
+
+<h2>Manage Levels</h2>
+
+<form asp-action="CreateInline" method="post" class="d-flex gap-2 mb-4">
+	<input type="text" name="name" class="form-control" placeholder="Add new level..." required />
+	<button type="submit" class="btn btn-primary">Add</button>
+</form>
+
+<table class="table table-striped align-middle">
+	<thead>
+		<tr>
+			<th>Name</th>
+			<th style="width: 180px;">Actions</th>
+		</tr>
+	</thead>
+	<tbody>
+		@foreach (var level in Model)
+		{
+			<tr>
+				<td>
+					<form asp-action="EditInline" method="post" class="d-flex gap-2">
+						<input type="hidden" name="id" value="@level.Id" />
+						<input type="text" name="name" value="@level.Name" class="form-control" required />
+						<button type="submit" class="btn btn-sm btn-success">Edit</button>
+					</form>
+				</td>
+				<td>
+					<form asp-action="Delete" method="post" class="d-inline">
+						<input type="hidden" name="id" value="@level.Id" />
+						<button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Delete this level?')">Delete</button>
+					</form>
+				</td>
+			</tr>
+		}
+	</tbody>
+</table>

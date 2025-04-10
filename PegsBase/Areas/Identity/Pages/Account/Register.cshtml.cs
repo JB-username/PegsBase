@@ -107,6 +107,15 @@ namespace PegsBase.Areas.Identity.Pages.Account
             [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
             public string ConfirmPassword { get; set; }
             public string Token { get; set; }
+
+            [Required]
+            [Display(Name = "First Name")]
+            public string FirstName { get; set; }
+
+            [Required]
+            [Display(Name = "Last Name")]
+            public string LastName { get; set; }
+
         }
 
 
@@ -162,6 +171,7 @@ namespace PegsBase.Areas.Identity.Pages.Account
 
                 await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
                 await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
+                
                 var result = await _userManager.CreateAsync(user, Input.Password);
 
                 if (result.Succeeded)
@@ -177,7 +187,7 @@ namespace PegsBase.Areas.Identity.Pages.Account
                     await _dbContext.SaveChangesAsync();
 
                     // ✅ 4. Optional: Assign default role
-                    await _userManager.AddToRoleAsync(user, "Viewer");
+                    //await _userManager.AddToRoleAsync(user, "Viewer");
 
                     // ✅ 5. Continue with email confirmation flow
                     var userId = await _userManager.GetUserIdAsync(user);
@@ -216,16 +226,26 @@ namespace PegsBase.Areas.Identity.Pages.Account
 
         private ApplicationUser CreateUser()
         {
-            try
+            var user = new ApplicationUser
             {
-                return Activator.CreateInstance<ApplicationUser>();
-            }
-            catch
-            {
-                throw new InvalidOperationException($"Can't create an instance of '{nameof(ApplicationUser)}'. " +
-                    $"Ensure that '{nameof(ApplicationUser)}' is not an abstract class and has a parameterless constructor, or alternatively " +
-                    $"override the register page in /Areas/Identity/Pages/Account/Register.cshtml");
-            }
+                FirstName = Input.FirstName,
+                LastName = Input.LastName
+            };
+
+            user.GenerateNormalizedName();
+
+            return user;
+            
+            //try
+            //{
+            //    return Activator.CreateInstance<ApplicationUser>();
+            //}
+            //catch
+            //{
+            //    throw new InvalidOperationException($"Can't create an instance of '{nameof(ApplicationUser)}'. " +
+            //        $"Ensure that '{nameof(ApplicationUser)}' is not an abstract class and has a parameterless constructor, or alternatively " +
+            //        $"override the register page in /Areas/Identity/Pages/Account/Register.cshtml");
+            //}
         }
 
         private IUserEmailStore<ApplicationUser> GetEmailStore()

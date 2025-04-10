@@ -1,6 +1,7 @@
 ﻿@using PegsBase.Models.Enums;
 
-@model PegRegister
+@model PegsBase.Models.PegRegister
+
 @{
 	string filter = Context.Request.Query["filter"];
 }
@@ -14,6 +15,7 @@
 				</div>
 				<div class="card-body">
 					<form asp-action="Edit" method="post">
+						@Html.AntiForgeryToken()
 						@* <div asp-validation-summary="All" class="text-danger"></div> *@
 						<div class="form-group mb-3">
 							<label asp-for="PegName" class="form-label">Peg Number</label>
@@ -21,14 +23,14 @@
 							<span asp-validation-for="PegName" class="text-danger"></span>
 						</div>
 						<div class="form-group mb-3">
-							<label asp-for="Level" class="form-label">Level Number</label>
-							<input asp-for="Level" class="form-control" placeholder="Enter level number" />
-							<span asp-validation-for="Level" class="text-danger"></span>
+							<label asp-for="LevelId" class="form-label">Level</label>
+							<select asp-for="LevelId" asp-items="ViewBag.Levels" class="form-select"></select>
+							<span asp-validation-for="LevelId" class="text-danger"></span>
 						</div>
 						<div class="form-group mb-3">
-							<label asp-for="Locality" class="form-label">Locality</label>
-							<input asp-for="Locality" class="form-control" placeholder="Enter Peg location" />
-							<span asp-validation-for="Locality" class="text-danger"></span>
+							<label asp-for="LocalityId" class="form-label">Locality</label>
+							<select asp-for="LocalityId" asp-items="ViewBag.Localities" class="form-select"></select>
+							<span asp-validation-for="LocalityId" class="text-danger"></span>
 						</div>
 						<div class="form-group mb-3">
 							<label asp-for="YCoord" class="form-label">Y Coord</label>
@@ -51,9 +53,9 @@
 							<span asp-validation-for="GradeElevation" class="text-danger"></span>
 						</div>
 						<div class="form-group mb-3">
-							<label asp-for="Surveyor" class="form-label">Surveyor</label>
-							<input asp-for="Surveyor" class="form-control" placeholder="Enter surveyor name" />
-							<span asp-validation-for="Surveyor" class="text-danger"></span>
+							<label asp-for="SurveyorId" class="form-label">Surveyor</label>
+							<select asp-for="SurveyorId" asp-items="ViewBag.Surveyors" class="form-select"></select>
+							<span asp-validation-for="SurveyorId" class="text-danger"></span>
 						</div>
 						<div class="form-group mb-3">
 							<label asp-for="SurveyDate" class="form-label">Survey Date</label>
@@ -69,7 +71,7 @@
 										   asp-for="PointType"
 										   value="@((int)type)"
 										   id="PointType_@type"
-										   checked="@(Model.PointType == type)" />/>
+										   checked="@(Model.PointType == type)" />
 									<label class="form-check-label" for="PointType_@type">
 										@type.ToString()
 									</label>
