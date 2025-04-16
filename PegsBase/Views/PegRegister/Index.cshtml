@@ -1,5 +1,6 @@
 ﻿@model List<PegRegister>
 @using PegsBase.Models.Constants
+@using PegsBase.Models.Entities
 
 @{
 	ViewData["Title"] = "Peg Register";
@@ -12,7 +13,7 @@
 	bool isBeacon = filter == "Beacon";
 	bool isControl = filter == "Control";
 	bool showLevel = !isBeacon;
-	bool showGrade = !(isBeacon || isControl);	
+	bool showGrade = !(isBeacon || isControl);
 }
 
 
@@ -44,7 +45,7 @@
 		<h2 class="mb-3 mb-md-0"></h2>
 
 		<div class="btn-group">
-			
+
 
 			<button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
 				Import Options
@@ -58,7 +59,7 @@
 	</div>
 
 	<!-- Filters -->
-	<form method="get" class="row g-2 mb-4">
+	<form id="filterForm" class="row g-2 mb-4" onsubmit="event.preventDefault();">
 		<div class="col-md-3">
 			<input type="text" name="search" value="@search" class="form-control" placeholder="Search" />
 		</div>
@@ -82,13 +83,22 @@
 		</div>
 
 		<div class="col-md-3 text-end">
-			<button type="submit" class="btn btn-outline-primary w-100">Filter</button>
+			<select name="levelId" class="form-select">
+				<option value="">All Levels</option>
+				@foreach (var level in (ViewBag.Levels as List<Level>) ?? new List<Level>())
+				{
+					<option value="@level.Id" selected="@(level.Id.ToString() == Context.Request.Query["levelId"])">
+						@level.Name
+					</option>
+				}
+
+			</select>
 		</div>
 	</form>
 </div>
 
 <div class="container mb-4 mt-1">
-	<div class="row pt-4">		
+	<div class="row pt-4" id="pegTableContainer">
 		<div>
 			@await Html.PartialAsync("_PegTable", Model)
 		</div>
@@ -117,7 +127,13 @@
 
 
 <script>
-	document.addEventListener('DOMContentLoaded', function () {
+
+</script>
+
+
+@section Scripts {
+	<script>
+		document.addEventListener('DOMContentLoaded', function () {
 			const checkboxes = document.querySelectorAll('.export-check');
 			 const exportButtons = document.getElementById('exportButtons');
 
@@ -132,6 +148,47 @@
 
 			toggleExportButtons(); // Run on load
 		});
-</script>
 
+
+
+			function loadPegTable(searchOverride = null) {
+			const search = searchOverride ?? document.querySelector('input[name="search"]').value;
+			const filter = document.querySelector('select[name="filter"]').value;
+			const sortOrder = document.querySelector('select[name="sortOrder"]').value;
+			const levelId = document.querySelector('select[name="levelId"]').value;
+
+			const url = `/PegRegister/GetFilteredPegTable?search=${encodeURIComponent(search)}&filter=${encodeURIComponent(filter)}&sortOrder=${encodeURIComponent(sortOrder)}&levelId=${encodeURIComponent(levelId)}`;
+			fetch(url)
+				.then(res => res.text())
+				.then(html => {
+					document.getElementById("pegTableContainer").innerHTML = html;
+				});
+		}
+
+				document.querySelector('input[name="search"]').addEventListener("input", (e) => {
+			clearTimeout(window.searchDebounce);
+			const currentValue = e.target.value;
+
+			window.searchDebounce = setTimeout(() => {
+				loadPegTable(currentValue);
+			}, 300);
+		});
+
+		document.querySelector('select[name="filter"]').addEventListener("change", () => {
+			const searchValue = document.querySelector('input[name="search"]').value;
+			loadPegTable(searchValue);
+		});
+
+		document.querySelector('select[name="sortOrder"]').addEventListener("change", () => {
+			const searchValue = document.querySelector('input[name="search"]').value;
+			loadPegTable(searchValue);
+		});
+
+		document.querySelector('select[name="levelId"]').addEventListener("change", () => {
+			const searchValue = document.querySelector('input[name="search"]').value;
+			loadPegTable(searchValue);
+		});
+
+	</script>
+}
 

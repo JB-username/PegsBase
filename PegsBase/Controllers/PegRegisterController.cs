@@ -51,14 +51,15 @@ namespace PegsBase.Controllers
             Roles.MineSurveyor + "," +
             Roles.SurveyAnalyst + "," +
             Roles.Surveyor)]
-        public IActionResult Index(SurveyPointType? filter, string sortOrder)
+        public async Task<IActionResult> Index(SurveyPointType? filter, string sortOrder)
         {
-            var objPegsList = _dbContext.PegRegister.AsQueryable();
-            var pegs = _dbContext.PegRegister
-    .Include(p => p.Level)
-    .Include(p => p.Locality)
-    .Include(p => p.Surveyor) // If surveyor is ApplicationUser
-    .ToList();
+            ViewBag.Levels = await _dbContext.Levels.OrderBy(l => l.Name).ToListAsync();
+
+            var objPegsList = _dbContext.PegRegister
+                .Include(p => p.Level)
+                .Include(p => p.Locality)
+                .Include(p => p.Surveyor)
+                .AsQueryable();
 
             if (filter.HasValue)
             {
@@ -84,8 +85,9 @@ namespace PegsBase.Controllers
                     break;
             }
 
-            return View(objPegsList.ToList());
+            return View(await objPegsList.ToListAsync());
         }
+
 
         [Authorize(Roles =
             Roles.Master + "," +
@@ -807,5 +809,59 @@ namespace PegsBase.Controllers
                 return View("BasicPegView", peg);
             }
         }
+
+        [HttpGet]
+        public async Task<IActionResult> GetFilteredPegTable(string search, string filter, string sortOrder, string levelId)
+        {
+            var query = _dbContext.PegRegister
+                .Include(p => p.Level)
+                .Include(p => p.Locality)
+                .Include(p => p.Surveyor)
+                .AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                search = search.Trim().ToUpper(); // Normalize for case-insensitive matching
+
+                query = query.Where(p =>
+                    p.PegName.ToUpper().Contains(search) ||
+                    p.Surveyor.NormalizedFullName.ToUpper().Contains(search) ||
+                    p.SurveyorNameText.ToUpper().Contains(search) ||
+                    p.Locality.Name.ToUpper().Contains(search));
+            }
+
+
+            if (!string.IsNullOrEmpty(filter) && Enum.TryParse<SurveyPointType>(filter, out var pointType))
+            {
+                query = query.Where(p => p.PointType == pointType);
+            }
+
+            if (!string.IsNullOrEmpty(levelId) && int.TryParse(levelId, out var parsedLevelId))
+            {
+                query = query.Where(p => p.LevelId == parsedLevelId);
+            }
+
+
+            // Example sort (customize as needed)
+            switch (sortOrder)
+            {
+                case "date_asc":
+                    query = query.OrderBy(p => p.SurveyDate);
+                    break;
+                case "name_asc":
+                    query = query.OrderBy(p => p.PegName);
+                    break;
+                case "name_desc":
+                    query = query.OrderByDescending(p => p.PegName);
+                    break;
+                default:
+                    query = query.OrderByDescending(p => p.SurveyDate); // default: newest first
+                    break;
+            }
+
+            var pegs = await query.ToListAsync();
+            return PartialView("_PegTable", pegs);
+        }
+
     }
 }

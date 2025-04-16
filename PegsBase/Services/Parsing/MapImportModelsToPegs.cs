@@ -36,22 +36,23 @@ namespace PegsBase.Services.Parsing
                     YCoord = row.YCoord,
                     ZCoord = row.ZCoord,
                     GradeElevation = row.GradeElevation,
-                    SurveyDate = row.SurveyDate.HasValue
-                            ? row.SurveyDate.Value
-                            : DateOnly.FromDateTime(DateTime.Today),
+                    SurveyDate = row.SurveyDate ?? DateOnly.FromDateTime(DateTime.Today),
                     PointType = row.PointType,
                     PegFailed = false,
                     HasPegCalc = false
                 };
 
+                // Handle Level
                 var level = levels.FirstOrDefault(l => string.Equals(l.Name, row.LevelName, StringComparison.OrdinalIgnoreCase));
                 if (level == null && !string.IsNullOrWhiteSpace(row.LevelName))
                 {
                     level = new Level { Name = row.LevelName.Trim() };
                     _dbContext.Levels.Add(level);
-                    levels.Add(level); // Add to local list to prevent duplicates
+                    await _dbContext.SaveChangesAsync(); // 👈 get the Id immediately
+                    levels.Add(level);
                 }
 
+                // Handle Locality
                 var locality = localities.FirstOrDefault(l => string.Equals(l.Name, row.LocalityName, StringComparison.OrdinalIgnoreCase));
                 if (locality == null && !string.IsNullOrWhiteSpace(row.LocalityName))
                 {
@@ -61,18 +62,28 @@ namespace PegsBase.Services.Parsing
                         Level = level // optional: assign level
                     };
                     _dbContext.Localities.Add(locality);
-                    localities.Add(locality); // Prevent duplicate additions
+                    await _dbContext.SaveChangesAsync(); // 👈 again, get the Id immediately
+                    localities.Add(locality);
                 }
 
                 peg.LevelId = level?.Id;
+                peg.Level = level;
+                
                 peg.LocalityId = locality?.Id;
+                peg.Locality = locality;
 
+                // Match surveyor
                 var normalizedInput = Normalize(row.SurveyorName);
-                var surveyor = users.FirstOrDefault(u => u.NormalizedFullName == normalizedInput);
+                var surveyor = users.FirstOrDefault(u =>
+                    Normalize(u.FirstName + " " + u.LastName) == normalizedInput);
+               
                 peg.SurveyorId = surveyor?.Id;
+                peg.Surveyor = surveyor;
+                
 
                 result.Add(peg);
             }
+
             await _dbContext.SaveChangesAsync();
 
             return result;
