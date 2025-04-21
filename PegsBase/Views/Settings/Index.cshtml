@@ -1,32 +1,34 @@
-﻿@model PegsBase.Models.Settings.ImportSettings
-@{
-    ViewBag.Title = "Import Settings";
+﻿@{
+    ViewData["Title"] = "Admin Settings";
 }
-<h2>Import Settings</h2>
 
-<form asp-action="Index" method="post">
-    <div>
-        <label>
-            <input type="checkbox" asp-for="SwapXY" />
-            Swap X and Y Coordinates
-        </label>
-    </div>
-    <div>
-        <label>
-            <input type="checkbox" asp-for="InvertX" />
-            Invert X Sign (+/-)
-        </label>
-    </div>
-    <div>
-        <label>
-            <input type="checkbox" asp-for="InvertY" />
-            Invert Y Sign (+/-)
-        </label>
-    </div>
-    <button type="submit">Save Settings</button>
-</form>
+<h2 class="mb-4">Settings Panel</h2>
 
-@if (ViewBag.Message != null)
-{
-    <p>@ViewBag.Message</p>
-}
+<div class="row g-4">
+    <div class="col-md-6">
+        <a asp-controller="Settings" asp-action="Index" class="btn btn-outline-primary w-100 py-3">
+            Import Settings
+        </a>
+    </div>
+    <div class="col-md-6">
+        <a asp-controller="Admin" asp-action="Index" class="btn btn-outline-secondary w-100 py-3">
+            Send Invite
+        </a>
+    </div>
+    <div class="col-md-6">
+        <a asp-controller="Admin" asp-action="Users" class="btn btn-outline-secondary w-100 py-3">
+            Manage Users
+        </a>
+    </div>
+    <div class="col-md-6">
+        <a asp-controller="Levels" asp-action="Index" class="btn btn-outline-info w-100 py-3">
+            Manage Levels
+        </a>
+    </div>
+    <div class="col-md-6">
+        <a asp-controller="Locality" asp-action="Index" class="btn btn-outline-info w-100 py-3">
+            Manage Localities
+        </a>
+    </div>
+</div>
+

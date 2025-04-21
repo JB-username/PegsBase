@@ -58,7 +58,7 @@
                             <td>@entry.XCoord</td>
                             <td>@entry.ZCoord</td>
                             <td>@entry.GradeElevation</td>
-                            <td>@entry.Surveyor</td>
+                            <td>@(entry.Surveyor?.DisplayName ?? entry.SurveyorNameText ?? "-")</td>
                             <td>@entry.SurveyDate.ToShortDateString()</td>
                         </tr>
                     }

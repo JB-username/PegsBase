@@ -4,12 +4,19 @@ using PegsBase.Models;
 using PegsBase.Services.Parsing.Interfaces;
 using System.Globalization;
 using PegsBase.Models.ViewModels;
+using PegsBase.Models.Identity;
 
 namespace PegsBase.Services.Parsing
 {
     public class RawSurveyDataDatFileParser : IRawSurveyDataDatFileParser
     {
-        
+        private readonly ApplicationDbContext _dbContext;
+
+        public RawSurveyDataDatFileParser(ApplicationDbContext dbContext)
+        {
+            _dbContext = dbContext;
+        }
+
         public async Task<List<PegCalcViewModel>> ParseRawSurveyFileAsync(IFormFile file)
         {
             var rawDataList = new List<PegCalcViewModel>();
@@ -170,6 +177,22 @@ namespace PegsBase.Services.Parsing
 
                 if (rawDataViewModel != null)
                 {
+                    var normalizedSurveyor = ApplicationUser.Normalize(rawDataViewModel.Surveyor ?? "");
+                    var surveyorMatch = await _dbContext.Users
+                        .FirstOrDefaultAsync(u => u.NormalizedFullName == normalizedSurveyor);
+                    rawDataViewModel.SurveyorId = surveyorMatch?.Id;
+                    rawDataViewModel.Surveyor = surveyorMatch == null ? rawDataViewModel.Surveyor : null;
+
+                    var locality = await _dbContext.Localities
+                        .Include(l => l.Level)
+                        .FirstOrDefaultAsync(l => l.Name == rawDataViewModel.Locality);
+
+                    if (locality != null)
+                    {
+                        rawDataViewModel.LocalityId = locality.Id;
+                        rawDataViewModel.LevelId = locality.LevelId;
+                    }
+
                     rawDataList.Add(rawDataViewModel);
                 }
             }

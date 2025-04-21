@@ -372,3 +372,4 @@ FodyWeavers.xsd
 /PegsBase/appsettings.PegsBaseTest.json
 /PegsBase/appsettings.Rietberg.json
 /PegsBase/appsettings.PegsBase.json
+/PegsBase/Views/Home/TermsOfSevice.cshtml

@@ -1,4 +1,5 @@
 ﻿using PegsBase.Models.Enums;
+using PegsBase.Models.Entities;
 using System.ComponentModel.DataAnnotations;
 
 namespace PegsBase.Models.MinePlans
@@ -8,7 +9,10 @@ namespace PegsBase.Models.MinePlans
         public int Id { get; set; }
         [Display(Name = "Plan Name")]
         public string PlanName { get; set; }
-        public string Level { get; set; }
+
+        public int LevelId { get; set; }
+        public Level Level { get; set; }
+        public int? LocalityId { get; set; }
         public string Locality { get; set; }
         public int Scale { get; set; }
 

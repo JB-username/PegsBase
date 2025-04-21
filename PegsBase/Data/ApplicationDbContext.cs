@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using PegsBase.Models.Identity;
 using PegsBase.Models.MinePlans;
 using PegsBase.Models.JobRequests;
+using PegsBase.Models.Entities;
 
 namespace PegsBase.Data
 {
@@ -21,6 +22,11 @@ namespace PegsBase.Data
         public DbSet<WhitelistedEmails> WhitelistedEmails { get; set; }
         public DbSet<MinePlan> MinePlans { get; set; }
         public DbSet<JobRequest> JobRequests { get; set; }
+        public DbSet<UserGroup> UserGroups { get; set; }
+
+        public DbSet<Level> Levels { get; set; }
+        public DbSet<Locality> Localities { get; set; }
+
     }
 }
 

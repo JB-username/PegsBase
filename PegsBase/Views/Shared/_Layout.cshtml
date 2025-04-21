@@ -1,131 +1,177 @@
 ﻿@using PegsBase.Models.Settings;
+@using PegsBase.Models.Constants;
+@using Microsoft.AspNetCore.Identity;
+@using PegsBase.Models.Identity;
+
+@inject UserManager<ApplicationUser> UserManager
+@{
+	var currentUser = await UserManager.GetUserAsync(User);
+}
+
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - PegsBase</title>
-    <script type="importmap"></script>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/PegsBase.styles.css" asp-append-version="true" />
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    @RenderSection("Styles", required: false)
-    @inject Microsoft.Extensions.Options.IOptions<ClientSettings> ClientOptions
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>@ViewData["Title"] - PegsBase</title>
+	<script type="importmap"></script>
+	<link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+	<link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+	<link rel="stylesheet" href="~/PegsBase.styles.css" asp-append-version="true" />
+	<script src="~/lib/jquery/dist/jquery.min.js"></script>
+	@RenderSection("Styles", required: false)
+	@inject Microsoft.Extensions.Options.IOptions<ClientSettings> ClientOptions
 </head>
 
-<body data-bs-theme="light">    
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-primary border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand text-light" asp-area="" asp-controller="Home" asp-action="Index">
-                    <img src="~/favicon.svg" alt="Home" style="height: 32px; margin-right: 3px;" />
-                    PegsBase</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>               
+<body data-bs-theme="light">
+	<header>
+		<nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-primary border-bottom box-shadow">
+			<div class="container-fluid">
+				<a class="navbar-brand text-light" asp-area="" asp-controller="Home" asp-action="Index">
+					<img src="~/favicon.svg" alt="Home" style="height: 32px; margin-right: 3px;" />
+					PegsBase
+				</a>
+				<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+						aria-expanded="false" aria-label="Toggle navigation">
+					<span class="navbar-toggler-icon"></span>
+				</button>
 
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-light" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-light" asp-area="" asp-controller="PegRegister" asp-action="Index">Peg Register</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-light" asp-area="" asp-controller="SurveyNotes" asp-action="Index">Survey Notes</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-light" asp-area="" asp-controller="MinePlans" asp-action="Index">Mine Plans</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-light" asp-area="" asp-controller="JobRequests" asp-action="Index">Job Requests</a>
-                        </li>
-                        <li class="nav-item">
-                            <button id="darkModeToggle" class="btn btn-sm btn-outline-secondary text-end">🌙</button>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </nav>
-    </header>
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
-    </div>
+				<div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+					<ul class="navbar-nav flex-grow-1">
+						<li class="nav-item">
+							<a class="nav-link text-light" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+						</li>
+						<li class="nav-item">
+							<a class="nav-link text-light" asp-area="" asp-controller="PegRegister" asp-action="Index">Peg Register</a>
+						</li>
+						<li class="nav-item">
+							<a class="nav-link text-light" asp-area="" asp-controller="SurveyNotes" asp-action="Index">Survey Notes</a>
+						</li>
+						<li class="nav-item">
+							<a class="nav-link text-light" asp-area="" asp-controller="MinePlans" asp-action="Index">Mine Plans</a>
+						</li>
+						<li class="nav-item">
+							<a class="nav-link text-light" asp-area="" asp-controller="JobRequests" asp-action="Index">Job Requests</a>
+						</li>
 
-    <footer class="border-top bg-primary mt-5 footer text-light">
-        <div class="container d-flex justify-content-between align-items-center py-2">
-            <div>
-                <img src="~/images/Ampelon Digital White.png" alt="Ampelon Digital" style="height: 28px;" />
-            </div>
-            <div>
-                &copy; 2025 - PegsBase
-            </div>
-            <div>
-                <img src="@ClientOptions.Value.LogoPath" alt="@ClientOptions.Value.ClientName Logo" style="height: 28px;" />
-            </div>
-        </div>
-    </footer>
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
+					</ul>
+				</div>
+			</div>
+		</nav>
+		<div class="p-3">
+			<div class="row align-items-center justify-content-between">
+				<!-- 👈 Left side: User Info -->
+				<div class="col-auto">
+					@if (User.Identity.IsAuthenticated)
+					{
+						<span class="nav-link">Hello, @currentUser.FirstName</span>
+					}
+					else
+					{
+						<a class="nav-link" href="/Identity/Account/Login">Login</a>
+					}
+				</div>
 
-    @await RenderSectionAsync("Scripts", required: false)
+				<!-- 👉 Right side: Buttons -->
+				<div class="col-auto">
+					<div class="btn-group">
+						@if (RoleGroups.Admins.Any(role => User.IsInRole(role)))
+						{
+							<a class="btn btn-sm btn-outline-secondary" asp-controller="Settings" asp-action="Index" title="Admin Settings">
+								<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-gear" viewBox="0 0 16 16">
+									<path d="M8 4.754a3.246 3.246 0 1 0 0 6.492 3.246 3.246 0 0 0 0-6.492M5.754 8a2.246 2.246 0 1 1 4.492 0 2.246 2.246 0 0 1-4.492 0" />
+									<path d="M9.796 1.343c-.527-1.79-3.065-1.79-3.592 0l-.094.319a.873.873 0 0 1-1.255.52l-.292-.16c-1.64-.892-3.433.902-2.54 2.541l.159.292a.873.873 0 0 1-.52 1.255l-.319.094c-1.79.527-1.79 3.065 0 3.592l.319.094a.873.873 0 0 1 .52 1.255l-.16.292c-.892 1.64.901 3.434 2.541 2.54l.292-.159a.873.873 0 0 1 1.255.52l.094.319c.527 1.79 3.065 1.79 3.592 0l.094-.319a.873.873 0 0 1 1.255-.52l.292.16c1.64.893 3.434-.902 2.54-2.541l-.159-.292a.873.873 0 0 1 .52-1.255l.319-.094c1.79-.527 1.79-3.065 0-3.592l-.319-.094a.873.873 0 0 1-.52-1.255l.16-.292c.893-1.64-.902-3.433-2.541-2.54l-.292.159a.873.873 0 0 1-1.255-.52zm-2.633.283c.246-.835 1.428-.835 1.674 0l.094.319a1.873 1.873 0 0 0 2.693 1.115l.291-.16c.764-.415 1.6.42 1.184 1.185l-.159.292a1.873 1.873 0 0 0 1.116 2.692l.318.094c.835.246.835 1.428 0 1.674l-.319.094a1.873 1.873 0 0 0-1.115 2.693l.16.291c.415.764-.42 1.6-1.185 1.184l-.291-.159a1.873 1.873 0 0 0-2.693 1.116l-.094.318c-.246.835-1.428.835-1.674 0l-.094-.319a1.873 1.873 0 0 0-2.692-1.115l-.292.16c-.764.415-1.6-.42-1.184-1.185l.159-.291A1.873 1.873 0 0 0 1.945 8.93l-.319-.094c-.835-.246-.835-1.428 0-1.674l.319-.094A1.873 1.873 0 0 0 3.06 4.377l-.16-.292c-.415-.764.42-1.6 1.185-1.184l.292.159a1.873 1.873 0 0 0 2.692-1.115z" />
+								</svg>
+							</a>
+						}
 
-    <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1100">
-        <div id="appToast" class="toast align-items-center text-white bg-success border-0" role="alert">
-            <div class="d-flex">
-                <div class="toast-body" id="toast-body">Placeholder</div>
-                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
-            </div>
-        </div>
-    </div>
+						<button id="darkModeToggle" class="btn btn-sm btn-outline-secondary">🌙</button>
+					</div>
+				</div>
+			</div>
+		</div>
+
+	</header>
+
+	<!-- Main Content Area -->
+	<div class="flex-grow-1">
+		<div class="container py-4">
+			<main role="main" class="pb-5">
+				@RenderBody()
+			</main>
+		</div>
+	</div>
 
 
-    @if (TempData["Success"] != null)
-    {
-        <script>
-            window.addEventListener('DOMContentLoaded', () => {
-                const toastEl = document.getElementById('appToast');
-                if (toastEl) {
-                    const toast = new bootstrap.Toast(toastEl, { delay: 4000 });
-                    toast.show();
-                }
-            });
-        </script>
-    }
+	<footer class="border-top bg-primary mt-5 footer text-light">
+		<div class="container d-flex justify-content-between align-items-center py-2">
+			<div>
+				<img src="~/images/Ampelon Digital White.png" alt="Ampelon Digital" style="height: 28px;" />
+			</div>
+			<div>
+				&copy; 2025 - PegsBase
+			</div>
+			<div>
+				<img src="@ClientOptions.Value.LogoPath" alt="@ClientOptions.Value.ClientName Logo" style="height: 28px;" />
+			</div>
+		</div>
+	</footer>
+	<script src="~/lib/jquery/dist/jquery.min.js"></script>
+	<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+	<script src="~/js/site.js" asp-append-version="true"></script>
 
-    <div id="loadingSpinner" class="position-fixed top-50 start-50 translate-middle" style="z-index: 2000; display: none;">
-        <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
-            <span class="visually-hidden">Loading...</span>
-        </div>
-    </div>
+	@await RenderSectionAsync("Scripts", required: false)
 
-    <script>
-        document.addEventListener("DOMContentLoaded", () => {
-            const body = document.body;
+	<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1100">
+		<div id="appToast" class="toast align-items-center text-white bg-success border-0" role="alert">
+			<div class="d-flex">
+				<div class="toast-body" id="toast-body">Placeholder</div>
+				<button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+			</div>
+		</div>
+	</div>
 
-            // Check system preference if no saved theme
-            const systemPrefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-            const savedTheme = localStorage.getItem("bsTheme") || (systemPrefersDark ? "dark" : "light");
 
-            // Apply saved or system preference theme
-            body.setAttribute("data-bs-theme", savedTheme);
+	@if (TempData["Success"] != null)
+	{
+		<script>
+			window.addEventListener('DOMContentLoaded', () => {
+				const toastEl = document.getElementById('appToast');
+				if (toastEl) {
+					const toast = new bootstrap.Toast(toastEl, { delay: 4000 });
+					toast.show();
+				}
+			});
+		</script>
+	}
 
-            // Toggle theme on button click
-            document.getElementById("darkModeToggle").addEventListener("click", () => {
-                const current = body.getAttribute("data-bs-theme");
-                const newTheme = current === "dark" ? "light" : "dark";
-                body.setAttribute("data-bs-theme", newTheme);
-                localStorage.setItem("bsTheme", newTheme);
-            });
-        });
-    </script>
+	<div id="loadingSpinner" class="position-fixed top-50 start-50 translate-middle" style="z-index: 2000; display: none;">
+		<div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+			<span class="visually-hidden">Loading...</span>
+		</div>
+	</div>
+
+	<script>
+		document.addEventListener("DOMContentLoaded", () => {
+			const body = document.body;
+
+			// Check system preference if no saved theme
+			const systemPrefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+			const savedTheme = localStorage.getItem("bsTheme") || (systemPrefersDark ? "dark" : "light");
+
+			// Apply saved or system preference theme
+			body.setAttribute("data-bs-theme", savedTheme);
+
+			// Toggle theme on button click
+			document.getElementById("darkModeToggle").addEventListener("click", () => {
+				const current = body.getAttribute("data-bs-theme");
+				const newTheme = current === "dark" ? "light" : "dark";
+				body.setAttribute("data-bs-theme", newTheme);
+				localStorage.setItem("bsTheme", newTheme);
+			});
+		});
+	</script>
 
 </body>
 </html>

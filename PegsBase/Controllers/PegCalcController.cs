@@ -89,8 +89,13 @@ namespace PegsBase.Controllers
 
             var calculated = _pegCalcService.CalculatePeg(viewModel, setupPeg, backsightPeg);
 
+            calculated.Levels = await _db.Levels.OrderBy(l => l.Name).ToListAsync();
+            calculated.Localities = await _db.Localities.OrderBy(l => l.Name).ToListAsync();
+            calculated.Surveyors = await _db.Users.OrderBy(u => u.FirstName).ToListAsync();
+
             return View("PegCalcResult", calculated);
         }
+
 
 
         [HttpGet]
@@ -128,40 +133,46 @@ namespace PegsBase.Controllers
             {
                 pegRegister = new PegRegister
                 {
-                    Level = rawData.Level,
-                    Locality = rawData.Locality,
-                    GradeElevation = rawData.GradeElevation,
-                    Surveyor = rawData.Surveyor,
-
-                    PointType = rawData.PointType,
-
                     PegName = rawData.ForeSightPeg,
                     YCoord = rawData.NewPegY,
                     XCoord = rawData.NewPegX,
                     ZCoord = rawData.NewPegZ,
+                    GradeElevation = rawData.GradeElevation,
                     SurveyDate = rawData.SurveyDate,
                     PegFailed = rawData.PegFailed,
-
-                    HasPegCalc = true,
                     FromPeg = rawData.StationPeg,
+                    HasPegCalc = true,
+
+                    PointType = rawData.PointType,
+
+                    // ✅ Safe assignments with matching types
+                    LevelId = rawData.LevelId,
+                    LocalityId = rawData.LocalityId,
+                    SurveyorId = rawData.SurveyorId.ToString(),
+
+                    // ✅ Optional fallback name for display if SurveyorId is null
+                    SurveyorNameText = string.IsNullOrWhiteSpace(rawData.SurveyorId.ToString())
+                            ? rawData.Surveyor
+                             : null
                 };
 
                 _db.PegRegister.Add(pegRegister);
             }
             else
             {
-                // Update the existing peg
+                // Update fields on existing peg if needed
                 pegRegister.HasPegCalc = true;
-                // (Optional) Update any other fields you might want to refresh
-            };
-            
-            
+                // optionally update Surveyor, Level, Locality, etc.
+            }
+
+
+
 
             var raw = new RawSurveyData
             {
-                Surveyor = rawData.Surveyor,
+                Surveyor = rawData.SurveyorId?.ToString() ?? rawData.Surveyor,
                 SurveyDate = rawData.SurveyDate,
-                Locality = rawData.Locality,
+                LocalityId = rawData.LocalityId,
 
                 StationPeg = rawData.StationPeg,
                 BackSightPeg = rawData.BackSightPeg,

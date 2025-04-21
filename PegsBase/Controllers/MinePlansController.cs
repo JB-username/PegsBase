@@ -36,14 +36,14 @@ namespace PegsBase.Controllers
                 {
                     query = query.Where(p =>
                         EF.Functions.ILike(p.PlanName, $"%{keyword}%") ||
-                        EF.Functions.ILike(p.Level, $"%{keyword}%") ||
+                        EF.Functions.ILike(p.Level.Name, $"%{keyword}%") ||
                         EF.Functions.ILike(p.Locality, $"%{keyword}%"));
                 }
             }
 
             if (!string.IsNullOrWhiteSpace(level))
             {
-                query = query.Where(p => p.Level == level);
+                query = query.Where(p => p.Level.Name == level);
             }
 
             if (type.HasValue)
@@ -140,8 +140,8 @@ namespace PegsBase.Controllers
             var plan = new MinePlan
             {
                 PlanName = model.PlanName,
-                Level = model.Level,
-                Locality = model.Locality,
+                LevelId = model.LevelId,
+                LocalityId = model.LocalityId,
                 Scale = model.Scale,
                 PlanType = model.PlanType,
                 IsSigned = model.IsSigned,

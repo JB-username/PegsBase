@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using PegsBase.Models.Settings;
 using PegsBase.Services.Settings;
+using Microsoft.AspNetCore.Authorization;
 
 namespace PegsBase.Controllers
 {
@@ -13,6 +14,13 @@ namespace PegsBase.Controllers
         {
             _settingsService = settingsService;
         }
+
+        [Authorize(Roles = "Master" + "," + "Admin")]
+        public IActionResult Home()
+        {
+            return View();
+        }
+
 
         public IActionResult Index()
         {

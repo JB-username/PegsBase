@@ -34,32 +34,60 @@
                     </td>
                     <td>
                         @Model.PreviewRows[i].XCoord
-                        <input type="hidden" asp-for="PreviewRows[@i].XCoord" /></td>
+                        <input type="hidden" asp-for="PreviewRows[@i].XCoord" />
+                    </td>
                     <td>
                         @Model.PreviewRows[i].YCoord
-                        <input type="hidden" asp-for="PreviewRows[@i].YCoord" /></td>
+                        <input type="hidden" asp-for="PreviewRows[@i].YCoord" />
+                    </td>
                     <td>
                         @Model.PreviewRows[i].ZCoord
-                        <input type="hidden" asp-for="PreviewRows[@i].ZCoord" /></td>
-                    <td><input class="form-control" asp-for="PreviewRows[@i].GradeElevation" /></td>
-                    <td><input class="form-control" asp-for="PreviewRows[@i].Surveyor" /></td>
-                    <td><input class="form-control" asp-for="PreviewRows[@i].Locality" /></td>
+                        <input type="hidden" asp-for="PreviewRows[@i].ZCoord" />
+                    </td>
+                    <td>
+                        <input class="form-control" asp-for="PreviewRows[@i].GradeElevation" />
+                    </td>
+
+                    <!-- Surveyor Dropdown -->
+                    <td>
+                        <select class="form-select" asp-for="PreviewRows[@i].SurveyorId" asp-items="ViewBag.Surveyors">
+                            <option value="">Select Surveyor</option>
+                        </select>
+                    </td>
+
+                    <!-- Locality Dropdown -->
+                    <td>
+                        <select class="form-select" asp-for="PreviewRows[@i].LocalityId" asp-items="ViewBag.Localities">
+                            <option value="">Select Locality</option>
+                        </select>
+                    </td>
+
+                    <!-- Date -->
                     <td>
                         <input class="form-control"
                                name="PreviewRows[@i].SurveyDate"
                                type="date"
                                value="@(Model.PreviewRows[i].SurveyDate?.ToString("yyyy-MM-dd") ?? "")" />
                     </td>
-                    <td><input class="form-control" asp-for="PreviewRows[@i].Level" /></td>
+
+                    <!-- Level Dropdown -->
                     <td>
-                        <select class="form-control" 
-                        asp-for="PreviewRows[@i].Type" 
-                        asp-items="Html.GetEnumSelectList<SurveyPointType>()">
+                        <select class="form-select" asp-for="PreviewRows[@i].LevelId" asp-items="ViewBag.Levels">
+                            <option value="">-- Select Level --</option>
+                        </select>
+                    </td>
+
+                    <!-- Point Type Dropdown -->
+                    <td>
+                        <select class="form-select"
+                                asp-for="PreviewRows[@i].Type"
+                                asp-items="Html.GetEnumSelectList<SurveyPointType>()">
                             <option value="">-- Select Type --</option>
                         </select>
                     </td>
                 </tr>
             }
+
         </tbody>
     </table>
 

@@ -1,7 +1,10 @@
 ﻿
 
+using PegsBase.Models.Entities;
 using PegsBase.Models.Enums;
+using PegsBase.Models.Identity;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace PegsBase.Models
 {
@@ -9,9 +12,10 @@ namespace PegsBase.Models
     {
         public int Id { get; set; }
         public string Title { get; set; }
-        public string Level { get; set; }
-        public string Locality { get; set; }
-        public string UploadedBy { get; set; }
+        public int LevelId { get; set; }
+        public Level Level { get; set; }
+        public string UploadedById { get; set; }
+        public ApplicationUser UploadedBy { get; set; }
 
         [DataType(DataType.Date)]
         [DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}", ApplyFormatInEditMode = true)]
@@ -25,5 +29,7 @@ namespace PegsBase.Models
         public bool RequiresManualSignature => NoteType == SurveyNoteType.HolingNote;
         public string? ThumbnailPath { get; set; } // e.g. ~/uploads/thumbnails/xxx.jpg
 
+        public int LocalityId {  get; set; }
+        public Locality Locality { get; set; }
     }
 }

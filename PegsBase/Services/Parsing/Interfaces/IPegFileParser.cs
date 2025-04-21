@@ -4,6 +4,6 @@ namespace PegsBase.Services.Parsing.Interfaces
 {
     public interface IPegFileParser
     {
-        List<PegRegister> Parse(Stream fileStream);
+        List<PegRegisterImportModel> Parse(Stream fileStream);
     }
 }
