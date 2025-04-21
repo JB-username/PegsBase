@@ -6,63 +6,63 @@
 }
 
 @section Styles {
-	<style>
+<style>
 
-		.a4-preview {
-			width: 210mm;
-			min-height: 297mm;
-			padding: 0mm;
-			margin: auto;
-			background: white;
-			box-shadow: 0 0 5px rgba(0,0,0,0.2);
-			box-sizing: border-box;
-			overflow: hidden;
-		}
+	.a4-preview {
+	width: 210mm;
+	min-height: 297mm;
+	padding: 0mm;
+	margin: auto;
+	background: white;
+	box-shadow: 0 0 5px rgba(0,0,0,0.2);
+	box-sizing: border-box;
+	overflow: hidden;
+	}
 
-		@@media print {
+	@@media print {
 
-			body * {
-				visibility: hidden;
-			}
+	body * {
+	visibility: hidden;
+	}
 
-			*,
-			*::before,
-			*::after {
-				box-sizing: border-box;
-			}
+	*,
+	*::before,
+	*::after {
+	box-sizing: border-box;
+	}
 
-			.text-muted {
-				color: #333 !important;
-			}
+	.text-muted {
+	color: #333 !important;
+	}
 
-			.a4-page {
-				width: 210mm;
-				min-height: 297mm;
-				padding: 0mm;
-				margin: auto;
-				background: white;
-				box-shadow: 0 0 5px rgba(0,0,0,0.2);
-				box-sizing: border-box;
-				overflow: hidden;
-			}
+	.a4-page {
+	width: 210mm;
+	min-height: 297mm;
+	padding: 0mm;
+	margin: auto;
+	background: white;
+	box-shadow: 0 0 5px rgba(0,0,0,0.2);
+	box-sizing: border-box;
+	overflow: hidden;
+	}
 
-			.print-area, .print-area * {
-				visibility: visible;
-			}
+	.print-area, .print-area * {
+	visibility: visible;
+	}
 
-			.print-area {
-				position: absolute;
-				top: 0;
-				left: 0;
-				width: 100%;
+	.print-area {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
 
-			}
+	}
 
-			.d-print-none, nav, footer, header {
-				display: none !important;
-			}
-		}
-	</style>
+	.d-print-none, nav, footer, header {
+	display: none !important;
+	}
+	}
+</style>
 }
 
 <div class="a4-page">
@@ -414,26 +414,42 @@
 
 					<div class="form-group">
 						<label>Level</label>
-						<input type="text" id="inputLevel" class="form-control" />
+						@if (Model.Levels != null)
+						{
+							<select asp-for="LevelId" class="form-control" asp-items="@(new SelectList(Model.Levels, "Id", "Name"))">
+								<option value="">Select Level</option>
+							</select>
+						}
 					</div>
 
 					<div class="form-group">
 						<label>Surveyor</label>
-						<input type="text" id="inputSurveyor" class="form-control" />
+						<select asp-for="SurveyorId" class="form-control" asp-items="@(new SelectList(Model.Surveyors, "Id", "DisplayName"))">
+							<option value="">Select Surveyor</option>
+						</select>
+
+					</div>
+					<div class="col-md-6">
+						<label>Surveyor Name (if manual)</label>
+						<input asp-for="SurveyorNameText" class="form-control" placeholder="e.g., J. Smith" />
 					</div>
 
 					<div class="form-group">
 						<label>Locality</label>
-						<input type="text" id="inputLocality" class="form-control" />
+						@if (Model.Locality != null)
+						{
+							<select asp-for="LocalityId" class="form-control" asp-items="@(new SelectList(Model.Localities, "Id", "Name"))">
+								<option value="">Select Locality</option>
+							</select>
+						}
 					</div>
 
 					<div class="form-group">
 						<label>Survey Point Type</label>
-						<select id="inputPointType" class="form-control">
-							<option value="Peg">Peg</option>
-							<option value="Control">Control</option>
-							<option value="Beacon">Beacon</option>
+						<select asp-for="PointType" asp-items="Html.GetEnumSelectList<SurveyPointType>()" class="form-control">
+							<option value="">Select Point Type</option>
 						</select>
+
 					</div>
 				</div>
 
@@ -451,20 +467,20 @@
 	<hr />
 
 	@* Hidden form fields for submission *@
-	<input type="hidden" name="Level" id="hiddenLevel" />
-	<input type="hidden" name="Surveyor" id="hiddenSurveyor" />
-	<input type="hidden" name="Locality" id="hiddenLocality" />
-	<input type="hidden" name="PointType" id="hiddenPointType" />
+	@* <input type="hidden" name="Level" id="hiddenLevel" /> *@
+	@* <input type="hidden" name="Surveyor" id="hiddenSurveyor" /> *@
+	@* <input type="hidden" name="Locality" id="hiddenLocality" /> *@
+	@* <input type="hidden" name="PointType" id="hiddenPointType" /> *@
 
 	@Html.HiddenFor(m => m.NewPegX)
 	@Html.HiddenFor(m => m.NewPegY)
 	@Html.HiddenFor(m => m.NewPegZ)
 
-	@Html.HiddenFor(m => m.Surveyor, new { id = "hiddenSurveyor" })
+	@* @Html.HiddenFor(m => m.Surveyor, new { id = "hiddenSurveyor" }) *@
 	@Html.HiddenFor(m => m.SurveyDate)
-	@Html.HiddenFor(m => m.Locality, new { id = "hiddenLocality" })
-	@Html.HiddenFor(m => m.Level, new { id = "hiddenLevel" })
-	@Html.HiddenFor(m => m.PointType, new { id = "hiddenPointType" })
+	@* @Html.HiddenFor(m => m.Locality, new { id = "hiddenLocality" }) *@
+	@* @Html.HiddenFor(m => m.Level, new { id = "hiddenLevel" }) *@
+	@* @Html.HiddenFor(m => m.PointType, new { id = "hiddenPointType" }) *@
 
 	@Html.HiddenFor(m => m.ForeSightPeg)
 	@Html.HiddenFor(m => m.StationPeg)
@@ -551,32 +567,37 @@
 
 @section Scripts {
 	<script>
-		function updatePreview(fieldId, previewId, hiddenId) {
-			const value = document.getElementById(fieldId).value;
-			document.getElementById(previewId).textContent = value;
-			document.getElementById(hiddenId).value = value;
-		}
-
-		document.getElementById('inputLevel').addEventListener('input', function () {
-			updatePreview('inputLevel', 'previewLevel', 'hiddenLevel');
+		// Surveyor live preview
+		document.querySelector('[name="SurveyorId"]').addEventListener('change', function () {
+			const text = this.options[this.selectedIndex].text;
+			document.getElementById('previewSurveyor').textContent = text;
+			document.getElementById('displaySurveyor').textContent = text;
 		});
 
-		document.getElementById('inputSurveyor').addEventListener('input', function () {
-			updatePreview('inputSurveyor', 'previewSurveyor', 'hiddenSurveyor');
-			document.getElementById('displaySurveyor').textContent = this.value;
+		// Locality live preview
+		document.querySelector('[name="LocalityId"]').addEventListener('change', function () {
+			const text = this.options[this.selectedIndex].text;
+			document.getElementById('previewLocality').textContent = text;
+			document.getElementById('displayLocality').textContent = text;
 		});
 
-		document.getElementById('inputLocality').addEventListener('input', function () {
-			updatePreview('inputLocality', 'previewLocality', 'hiddenLocality');
-			document.getElementById('displayLocality').textContent = this.value;
+		// Level live preview
+		document.querySelector('[name="LevelId"]').addEventListener('change', function () {
+			const text = this.options[this.selectedIndex].text;
+			document.getElementById('previewLevel').textContent = text;
 		});
 
-		document.getElementById('inputPointType').addEventListener('change', function () {
-			updatePreview('inputPointType', 'previewPointType', 'hiddenPointType');
+		// PointType live preview (enum)
+		document.querySelector('[name="PointType"]').addEventListener('change', function () {
+			const text = this.options[this.selectedIndex].text;
+			document.getElementById('previewPointType').textContent = text;
 		});
 
-		// Trigger update from dropdown on page load
-		document.getElementById('inputPointType').dispatchEvent(new Event('change'));
-
+		// Trigger preview updates on page load
+		document.querySelector('[name="SurveyorId"]').dispatchEvent(new Event('change'));
+		document.querySelector('[name="LocalityId"]').dispatchEvent(new Event('change'));
+		document.querySelector('[name="LevelId"]').dispatchEvent(new Event('change'));
+		document.querySelector('[name="PointType"]').dispatchEvent(new Event('change'));
 	</script>
 }
+

@@ -26,7 +26,7 @@ namespace PegsBase.Models.Identity
             NormalizedFullName = Normalize($"{FirstName} {LastName}");
         }
 
-        private static string Normalize(string name)
+        public static string Normalize(string name)
         {
             return name?
                 .Replace(".", "")

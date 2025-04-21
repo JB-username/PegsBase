@@ -53,13 +53,21 @@
 			<hr />
 			<div class="row">
 				<p class="col"><strong>Level:</strong></p>
-				<p class="col">@Model.Level</p>
+				<p class="col">@Model.Level?.Name</p>
 				<p class="col"><strong>Locality:</strong></p>
-				<p class="col">@Model.Locality</p>
+				<p class="col">@Model.Locality?.Name</p>
 			</div>
 			<div class="row">
 				<p class="col"><strong>Surveyed By:</strong></p>
-				<p class="col">@Model.Surveyor</p>
+				<p class="col">
+					@{
+						var name = Model.Surveyor != null
+						? $"{Model.Surveyor.FirstName} {Model.Surveyor.LastName}"
+						: Model.SurveyorNameText; // Fallback string field for manual/historical entries
+
+						@name
+					}
+				</p>
 				<p class="col"><strong>Check:</strong></p>
 				@if (!Model.PegFailed)
 				{

@@ -1,4 +1,6 @@
-﻿using PegsBase.Models.Enums;
+﻿using PegsBase.Models.Entities;
+using PegsBase.Models.Enums;
+using PegsBase.Models.Identity;
 using System;
 using System.ComponentModel.DataAnnotations;
 
@@ -9,14 +11,26 @@ namespace PegsBase.Models.ViewModels
         //Meta Data
         [Key]
         public int Id { get; set; }
+        public string? SurveyorId { get; set; }
         public string? Surveyor { get; set; }
+        public string? SurveyorNameText { get; set; }
         public DateOnly SurveyDate { get; set; }
         public int LocalityId { get; set; }
         public string? Locality { get; set; }
         public int LevelId { get; set; }
         public int Level { get; set; }
         public decimal GradeElevation { get; set; }
-        public SurveyPointType PointType { get; set; }
+        public SurveyPointType PointType { get; set; } = SurveyPointType.Peg;
+
+        public string? SurveyorDisplayName { get; set; }
+        public string? LocalityName { get; set; }
+        public string? LevelName { get; set; }
+
+
+        public List<Level> Levels { get; set; } = new List<Level>();
+        public List<Locality> Localities { get; set; } = new List<Locality>();
+        public List<ApplicationUser> Surveyors { get; set; } = new List<ApplicationUser>();
+
 
         //Pegs Used
         public string? StationPeg { get; set; }

@@ -698,7 +698,12 @@ namespace PegsBase.Controllers
             Roles.Surveyor)]
         public async Task<IActionResult> ViewPeg(int id)
         {
-            var peg = await _dbContext.PegRegister.FirstOrDefaultAsync(p => p.Id == id);
+            var peg = await _dbContext.PegRegister
+                .Include(p => p.Level)
+                .Include(p => p.Locality)
+                .Include(p => p.Surveyor)
+                .FirstOrDefaultAsync(p => p.Id == id);
+
 
             if (peg == null)
                 return NotFound();
@@ -796,10 +801,15 @@ namespace PegsBase.Controllers
                     // Metadata
                     Surveyor = rawData.Surveyor,
                     SurveyDate = rawData.SurveyDate,
-                    Locality = rawData.Locality,
+                    LocalityId = rawData.LocalityId,
                     Level = peg.Level.Id,
                     PointType = peg.PointType,
-                    PegFailed = rawData.PegFailed
+                    PegFailed = rawData.PegFailed,
+
+                    // Display info
+                    SurveyorDisplayName = peg.Surveyor?.DisplayName ?? rawData.Surveyor,
+                    LocalityName = peg.Locality?.Name,
+                    LevelName = peg.Level?.Name
                 };
 
                 return View("PegCalcResultViewOnly", viewModel);

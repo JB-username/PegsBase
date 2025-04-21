@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using PegsBase.Models.Entities;
+using System.ComponentModel.DataAnnotations;
 
 namespace PegsBase.Models
 {
@@ -9,7 +10,9 @@ namespace PegsBase.Models
         public int Id { get; set; }
         public string? Surveyor {  get; set; }
         public DateOnly SurveyDate { get; set; }
-        public string? Locality { get; set; }
+        public int LocalityId { get; set; }
+        public Locality Locality { get; set; }
+
 
         //Pegs Used
         public string? StationPeg {  get; set; }

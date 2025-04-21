@@ -69,9 +69,10 @@
 		<div class="card-body">
 			<div class="row mt-1 ">
 				<div class="mb-3 col-6">
-					<strong>Survey Date:</strong> @Model.SurveyDate.ToString("yyyy/MM/dd")  <br />
-					<strong>Surveyor: </strong><span id="displaySurveyor">@Model.Surveyor</span>  <br />
-					<strong>Locality: </strong><span id="displayLocality">@Model.Locality</span> <br />
+					<strong>Surveyor: </strong><span id="displaySurveyor">@Model.SurveyorDisplayName</span><br />
+					<strong>Locality: </strong><span id="displayLocality">@Model.LocalityName</span><br />
+					<strong>Level: </strong><span id="displayLevel">@Model.LevelName</span>
+
 				</div>
 				<div class="mb-3 col-6">
 					<div class="row">
