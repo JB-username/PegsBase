@@ -1,0 +1,41 @@
+﻿@model PegsBase.Models.ViewModels.PegCalcViewModel
+
+@{
+    Layout = "~/Views/Shared/_PdfLayout.cshtml";
+    ViewData["Title"] = "PegCalc Test Export";
+}
+
+@section Styles {
+    <style>
+        .test-container {
+            background-color: #fdf6e3;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+        }
+
+        .header {
+            font-size: 24px;
+            color: #444;
+            margin-bottom: 10px;
+        }
+
+        .angle-row {
+            margin: 5px 0;
+            padding: 5px;
+            background-color: #eef;
+            border: 1px solid #ccd;
+        }
+    </style>
+}
+
+<div class="test-container">
+    <div class="header">PegCalc PDF Test</div>
+
+    <p><strong>ForeSight Peg:</strong> @Model.ForeSightPeg</p>
+    <p><strong>Surveyor:</strong> @Model.SurveyorDisplayName</p>
+    <p><strong>Locality:</strong> @Model.LocalityName</p>
+    <p><strong>Level:</strong> @Model.LevelName</p>
+
+    <div class="angle-row"><strong>HAngle Direct Arc1 Backsight:</strong> @Model.FormatDMS(Model.HAngleDirectArc1Backsight)</div>
+    <div class="angle-row"><strong>HAngle Direct Arc1 Foresight:</strong> @Model.FormatDMS(Model.HAngleDirectArc1Foresight)</div>
+</div>

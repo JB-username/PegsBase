@@ -18,6 +18,7 @@ using PegsBase.Services.PegCalc.Interfaces;
 using PegsBase.Services.Settings;
 using System.Data.Common;
 using System.Globalization;
+using Rotativa.AspNetCore;
 
 namespace PegsBase
 {
@@ -90,6 +91,14 @@ namespace PegsBase
             app.UseRouting();
 
             app.UseStaticFiles();
+
+#if DEBUG
+            RotativaConfiguration.Setup("C:\\Rotativa\\Windows");
+#else
+            RotativaConfiguration.Setup("/usr/local/bin");
+#endif
+
+
             app.UseSession();
 
             app.UseAuthorization();
