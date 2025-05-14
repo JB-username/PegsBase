@@ -55,7 +55,8 @@ namespace PegsBase
             builder.Services.AddDbContext<ApplicationDbContext>(
                 options => options.UseNpgsql(
                     builder.Configuration.GetConnectionString(
-                        "DefaultConnection")));
+                        "DefaultConnection"))
+                );
 
             builder.Services.AddScoped<IPegFileParser, CsvPegFileParser>();
             builder.Services.AddScoped<ICoordinateDatParserService, CoordinateDatParserService>();
@@ -93,6 +94,7 @@ namespace PegsBase
             app.UseRouting();
 
             app.UseStaticFiles();
+
 
 //#if DEBUG
 //            RotativaConfiguration.Setup("C:\\Rotativa\\Windows");
