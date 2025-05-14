@@ -16,6 +16,8 @@ using PegsBase.Services.Parsing.Interfaces;
 using PegsBase.Services.PegCalc.Implementations;
 using PegsBase.Services.PegCalc.Interfaces;
 using PegsBase.Services.Settings;
+using PegsBase.Services.QuickCalcs.Interfaces;
+using PegsBase.Services.QuickCalcs.Implementations;
 using System.Data.Common;
 using System.Globalization;
 using Rotativa.AspNetCore;
@@ -61,6 +63,7 @@ namespace PegsBase
             builder.Services.AddScoped<IRawSurveyDataDatFileParser, RawSurveyDataDatFileParser>();
             builder.Services.AddScoped<IMapImportModelsToPegs, MapImportModelsToPegs>();
             builder.Services.AddScoped<IImportSettingsService, ImportSettingsService>();
+            builder.Services.AddScoped<IJoinCalculatorService, JoinCalculatorService>();
 
             builder.Services.AddTransient<IEmailSender, EmailSender>();
 

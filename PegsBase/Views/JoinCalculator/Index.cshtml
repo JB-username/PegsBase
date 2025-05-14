@@ -1,0 +1,90 @@
+﻿@model PegsBase.Models.QuickCalcs.JoinCalculatorViewModel
+
+<form asp-action="Index" method="post" class="row g-3">
+    <div class="col-md-6">
+        <label asp-for="FirstPegId" class="form-label"></label>
+        <select asp-for="FirstPegId" asp-items="Model.PegOptions" class="form-select">
+            <option value="">-- choose --</option>
+        </select>
+        <span asp-validation-for="FirstPegId" class="text-danger"></span>
+    </div>
+
+    <div class="col-md-6">
+        <label asp-for="SecondPegId" class="form-label"></label>
+        <select asp-for="SecondPegId" asp-items="Model.PegOptions" class="form-select">
+            <option value="">-- choose --</option>
+        </select>
+        <span asp-validation-for="SecondPegId" class="text-danger"></span>
+    </div>
+
+    <div class="col-12">
+        <button type="submit" class="btn btn-primary">Calculate</button>
+    </div>
+</form>
+
+@if (Model.Result != null)
+{
+    <h3 class="mt-4">Results</h3>
+
+    <!-- 3.1: raw coords at the top -->
+    <div class="card mb-3">
+        <div class="card-header">Coordinates</div>
+        <dl class="row m-3"> 
+            <dd class="col-sm-3 text-muted">Point ID</dd>
+            <dd class="col-sm-3 text-muted">Y Coordinate</dd>
+            <dd class="col-sm-3 text-muted">X Coordinate</dd>
+            <dd class="col-sm-3 text-muted">Z Coordinate</dd>
+        </dl>
+        <dl class="row ms-3">
+            <dt class="col-sm-3">@Html.DisplayNameFor(m => m.FirstPegId)</dt>
+            <dd class="col-sm-3">@($"{Model.StartY:F3}")</dd>
+            <dd class="col-sm-3">@($"{Model.StartX:F3}")</dd>
+            <dd class="col-sm-3">@($"{Model.StartZ:F3}")</dd>
+        </dl>
+        <dl class="row ms-3">
+            <dt class="col-sm-3">@Html.DisplayNameFor(m => m.SecondPegId)</dt>
+            <dd class="col-sm-3">@($"{Model.EndY:F3}")</dd>
+            <dd class="col-sm-3">@($"{Model.EndX:F3}")</dd>
+            <dd class="col-sm-3">@($"{Model.EndZ:F3}")</dd>
+        </dl>
+    </div>
+
+    <!-- 3.2: distances grouped -->
+    <div class="card mb-3">
+        <div class="card-header">Distances</div>
+        <dl class="row m-3">
+            <dt class="col-sm-4">Horizontal</dt>
+            <dd class="col-sm-8">@($"{Model.Result.HorizontalDistance:F3} m")</dd>
+
+            <dt class="col-sm-4">Vertical</dt>
+            <dd class="col-sm-8">@($"{Model.Result.VerticalDifference:F3} m")</dd>
+
+            <dt class="col-sm-4">Slope</dt>
+            <dd class="col-sm-8">@($"{Model.Result.SlopeDistance:F3} m")</dd>
+        </dl>
+    </div>
+
+    <!-- 3.3: bearing grouped -->
+    <div class="card mb-3">
+        <div class="card-header">Bearing</div>
+        <dl class="row m-3">
+            <dt class="col-sm-4">Decimal (°)</dt>
+            <dd class="col-sm-8">@($"{Model.Result.BearingDegrees:F6}")</dd>
+
+            <dt class="col-sm-4">DMS</dt>
+            <dd class="col-sm-8">@Model.FormatDMS((decimal)Model.Result.BearingDegrees)</dd>
+        </dl>
+    </div>
+
+    <!-- 3.4: dip grouped -->
+    <div class="card mb-3">
+        <div class="card-header">Dip</div>
+        <dl class="row m-3">
+            <dt class="col-sm-4">Decimal (°)</dt>
+            <dd class="col-sm-8">@($"{Model.Result.DipDegrees:F6}")</dd>
+
+            <dt class="col-sm-4">DMS</dt>
+            <dd class="col-sm-8">@Model.FormatDMS((decimal)Model.Result.DipDegrees)</dd>
+        </dl>
+    </div>
+}
