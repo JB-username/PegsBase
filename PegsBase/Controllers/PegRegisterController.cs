@@ -16,6 +16,8 @@ using PegsBase.Services.Parsing;
 using PegsBase.Services.Parsing.Interfaces;
 using PegsBase.Services.PegCalc.Interfaces;
 using System.Text;
+using Rotativa.AspNetCore;
+using PegsBase.Services.Settings;
 
 namespace PegsBase.Controllers
 {
@@ -28,14 +30,16 @@ namespace PegsBase.Controllers
         private readonly IPegCalcService _pegCalcService;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IMapImportModelsToPegs _pegMapper;
+        private readonly IImportSettingsService _importSettingsService;
 
         public PegRegisterController(
-            ApplicationDbContext db, 
+            ApplicationDbContext db,
             IPegFileParser pegFileParser,
             ICoordinateDatParserService coordinateDatParserService,
             IPegCalcService pegCalcService,
             UserManager<ApplicationUser> user,
-            IMapImportModelsToPegs mapImportModelsToPeg)
+            IMapImportModelsToPegs mapImportModelsToPeg,
+            IImportSettingsService importSettingsService)
         {
             _dbContext = db;
             _pegFileParser = pegFileParser;
@@ -43,11 +47,13 @@ namespace PegsBase.Controllers
             _pegCalcService = pegCalcService;
             _userManager = user;
             _pegMapper = mapImportModelsToPeg;
+            _importSettingsService = importSettingsService;
         }
 
         [Authorize(Roles =
             Roles.Master + "," +
-            Roles.Mrm + "," + 
+            Roles.Admin + "," +
+            Roles.Mrm + "," +
             Roles.MineSurveyor + "," +
             Roles.SurveyAnalyst + "," +
             Roles.Surveyor)]
@@ -88,9 +94,16 @@ namespace PegsBase.Controllers
             return View(await objPegsList.ToListAsync());
         }
 
+        [HttpPost]
+        public IActionResult Index(List<int> selectedIds)
+        {
+            return Content("Selected: " + string.Join(", ", selectedIds ?? new List<int>()));
+        }
+
 
         [Authorize(Roles =
             Roles.Master + "," +
+            Roles.Admin + "," +
             Roles.MineSurveyor + "," +
             Roles.SurveyAnalyst + "," +
             Roles.Surveyor)]
@@ -121,6 +134,7 @@ namespace PegsBase.Controllers
 
         [Authorize(Roles =
             Roles.Master + "," +
+            Roles.Admin + "," +
             Roles.MineSurveyor + "," +
             Roles.SurveyAnalyst + "," +
             Roles.Surveyor)]
@@ -172,6 +186,7 @@ namespace PegsBase.Controllers
 
         [Authorize(Roles =
             Roles.Master + "," +
+            Roles.Admin + "," +
             Roles.MineSurveyor + "," +
             Roles.SurveyAnalyst)]
         [HttpGet]
@@ -214,9 +229,9 @@ namespace PegsBase.Controllers
 
         [Authorize(Roles =
             Roles.Master + "," +
-            Roles.MineSurveyor + "," + 
+            Roles.Admin + "," +
+            Roles.MineSurveyor + "," +
             Roles.SurveyAnalyst)]
-        [HttpPost]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(PegRegister peg, string? filter)
@@ -251,6 +266,7 @@ namespace PegsBase.Controllers
 
         [Authorize(Roles =
             Roles.Master + "," +
+            Roles.Admin + "," +
             Roles.MineSurveyor + "," +
             Roles.SurveyAnalyst)]
         [HttpGet]
@@ -261,7 +277,7 @@ namespace PegsBase.Controllers
                 return NotFound();
             }
 
-            if(filter.HasValue)
+            if (filter.HasValue)
             {
                 TempData["LastFilter"] = filter.Value;
             }
@@ -278,29 +294,31 @@ namespace PegsBase.Controllers
 
         [Authorize(Roles =
             Roles.Master + "," +
+            Roles.Admin + "," +
             Roles.MineSurveyor + "," +
             Roles.SurveyAnalyst)]
         [HttpPost]
         public IActionResult DeletePost(int? id)
         {
             var pegToDelete = _dbContext.PegRegister.FirstOrDefault(p => p.Id == id);
-            
+
             if (pegToDelete == null)
             {
                 TempData["Error"] = "Peg Not Found.";
                 return RedirectToAction("Index");
             }
-            
+
             _dbContext.PegRegister.Remove(pegToDelete);
             _dbContext.SaveChanges();
 
             TempData["Success"] = $"Peg {pegToDelete.PegName} deleted successfully!";
             return RedirectToAction("Index");
-            
+
         }
 
         [Authorize(Roles =
             Roles.Master + "," +
+            Roles.Admin + "," +
             Roles.MineSurveyor + "," +
             Roles.SurveyAnalyst)]
         [HttpPost]
@@ -323,13 +341,15 @@ namespace PegsBase.Controllers
             return RedirectToAction("Index");
         }
 
+
         [Authorize(Roles =
             Roles.Master + "," +
+            Roles.Admin + "," +
             Roles.MineSurveyor + "," +
             Roles.SurveyAnalyst + "," +
             Roles.Surveyor)]
         [HttpPost]
-        public IActionResult ExportSelectedToCsv(List<int> selectedIds)
+        public IActionResult ExportSelectedToCsvPlans(List<int> selectedIds)
         {
             if (selectedIds == null || !selectedIds.Any())
             {
@@ -346,23 +366,81 @@ namespace PegsBase.Controllers
 
             foreach (var peg in selectedPegs)
             {
-                csv.AppendLine(
-                    $"{peg.PegName}," +
-                    $"{peg.YCoord}," +
-                    $"{peg.XCoord}," +
-                    $"{peg.ZCoord}," +
-                    $"{peg.GradeElevation},"
-                    );
+                // Export data AS-IS
+                csv.AppendLine($"{peg.PegName},{peg.YCoord},{peg.XCoord},{peg.ZCoord},{peg.GradeElevation}");
             }
 
             var fileBytes = Encoding.UTF8.GetBytes(csv.ToString());
-            var fileName = $"SelectedPegs_{DateTime.Now:yyyyMMddHHmmss}.csv";
+            var fileName = $"SelectedPegs_Plans_{DateTime.Now:yyyyMMddHHmmss}.csv";
 
             return File(fileBytes, "text/csv", fileName);
         }
 
+
+
+        [Authorize(Roles =
+        Roles.Master + "," +
+        Roles.Admin + "," +
+        Roles.MineSurveyor + "," +
+        Roles.SurveyAnalyst + "," +
+        Roles.Surveyor)]
+        [HttpPost]
+        public IActionResult ExportSelectedToCsvInstrument(List<int> selectedIds)
+        {
+            if (selectedIds == null || !selectedIds.Any())
+            {
+                TempData["Error"] = "Please select at least one peg to export.";
+                return RedirectToAction("Index");
+            }
+
+            var selectedPegs = _dbContext.PegRegister
+                .Where(p => selectedIds.Contains(p.Id))
+                .ToList();
+
+            var settings = _importSettingsService.GetSettings();
+
+            var csv = new StringBuilder();
+            csv.AppendLine("PegName,YCoord,XCoord,ZCoord,GradeElevation");
+
+            foreach (var peg in selectedPegs)
+            {
+                decimal x = peg.XCoord;
+                decimal y = peg.YCoord;
+
+                // 🔥 Reverse the AppSettings logic in reverse order
+                // 1. Reverse InvertX and InvertY (signs first)
+                if (settings.InvertX)
+                {
+                    x = -x;
+                }
+
+                if (settings.InvertY)
+                {
+                    y = -y;
+                }
+
+                // 2. Reverse SwapXY
+                if (settings.SwapXY)
+                {
+                    var temp = x;
+                    x = y;
+                    y = temp;
+                }
+
+                csv.AppendLine($"{peg.PegName},{y},{x},{peg.ZCoord},{peg.GradeElevation}");
+            }
+
+            var fileBytes = Encoding.UTF8.GetBytes(csv.ToString());
+            var fileName = $"SelectedPegs_Instrument_{DateTime.Now:yyyyMMddHHmmss}.csv";
+
+            return File(fileBytes, "text/csv", fileName);
+        }
+
+
+
         [Authorize(Roles =
             Roles.Master + "," +
+            Roles.Admin + "," +
             Roles.MineSurveyor + "," +
             Roles.SurveyAnalyst + "," +
             Roles.Surveyor)]
@@ -460,6 +538,7 @@ namespace PegsBase.Controllers
 
         [Authorize(Roles =
             Roles.Master + "," +
+            Roles.Admin + "," +
             Roles.MineSurveyor + "," +
             Roles.SurveyAnalyst + "," +
             Roles.Surveyor)]
@@ -471,6 +550,7 @@ namespace PegsBase.Controllers
 
         [Authorize(Roles =
             Roles.Master + "," +
+            Roles.Admin + "," +
             Roles.MineSurveyor + "," +
             Roles.SurveyAnalyst + "," +
             Roles.Surveyor)]
@@ -484,11 +564,31 @@ namespace PegsBase.Controllers
             }
 
             using var stream = file.OpenReadStream();
-            var importModels = _pegFileParser.Parse(stream); // Still returns PegRegisterImportModel
+            var importModels = _pegFileParser.Parse(stream); // List<PegRegisterImportModel>
 
-            var mappedPegs = await _pegMapper.MapAsync(importModels);
+            var settings = _importSettingsService.GetSettings();
 
-            TempData["ParsedPegs"] = JsonConvert.SerializeObject(mappedPegs);
+            foreach (var model in importModels)
+            {
+                if (settings.SwapXY)
+                {
+                    var temp = model.XCoord;
+                    model.XCoord = model.YCoord;
+                    model.YCoord = temp;
+                }
+
+                if (settings.InvertX)
+                {
+                    model.XCoord = -model.XCoord;
+                }
+
+                if (settings.InvertY)
+                {
+                    model.YCoord = -model.YCoord;
+                }
+            }
+
+            TempData["ParsedPegs"] = JsonConvert.SerializeObject(importModels);
 
             return RedirectToAction("Preview");
         }
@@ -496,6 +596,7 @@ namespace PegsBase.Controllers
 
         [Authorize(Roles =
             Roles.Master + "," +
+            Roles.Admin + "," +
             Roles.Mrm + "," +
             Roles.MineSurveyor + "," +
             Roles.SurveyAnalyst + "," +
@@ -506,12 +607,14 @@ namespace PegsBase.Controllers
             if (!TempData.TryGetValue("ParsedPegs", out var rawData) || rawData == null)
                 return RedirectToAction("Upload");
 
-            var pegs = JsonConvert.DeserializeObject<List<PegRegister>>(rawData.ToString());
-            return View(pegs);
+            var pegs = JsonConvert.DeserializeObject<List<PegRegisterImportModel>>(rawData.ToString());
+            return View(pegs); // View now expects PegRegisterImportModel
         }
+
 
         [Authorize(Roles =
             Roles.Master + "," +
+            Roles.Admin + "," +
             Roles.MineSurveyor + "," +
             Roles.SurveyAnalyst + "," +
             Roles.Surveyor)]
@@ -547,6 +650,7 @@ namespace PegsBase.Controllers
 
         [Authorize(Roles =
             Roles.Master + "," +
+            Roles.Admin + "," +
             Roles.MineSurveyor + "," +
             Roles.SurveyAnalyst + "," +
             Roles.Surveyor)]
@@ -559,6 +663,7 @@ namespace PegsBase.Controllers
 
         [Authorize(Roles =
             Roles.Master + "," +
+            Roles.Admin + "," +
             Roles.Mrm + "," +
             Roles.MineSurveyor + "," +
             Roles.SurveyAnalyst + "," +
@@ -581,6 +686,7 @@ namespace PegsBase.Controllers
 
         [Authorize(Roles =
             Roles.Master + "," +
+            Roles.Admin + "," +
             Roles.MineSurveyor + "," +
             Roles.SurveyAnalyst + "," +
             Roles.Surveyor)]
@@ -592,6 +698,7 @@ namespace PegsBase.Controllers
 
         [Authorize(Roles =
             Roles.Master + "," +
+            Roles.Admin + "," +
             Roles.MineSurveyor + "," +
             Roles.SurveyAnalyst + "," +
             Roles.Surveyor)]
@@ -607,6 +714,28 @@ namespace PegsBase.Controllers
             using var reader = new StreamReader(model.CoordinateFile.OpenReadStream());
             var parsedRows = await _coordinateDatParserService.ParseDatAsync(reader);
 
+            var settings = _importSettingsService.GetSettings();
+
+            foreach (var row in parsedRows)
+            {
+                if (settings.SwapXY)
+                {
+                    var temp = row.XCoord;
+                    row.XCoord = row.YCoord;
+                    row.YCoord = temp;
+                }
+
+                if (settings.InvertX)
+                {
+                    row.XCoord = -row.XCoord;
+                }
+
+                if (settings.InvertY)
+                {
+                    row.YCoord = -row.YCoord;
+                }
+            }
+
             model.PreviewRows = parsedRows.Take(2).ToList(); // Only show first 2
 
             if (!model.PreviewRows.Any())
@@ -620,7 +749,8 @@ namespace PegsBase.Controllers
             ViewBag.Surveyors = new SelectList(
                 _dbContext.Users
                     .OrderBy(u => u.LastName)
-                    .Select(u => new {
+                    .Select(u => new
+                    {
                         u.Id,
                         Name = u.FirstName.Substring(0, 1) + ". " + u.LastName
                     }),
@@ -718,6 +848,8 @@ namespace PegsBase.Controllers
 
                 var viewModel = new PegCalcViewModel
                 {
+                    Id = peg.Id,
+
                     ForeSightPeg = rawData.ForeSightPeg,
                     StationPeg = rawData.StationPeg,
                     BackSightPeg = rawData.BackSightPeg,
@@ -760,13 +892,13 @@ namespace PegsBase.Controllers
                     VAngleTransitArc2Backsight = rawData.VAngleTransitArc2Backsight,
                     VAngleTransitArc2Foresight = rawData.VAngleTransitArc2Foresight,
 
-                    HAngleDirectReducedArc1 =rawData.HAngleDirectReducedArc1,
+                    HAngleDirectReducedArc1 = rawData.HAngleDirectReducedArc1,
                     HAngleTransitReducedArc1 = rawData.HAngleTransitReducedArc1,
-                    HAngleDirectReducedArc2 =rawData.HAngleDirectReducedArc2,
-                    HAngleTransitReducedArc2 =rawData.HAngleTransitReducedArc2,
+                    HAngleDirectReducedArc2 = rawData.HAngleDirectReducedArc2,
+                    HAngleTransitReducedArc2 = rawData.HAngleTransitReducedArc2,
 
-                    HAngleMeanArc1 =rawData.HAngleMeanArc1,
-                    HAngleMeanArc2 =rawData.HAngleMeanArc2,
+                    HAngleMeanArc1 = rawData.HAngleMeanArc1,
+                    HAngleMeanArc2 = rawData.HAngleMeanArc2,
                     HAngleMeanFinal = rawData.HAngleMeanFinal,
                     HAngleMeanFinalReturn = rawData.HAngleMeanFinalReturn,
 
@@ -872,6 +1004,175 @@ namespace PegsBase.Controllers
             var pegs = await query.ToListAsync();
             return PartialView("_PegTable", pegs);
         }
+
+
+
+        public async Task<IActionResult> ExportPegCalcPdf(int id)
+        {
+            var peg = await _dbContext.PegRegister
+                .Include(p => p.Level)
+                .Include(p => p.Locality)
+                .Include(p => p.Surveyor)
+                .FirstOrDefaultAsync(p => p.Id == id);
+
+            if (peg == null)
+                return NotFound();
+
+            var rawData = await _dbContext.RawSurveyData
+                .FirstOrDefaultAsync(r => r.ForeSightPeg == peg.PegName);
+
+            if (rawData == null)
+                return View("BasicPegView", peg);
+
+            var model = new PegCalcViewModel
+            {
+                Id = peg.Id,
+
+                ForeSightPeg = rawData.ForeSightPeg,
+                StationPeg = rawData.StationPeg,
+                BackSightPeg = rawData.BackSightPeg,
+
+                TargetHeightBacksight = rawData.TargetHeightBacksight,
+                TargetHeightForesight = rawData.TargetHeightForesight,
+                InstrumentHeight = rawData.InstrumentHeight,
+                SlopeDistanceBacksight = rawData.SlopeDistanceBacksight,
+                SlopeDistanceForesight = rawData.SlopeDistanceForesight,
+
+                HorizontalDistanceBacksight = rawData.HorizontalDistanceBacksight,
+                HorizontalDistanceForesight = rawData.HorizontalDistanceForesight,
+
+                VerticalDifferenceBacksight = rawData.VerticalDifferenceBacksight,
+                VerticalDifferenceForesight = rawData.VerticalDifferenceForesight,
+
+                BackCheckHorizontalDistance = rawData.BackCheckHorizontalDistance,
+                BackCheckHorizontalDifference = rawData.BackCheckHorizontalDifference,
+
+                BackCheckPegElevations = rawData.BackCheckPegElevations,
+                BackCheckVerticalError = rawData.BackCheckVerticalError,
+
+                HAngleDirectArc1Backsight = rawData.HAngleDirectArc1Backsight,
+                HAngleDirectArc1Foresight = rawData.HAngleDirectArc1Foresight,
+                HAngleTransitArc1Backsight = rawData.HAngleTransitArc1Backsight,
+                HAngleTransitArc1Foresight = rawData.HAngleTransitArc1Foresight,
+
+                HAngleDirectArc2Backsight = rawData.HAngleDirectArc2Backsight,
+                HAngleDirectArc2Foresight = rawData.HAngleDirectArc2Foresight,
+                HAngleTransitArc2Backsight = rawData.HAngleTransitArc2Backsight,
+                HAngleTransitArc2Foresight = rawData.HAngleTransitArc2Foresight,
+
+                VAngleDirectArc1Backsight = rawData.VAngleDirectArc1Backsight,
+                VAngleDirectArc1Foresight = rawData.VAngleDirectArc1Foresight,
+                VAngleTransitArc1Backsight = rawData.VAngleTransitArc1Backsight,
+                VAngleTransitArc1Foresight = rawData.VAngleTransitArc1Foresight,
+
+                VAngleDirectArc2Backsight = rawData.VAngleDirectArc2Backsight,
+                VAngleDirectArc2Foresight = rawData.VAngleDirectArc2Foresight,
+                VAngleTransitArc2Backsight = rawData.VAngleTransitArc2Backsight,
+                VAngleTransitArc2Foresight = rawData.VAngleTransitArc2Foresight,
+
+                HAngleDirectReducedArc1 = rawData.HAngleDirectReducedArc1,
+                HAngleTransitReducedArc1 = rawData.HAngleTransitReducedArc1,
+                HAngleDirectReducedArc2 = rawData.HAngleDirectReducedArc2,
+                HAngleTransitReducedArc2 = rawData.HAngleTransitReducedArc2,
+
+                HAngleMeanArc1 = rawData.HAngleMeanArc1,
+                HAngleMeanArc2 = rawData.HAngleMeanArc2,
+                HAngleMeanFinal = rawData.HAngleMeanFinal,
+                HAngleMeanFinalReturn = rawData.HAngleMeanFinalReturn,
+
+                VAngleBacksightMeanArc1 = rawData.VAngleBacksightMeanArc1,
+                VAngleBacksightMeanArc2 = rawData.VAngleBacksightMeanArc2,
+                VAngleBacksightMeanFinal = rawData.VAngleBacksightMeanFinal,
+
+                VAngleForesightMeanArc1 = rawData.VAngleForesightMeanArc1,
+                VAngleForesightMeanArc2 = rawData.VAngleForesightMeanArc2,
+                VAngleForesightMeanFinal = rawData.VAngleForesightMeanFinal,
+
+                BackBearingReturn = rawData.BackBearingReturn,
+                ForwardBearing = rawData.ForwardBearing,
+                ForwardBearingReturn = rawData.ForwardBearingReturn,
+
+                BacksightPegX = rawData.BacksightPegX,
+                BacksightPegY = rawData.BacksightPegY,
+                BacksightPegZ = rawData.BacksightPegZ,
+
+                StationPegX = rawData.StationPegX,
+                StationPegY = rawData.StationPegY,
+                StationPegZ = rawData.StationPegZ,
+
+                NewPegX = rawData.NewPegX,
+                NewPegY = rawData.NewPegY,
+                NewPegZ = rawData.NewPegZ,
+
+                DeltaX = rawData.DeltaX,
+                DeltaY = rawData.DeltaY,
+                DeltaZ = rawData.DeltaZ,
+
+                // Metadata
+                Surveyor = rawData.Surveyor,
+                SurveyDate = rawData.SurveyDate,
+                LocalityId = rawData.LocalityId,
+                Level = peg.Level.Id,
+                PointType = peg.PointType,
+                PegFailed = rawData.PegFailed,
+
+                // Display info
+                SurveyorDisplayName = peg.Surveyor?.DisplayName ?? rawData.Surveyor,
+                LocalityName = peg.Locality?.Name,
+                LevelName = peg.Level?.Name
+            };
+
+            return new ViewAsPdf("PegCalcResultViewOnly", model)
+            {
+                FileName = $"PegCalc_{model.ForeSightPeg}.pdf",
+                PageSize = Rotativa.AspNetCore.Options.Size.A4,
+                CustomSwitches = "--enable-local-file-access --debug-javascript"
+            };
+        }
+
+        public async Task<IActionResult> ExportPegCalcTestPdf(int id)
+        {
+            // Minimal logic for testing
+            var model = new PegCalcViewModel
+            {
+                ForeSightPeg = "TEST-PEG",
+                SurveyDate = DateOnly.FromDateTime(DateTime.Today),
+                SurveyorDisplayName = "J. Tester",
+                LocalityName = "Test Locality",
+                LevelName = "Test Level",
+                PegFailed = false,
+
+                HAngleDirectArc1Backsight = 123.456m,
+                HAngleDirectArc1Foresight = 234.567m,
+                HAngleTransitArc1Backsight = 345.678m,
+                HAngleTransitArc1Foresight = 456.789m,
+
+                HAngleDirectArc2Backsight = 0,
+                HAngleDirectArc2Foresight = 0,
+                HAngleTransitArc2Backsight = 0,
+                HAngleTransitArc2Foresight = 0,
+
+                HAngleDirectReducedArc1 = 123.456m,
+                HAngleTransitReducedArc1 = 234.567m,
+                HAngleDirectReducedArc2 = 0,
+                HAngleTransitReducedArc2 = 0,
+
+                HAngleMeanArc1 = 179.999m,
+                HAngleMeanArc2 = 0,
+                HAngleMeanFinal = 180.000m,
+                HAngleMeanFinalReturn = 0
+            };
+
+
+            return new ViewAsPdf("PegCalcResultViewOnly", model)
+            {
+                FileName = $"TestPegCalc.pdf",
+                PageSize = Rotativa.AspNetCore.Options.Size.A4,
+                CustomSwitches = "--enable-local-file-access"
+            };
+        }
+
+
 
     }
 }

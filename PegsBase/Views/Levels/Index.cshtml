@@ -2,6 +2,7 @@
 
 @{
 	ViewData["Title"] = "Manage Levels";
+    var subSections = (SelectList)ViewBag.SubSections;
 }
 
 <h2>Manage Levels</h2>
@@ -19,23 +20,28 @@
 		</tr>
 	</thead>
 	<tbody>
-		@foreach (var level in Model)
-		{
-			<tr>
-				<td>
-					<form asp-action="EditInline" method="post" class="d-flex gap-2">
-						<input type="hidden" name="id" value="@level.Id" />
-						<input type="text" name="name" value="@level.Name" class="form-control" required />
-						<button type="submit" class="btn btn-sm btn-success">Edit</button>
-					</form>
-				</td>
-				<td>
-					<form asp-action="Delete" method="post" class="d-inline">
-						<input type="hidden" name="id" value="@level.Id" />
-						<button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Delete this level?')">Delete</button>
-					</form>
-				</td>
-			</tr>
-		}
+        @foreach (var level in Model)
+        {
+            <tr>
+                <td colspan="2">
+                    <form asp-action="EditInline" method="post" class="d-flex gap-2 align-items-center">
+                        <input type="hidden" name="id" value="@level.Id" />
+                        <input type="text" name="name" value="@level.Name" class="form-control" required />
+
+                        <select name="subSectionId" class="form-select" asp-items="subSections">
+                            <option value="">No Sub Section</option>
+                        </select>
+
+                        <button type="submit" class="btn btn-sm btn-success">Save</button>
+                    </form>
+                </td>
+                <td>
+                    <form asp-action="Delete" method="post" class="d-inline">
+                        <input type="hidden" name="id" value="@level.Id" />
+                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Delete this level?')">Delete</button>
+                    </form>
+                </td>
+            </tr>
+        }
 	</tbody>
 </table>

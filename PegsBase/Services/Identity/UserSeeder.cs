@@ -10,6 +10,7 @@ namespace PegsBase.Services.Identity
         {
             var userManager = serviceProvider.GetRequiredService<UserManager<ApplicationUser>>();
             await CreateUserWithRole(userManager, "jb@ampelongames.com", "Master@123!", Roles.Master, "Johan", "Bender");
+            await CreateUserWithRole(userManager, "tu@ampelongames.com", "AlsoMaster@123!", Roles.Master, "Test", "User");
         }
 
         private static async Task CreateUserWithRole(
@@ -31,7 +32,7 @@ namespace PegsBase.Services.Identity
                     LastName = lastName
                 };
 
-                user.GenerateNormalizedName(); // ✅ Call after setting name
+                user.GenerateNormalizedName();
 
                 var result = await userManager.CreateAsync(user, password);
 

@@ -1,10 +1,10 @@
-﻿using PegsBase.Models.Settings;
+﻿using PegsBase.Models;
 
 namespace PegsBase.Services.Settings
 {
     public interface IImportSettingsService
     {
-        ImportSettings GetSettings();
-        void SaveSettings(ImportSettings settings);
+        AppSettings GetSettings();
+        void SaveSettings(AppSettings settings);
     }
 }

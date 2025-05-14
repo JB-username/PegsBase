@@ -26,6 +26,11 @@ namespace PegsBase.Data
 
         public DbSet<Level> Levels { get; set; }
         public DbSet<Locality> Localities { get; set; }
+        public DbSet<MainSection> MainSections { get; set; }
+        public DbSet<SubSection> SubSections { get; set; }
+
+        public DbSet<AppSettings> AppSettings { get; set; }
+
 
     }
 }

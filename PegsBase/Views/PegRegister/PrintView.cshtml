@@ -37,14 +37,10 @@
                 <thead>
                     <tr>
                         <th>Peg Number</th>
-                        <th>Level</th>
-                        <th>Locality</th>
                         <th>Y Coord</th>
                         <th>X Coord</th>
                         <th>Z Coord</th>
                         <th>Grade</th>
-                        <th>Surveyor</th>
-                        <th>Date</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -52,14 +48,12 @@
                     {
                         <tr>
                             <td>@entry.PegName</td>
-                            <td>@entry.Level</td>
-                            <td>@entry.Locality</td>
-                            <td>@entry.YCoord</td>
-                            <td>@entry.XCoord</td>
-                            <td>@entry.ZCoord</td>
+                            <td>@entry.YCoord.ToString("F3")</td>
+                            <td>@entry.XCoord.ToString("F3")</td>
+                            <td>@entry.ZCoord.ToString("F3")</td>
                             <td>@entry.GradeElevation</td>
-                            <td>@(entry.Surveyor?.DisplayName ?? entry.SurveyorNameText ?? "-")</td>
-                            <td>@entry.SurveyDate.ToShortDateString()</td>
+                            @* <td>@(entry.Surveyor?.DisplayName ?? entry.SurveyorNameText ?? "-")</td> *@
+                            @* <td>@entry.SurveyDate.ToShortDateString()</td> *@
                         </tr>
                     }
                 </tbody>

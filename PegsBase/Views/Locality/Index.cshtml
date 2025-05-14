@@ -4,20 +4,40 @@
 @{
 	ViewData["Title"] = "Manage Localities";
 	var levels = (SelectList)ViewBag.Levels;
+	var subSections = (SelectList)ViewBag.SubSections;
 }
 
 <h2 class="mb-4">Manage Localities</h2>
 
+<!-- Filter by SubSection -->
+<form method="get" class="row g-2 mb-4 align-items-end">
+	<div class="col-md-6">
+		<label for="subSectionId" class="form-label">Filter by Sub Section</label>
+		<select name="subSectionId" class="form-select" asp-items="subSections">
+			<option value="">All Sub Sections</option>
+		</select>
+	</div>
+	<div class="col-md-2">
+		<button type="submit" class="btn btn-secondary w-100">Filter</button>
+	</div>
+</form>
+
 <!-- Create New Locality Inline -->
 <form asp-action="CreateInline" method="post" class="row g-2 mb-4 align-items-end">
-	<div class="col-md-6">
+	<div class="col-md-4">
 		<label for="name" class="form-label">Locality Name</label>
 		<input type="text" name="name" class="form-control" placeholder="Enter name..." required />
 	</div>
-	<div class="col-md-4">
+	<div class="col-md-3">
 		<label for="levelId" class="form-label">Level</label>
 		<select name="levelId" class="form-select" asp-items="levels" required>
 			<option value="">Select Level</option>
+		</select>
+	</div>
+	<div class="col-md-3">
+		<label for="subSectionId" class="form-label">Sub Section</label>
+		<select name="subSectionId" class="form-select" asp-items="subSections">
+			<option value="">Select Sub Section (optional)</option>
 		</select>
 	</div>
 	<div class="col-md-2">
@@ -31,6 +51,7 @@
 		<tr>
 			<th>Name</th>
 			<th>Level</th>
+			<th>Sub Section</th>
 			<th style="width: 180px;">Actions</th>
 		</tr>
 	</thead>
@@ -38,7 +59,7 @@
 		@foreach (var locality in Model)
 		{
 			<tr>
-				<td colspan="2">
+				<td colspan="3">
 					<form asp-action="EditInline" method="post" class="d-flex gap-2 align-items-center">
 						<input type="hidden" name="id" value="@locality.Id" />
 
@@ -47,6 +68,16 @@
 						<select name="levelId" class="form-select" asp-for="@locality.LevelId" asp-items="levels" required>
 							<option value="">Select Level</option>
 						</select>
+
+						<select name="subSectionId" class="form-select">
+							<option value="">No Sub Section</option>
+							@foreach (var s in subSections)
+							{
+								<option value="@s.Value" selected="@(s.Value == locality.SubSectionId?.ToString() ? "selected" : null)">@s.Text</option>
+							}
+						</select>
+
+
 
 						<button type="submit" class="btn btn-sm btn-success">Save</button>
 					</form>
@@ -60,6 +91,4 @@
 			</tr>
 		}
 	</tbody>
-
-
 </table>

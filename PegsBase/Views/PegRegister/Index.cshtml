@@ -97,6 +97,7 @@
 	</form>
 </div>
 
+<form method="post" id="bulkActionForm">
 <div class="container mb-4 mt-1">
 	<div class="row pt-4" id="pegTableContainer">
 		<div>
@@ -104,6 +105,8 @@
 		</div>
 	</div>
 </div>
+</form>
+
 
 @if (TempData["Success"]?.ToString()?.Contains("imported") == true)
 {
@@ -133,25 +136,28 @@
 
 @section Scripts {
 	<script>
-		document.addEventListener('DOMContentLoaded', function () {
+		// Define the checkbox logic function
+		function setupCheckboxExportLogic() {
 			const checkboxes = document.querySelectorAll('.export-check');
-			 const exportButtons = document.getElementById('exportButtons');
+			const exportButtons = document.getElementById('exportButtons');
 
 			function toggleExportButtons() {
 				const anyChecked = Array.from(checkboxes).some(cb => cb.checked);
-				exportButtons.classList.toggle('visible', anyChecked);
+				exportButtons.classList.toggle('d-none', !anyChecked); // Correct class toggling!
 			}
 
 			checkboxes.forEach(cb => {
 				cb.addEventListener('change', toggleExportButtons);
 			});
 
-			toggleExportButtons(); // Run on load
+			toggleExportButtons(); // Check state initially
+		}
+
+		document.addEventListener('DOMContentLoaded', function () {
+			setupCheckboxExportLogic();
 		});
 
-
-
-			function loadPegTable(searchOverride = null) {
+		function loadPegTable(searchOverride = null) {
 			const search = searchOverride ?? document.querySelector('input[name="search"]').value;
 			const filter = document.querySelector('select[name="filter"]').value;
 			const sortOrder = document.querySelector('select[name="sortOrder"]').value;
@@ -162,10 +168,12 @@
 				.then(res => res.text())
 				.then(html => {
 					document.getElementById("pegTableContainer").innerHTML = html;
+					setupCheckboxExportLogic(); // Re-attach listeners after reload
 				});
 		}
 
-				document.querySelector('input[name="search"]').addEventListener("input", (e) => {
+		// Filter/Search event bindings
+		document.querySelector('input[name="search"]').addEventListener("input", (e) => {
 			clearTimeout(window.searchDebounce);
 			const currentValue = e.target.value;
 
@@ -191,4 +199,5 @@
 
 	</script>
 }
+
 

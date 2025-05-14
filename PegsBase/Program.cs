@@ -18,6 +18,7 @@ using PegsBase.Services.PegCalc.Interfaces;
 using PegsBase.Services.Settings;
 using System.Data.Common;
 using System.Globalization;
+using Rotativa.AspNetCore;
 
 namespace PegsBase
 {
@@ -44,8 +45,6 @@ namespace PegsBase
               .AddRoles<IdentityRole>()
               .AddEntityFrameworkStores<ApplicationDbContext>();
 
-            builder.Services.AddSingleton<IImportSettingsService, ImportSettingsService>();
-
             builder.Services.AddSession();
             builder.Services.AddControllersWithViews();
             builder.Services.AddRazorPages();
@@ -61,7 +60,8 @@ namespace PegsBase
             builder.Services.AddScoped<IPegCalcService, PegCalcService>();
             builder.Services.AddScoped<IRawSurveyDataDatFileParser, RawSurveyDataDatFileParser>();
             builder.Services.AddScoped<IMapImportModelsToPegs, MapImportModelsToPegs>();
-            
+            builder.Services.AddScoped<IImportSettingsService, ImportSettingsService>();
+
             builder.Services.AddTransient<IEmailSender, EmailSender>();
 
             var cultureInfo = new CultureInfo("en-US");
@@ -90,6 +90,14 @@ namespace PegsBase
             app.UseRouting();
 
             app.UseStaticFiles();
+
+//#if DEBUG
+//            RotativaConfiguration.Setup("C:\\Rotativa\\Windows");
+//#else
+//            RotativaConfiguration.Setup("/usr/local/bin/wkhtmltopdf");
+//#endif
+
+
             app.UseSession();
 
             app.UseAuthorization();

@@ -5,6 +5,11 @@
 	ViewData["Title"] = "Peg Calculation Result";
 }
 
+@{
+	Layout = "~/Views/Shared/_PdfLayout.cshtml";
+}
+
+
 @section Styles {
 	<style>
 
@@ -72,7 +77,6 @@
 					<strong>Surveyor: </strong><span id="displaySurveyor">@Model.SurveyorDisplayName</span><br />
 					<strong>Locality: </strong><span id="displayLocality">@Model.LocalityName</span><br />
 					<strong>Level: </strong><span id="displayLevel">@Model.LevelName</span>
-
 				</div>
 				<div class="mb-3 col-6">
 					<div class="row">
@@ -401,6 +405,18 @@
 </div>
 
 
-	<div class="mt-4">
-		<button type="button" class="btn btn-secondary" onclick="window.print();">Print</button>
-	</div>
+<div class="mt-4 text-center d-print-none">
+	<a asp-action="ExportPegCalcPdf"
+	   asp-controller="PegRegister"
+	   asp-route-id="@Model.Id"
+	   class="btn btn-danger">
+		Download PDF
+	</a>
+
+	<a href="/PegRegister/ExportPegCalcTestPdf/81" class="btn btn-primary">Test PDF Export</a>
+
+
+	<button type="button" class="btn btn-secondary" onclick="window.print();">Print</button>
+</div>
+
+

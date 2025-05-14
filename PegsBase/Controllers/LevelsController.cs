@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
 using PegsBase.Data;
 using PegsBase.Models.Entities;
 
@@ -16,9 +18,23 @@ namespace PegsBase.Controllers
             _dbContext = context;
         }
 
-        public IActionResult Index()
+        public IActionResult Index(int? subSectionId)
         {
-            var levels = _dbContext.Levels.OrderBy(l => l.Name).ToList();
+            var levelsQuery = _dbContext.Levels
+                .Include(l => l.SubSection)
+                .OrderBy(l => l.Name)
+                .AsQueryable();
+
+            if (subSectionId.HasValue)
+            {
+                levelsQuery = levelsQuery.Where(l => l.SubSectionId == subSectionId.Value);
+            }
+
+            var levels = levelsQuery.ToList();
+
+            ViewBag.SubSections = new SelectList(_dbContext.SubSections
+                .OrderBy(s => s.Name), "Id", "Name", subSectionId);
+
             return View(levels);
         }
 
@@ -34,16 +50,19 @@ namespace PegsBase.Controllers
         }
 
         [HttpPost]
-        public IActionResult EditInline(int id, string name)
+        public IActionResult EditInline(int id, string name, int? subSectionId)
         {
             var level = _dbContext.Levels.Find(id);
             if (level != null && !string.IsNullOrWhiteSpace(name))
             {
                 level.Name = name.Trim();
+                level.SubSectionId = subSectionId; // Handle null or value
+
                 _dbContext.SaveChanges();
             }
             return RedirectToAction("Index");
         }
+
 
         [HttpPost]
         public IActionResult Delete(int id)

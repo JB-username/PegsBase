@@ -47,7 +47,6 @@
 
     <!-- Module Section Cards -->
     <div class="row g-4">
-
         <!-- Peg Register -->
         <div class="col-12 col-md-6 col-xl-6">
             @await Html.PartialAsync("_Card_PegRegister")
@@ -73,13 +72,17 @@
             @await Html.PartialAsync("_Card_MinePlans")
         </div>
 
-        @if (User.IsInRole("Master"))
-        {
-            <!-- Admin -->
-            <div class="col-12 col-md-6 col-xl-6">
-                @await Html.PartialAsync("_Card_MonthEndMeasuring")
-            </div>
-        }
+
+        <!-- Month End Measuring -->
+        <div class="col-12 col-md-6 col-xl-6">
+            @await Html.PartialAsync("_Card_MonthEndMeasuring")
+        </div>
+
+        <!-- Quick Calcs -->
+        <div class="col-12 col-md-6 col-xl-6">
+            @await Html.PartialAsync("_Card_QuickCalcs")
+        </div>
+
         
     </div>
 </div>
