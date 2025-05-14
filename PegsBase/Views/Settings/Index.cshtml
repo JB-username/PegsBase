@@ -1,32 +1,41 @@
 ﻿@{
-    ViewData["Title"] = "Admin Settings";
+    ViewData["Title"] = "Admin AppSettings";
 }
 
 <h2 class="mb-4">Settings Panel</h2>
 
-<div class="row g-4">
+<div class="row g-4 mb-5">
     <div class="col-md-6">
-        <a asp-controller="Settings" asp-action="Index" class="btn btn-outline-primary w-100 py-3">
-            Import Settings
+        <a asp-controller="Settings" asp-action="Settings" class="btn btn-primary w-100 py-3">
+            App Settings
         </a>
     </div>
+</div>
+<div class="row g-4 mb-5">
     <div class="col-md-6">
-        <a asp-controller="Admin" asp-action="Index" class="btn btn-outline-secondary w-100 py-3">
+        <a asp-controller="Admin" asp-action="Index" class="btn btn-success w-100 py-3">
             Send Invite
         </a>
     </div>
     <div class="col-md-6">
-        <a asp-controller="Admin" asp-action="Users" class="btn btn-outline-secondary w-100 py-3">
+        <a asp-controller="Admin" asp-action="Users" class="btn btn-success w-100 py-3">
             Manage Users
         </a>
     </div>
+</div>
+<div class="row g-4 mb-5">
     <div class="col-md-6">
-        <a asp-controller="Levels" asp-action="Index" class="btn btn-outline-info w-100 py-3">
+        <a asp-controller="Sections" asp-action="Index" class="btn btn-info w-100 py-3">
+            Manage Sections
+        </a>
+    </div>
+    <div class="col-md-6">
+        <a asp-controller="Levels" asp-action="Index" class="btn btn-info w-100 py-3">
             Manage Levels
         </a>
     </div>
     <div class="col-md-6">
-        <a asp-controller="Locality" asp-action="Index" class="btn btn-outline-info w-100 py-3">
+        <a asp-controller="Locality" asp-action="Index" class="btn btn-info w-100 py-3">
             Manage Localities
         </a>
     </div>

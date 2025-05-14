@@ -1,17 +1,48 @@
-﻿using PegsBase.Models.Settings;
+﻿using PegsBase.Data;
+using PegsBase.Models;
 
 namespace PegsBase.Services.Settings
 {
     public class ImportSettingsService : IImportSettingsService
     {
-        private ImportSettings _settings = new ImportSettings(); // You could load this from a file or DB
+        private readonly ApplicationDbContext _dbContext;
 
-        public ImportSettings GetSettings() => _settings;
-
-        public void SaveSettings(ImportSettings settings)
+        public ImportSettingsService(ApplicationDbContext dbContext)
         {
-            _settings = settings;
-            // Save to DB or config file if needed
+            _dbContext = dbContext;
+        }
+
+        public AppSettings GetSettings()
+        {
+            var settings = _dbContext.AppSettings.FirstOrDefault();
+
+            if (settings == null)
+            {
+                settings = new AppSettings();
+                _dbContext.AppSettings.Add(settings);
+                _dbContext.SaveChanges();
+            }
+
+            return settings;
+        }
+
+        public void SaveSettings(AppSettings settings)
+        {
+            var existing = _dbContext.AppSettings.FirstOrDefault();
+            if (existing != null)
+            {
+                existing.SwapXY = settings.SwapXY;
+                existing.InvertX = settings.InvertX;
+                existing.InvertY = settings.InvertY;
+
+                _dbContext.AppSettings.Update(existing);
+            }
+            else
+            {
+                _dbContext.AppSettings.Add(settings);
+            }
+
+            _dbContext.SaveChanges();
         }
     }
 }

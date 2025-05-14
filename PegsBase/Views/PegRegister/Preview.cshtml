@@ -1,6 +1,6 @@
 ﻿@using Newtonsoft.Json;
 
-@model List<PegRegister>
+@model List<PegsBase.Models.PegRegisterImportModel>
 
 <h2>Preview Pegs</h2>
 
@@ -25,16 +25,17 @@
             {
                 <tr>
                     <td>@peg.PegName</td>
-                    <td>@peg.Level?.Name</td>
-                    <td>@peg.Locality?.Name</td>
-                    <td>@peg.YCoord</td>
-                    <td>@peg.XCoord</td>
-                    <td>@peg.ZCoord</td>
+                    <td>@peg.LevelName</td> <!-- No .Level?.Name -->
+                    <td>@peg.LocalityName</td> <!-- No .Locality?.Name -->
+                    <td>@peg.YCoord.ToString("F3")</td>
+                    <td>@peg.XCoord.ToString("F3")</td>
+                    <td>@peg.ZCoord.ToString("F3")</td>
                     <td>@peg.GradeElevation</td>
-                    <td>@(peg.Surveyor?.DisplayName ?? peg.SurveyorNameText ?? "-")</td>
-                    <td>@peg.SurveyDate.ToShortDateString()</td>
+                    <td>@(peg.SurveyorName ?? "-")</td> <!-- No .Surveyor?.DisplayName -->
+                    <td>@peg.SurveyDate?.ToString("yyyy/MM/dd")</td>
                     <td>@peg.PointType</td>
                 </tr>
+
             }
         </tbody>
     </table>

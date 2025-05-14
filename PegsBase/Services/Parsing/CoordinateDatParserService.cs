@@ -23,8 +23,8 @@ namespace PegsBase.Services.Parsing
                     var peg = new PegPreviewModel
                     {
                         PegName = parts[0],
-                        YCoord = decimal.Parse(parts[1]),
-                        XCoord = decimal.Parse(parts[2]),
+                        XCoord = decimal.Parse(parts[1]),
+                        YCoord = decimal.Parse(parts[2]),
                         ZCoord = decimal.Parse(parts[3]),
                         GradeElevation = parts.Length >= 5 ? decimal.Parse(parts[4]) : null
                     };

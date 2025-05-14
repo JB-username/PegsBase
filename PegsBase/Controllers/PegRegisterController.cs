@@ -17,6 +17,7 @@ using PegsBase.Services.Parsing.Interfaces;
 using PegsBase.Services.PegCalc.Interfaces;
 using System.Text;
 using Rotativa.AspNetCore;
+using PegsBase.Services.Settings;
 
 namespace PegsBase.Controllers
 {
@@ -29,6 +30,7 @@ namespace PegsBase.Controllers
         private readonly IPegCalcService _pegCalcService;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IMapImportModelsToPegs _pegMapper;
+        private readonly IImportSettingsService _importSettingsService;
 
         public PegRegisterController(
             ApplicationDbContext db,
@@ -36,7 +38,8 @@ namespace PegsBase.Controllers
             ICoordinateDatParserService coordinateDatParserService,
             IPegCalcService pegCalcService,
             UserManager<ApplicationUser> user,
-            IMapImportModelsToPegs mapImportModelsToPeg)
+            IMapImportModelsToPegs mapImportModelsToPeg,
+            IImportSettingsService importSettingsService)
         {
             _dbContext = db;
             _pegFileParser = pegFileParser;
@@ -44,10 +47,12 @@ namespace PegsBase.Controllers
             _pegCalcService = pegCalcService;
             _userManager = user;
             _pegMapper = mapImportModelsToPeg;
+            _importSettingsService = importSettingsService;
         }
 
         [Authorize(Roles =
             Roles.Master + "," +
+            Roles.Admin + "," +
             Roles.Mrm + "," +
             Roles.MineSurveyor + "," +
             Roles.SurveyAnalyst + "," +
@@ -89,9 +94,16 @@ namespace PegsBase.Controllers
             return View(await objPegsList.ToListAsync());
         }
 
+        [HttpPost]
+        public IActionResult Index(List<int> selectedIds)
+        {
+            return Content("Selected: " + string.Join(", ", selectedIds ?? new List<int>()));
+        }
+
 
         [Authorize(Roles =
             Roles.Master + "," +
+            Roles.Admin + "," +
             Roles.MineSurveyor + "," +
             Roles.SurveyAnalyst + "," +
             Roles.Surveyor)]
@@ -122,6 +134,7 @@ namespace PegsBase.Controllers
 
         [Authorize(Roles =
             Roles.Master + "," +
+            Roles.Admin + "," +
             Roles.MineSurveyor + "," +
             Roles.SurveyAnalyst + "," +
             Roles.Surveyor)]
@@ -173,6 +186,7 @@ namespace PegsBase.Controllers
 
         [Authorize(Roles =
             Roles.Master + "," +
+            Roles.Admin + "," +
             Roles.MineSurveyor + "," +
             Roles.SurveyAnalyst)]
         [HttpGet]
@@ -215,9 +229,9 @@ namespace PegsBase.Controllers
 
         [Authorize(Roles =
             Roles.Master + "," +
+            Roles.Admin + "," +
             Roles.MineSurveyor + "," +
             Roles.SurveyAnalyst)]
-        [HttpPost]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(PegRegister peg, string? filter)
@@ -252,6 +266,7 @@ namespace PegsBase.Controllers
 
         [Authorize(Roles =
             Roles.Master + "," +
+            Roles.Admin + "," +
             Roles.MineSurveyor + "," +
             Roles.SurveyAnalyst)]
         [HttpGet]
@@ -279,6 +294,7 @@ namespace PegsBase.Controllers
 
         [Authorize(Roles =
             Roles.Master + "," +
+            Roles.Admin + "," +
             Roles.MineSurveyor + "," +
             Roles.SurveyAnalyst)]
         [HttpPost]
@@ -302,6 +318,7 @@ namespace PegsBase.Controllers
 
         [Authorize(Roles =
             Roles.Master + "," +
+            Roles.Admin + "," +
             Roles.MineSurveyor + "," +
             Roles.SurveyAnalyst)]
         [HttpPost]
@@ -324,13 +341,15 @@ namespace PegsBase.Controllers
             return RedirectToAction("Index");
         }
 
+
         [Authorize(Roles =
             Roles.Master + "," +
+            Roles.Admin + "," +
             Roles.MineSurveyor + "," +
             Roles.SurveyAnalyst + "," +
             Roles.Surveyor)]
         [HttpPost]
-        public IActionResult ExportSelectedToCsv(List<int> selectedIds)
+        public IActionResult ExportSelectedToCsvPlans(List<int> selectedIds)
         {
             if (selectedIds == null || !selectedIds.Any())
             {
@@ -347,23 +366,81 @@ namespace PegsBase.Controllers
 
             foreach (var peg in selectedPegs)
             {
-                csv.AppendLine(
-                    $"{peg.PegName}," +
-                    $"{peg.YCoord}," +
-                    $"{peg.XCoord}," +
-                    $"{peg.ZCoord}," +
-                    $"{peg.GradeElevation},"
-                    );
+                // Export data AS-IS
+                csv.AppendLine($"{peg.PegName},{peg.YCoord},{peg.XCoord},{peg.ZCoord},{peg.GradeElevation}");
             }
 
             var fileBytes = Encoding.UTF8.GetBytes(csv.ToString());
-            var fileName = $"SelectedPegs_{DateTime.Now:yyyyMMddHHmmss}.csv";
+            var fileName = $"SelectedPegs_Plans_{DateTime.Now:yyyyMMddHHmmss}.csv";
 
             return File(fileBytes, "text/csv", fileName);
         }
 
+
+
+        [Authorize(Roles =
+        Roles.Master + "," +
+        Roles.Admin + "," +
+        Roles.MineSurveyor + "," +
+        Roles.SurveyAnalyst + "," +
+        Roles.Surveyor)]
+        [HttpPost]
+        public IActionResult ExportSelectedToCsvInstrument(List<int> selectedIds)
+        {
+            if (selectedIds == null || !selectedIds.Any())
+            {
+                TempData["Error"] = "Please select at least one peg to export.";
+                return RedirectToAction("Index");
+            }
+
+            var selectedPegs = _dbContext.PegRegister
+                .Where(p => selectedIds.Contains(p.Id))
+                .ToList();
+
+            var settings = _importSettingsService.GetSettings();
+
+            var csv = new StringBuilder();
+            csv.AppendLine("PegName,YCoord,XCoord,ZCoord,GradeElevation");
+
+            foreach (var peg in selectedPegs)
+            {
+                decimal x = peg.XCoord;
+                decimal y = peg.YCoord;
+
+                // 🔥 Reverse the AppSettings logic in reverse order
+                // 1. Reverse InvertX and InvertY (signs first)
+                if (settings.InvertX)
+                {
+                    x = -x;
+                }
+
+                if (settings.InvertY)
+                {
+                    y = -y;
+                }
+
+                // 2. Reverse SwapXY
+                if (settings.SwapXY)
+                {
+                    var temp = x;
+                    x = y;
+                    y = temp;
+                }
+
+                csv.AppendLine($"{peg.PegName},{y},{x},{peg.ZCoord},{peg.GradeElevation}");
+            }
+
+            var fileBytes = Encoding.UTF8.GetBytes(csv.ToString());
+            var fileName = $"SelectedPegs_Instrument_{DateTime.Now:yyyyMMddHHmmss}.csv";
+
+            return File(fileBytes, "text/csv", fileName);
+        }
+
+
+
         [Authorize(Roles =
             Roles.Master + "," +
+            Roles.Admin + "," +
             Roles.MineSurveyor + "," +
             Roles.SurveyAnalyst + "," +
             Roles.Surveyor)]
@@ -461,6 +538,7 @@ namespace PegsBase.Controllers
 
         [Authorize(Roles =
             Roles.Master + "," +
+            Roles.Admin + "," +
             Roles.MineSurveyor + "," +
             Roles.SurveyAnalyst + "," +
             Roles.Surveyor)]
@@ -472,6 +550,7 @@ namespace PegsBase.Controllers
 
         [Authorize(Roles =
             Roles.Master + "," +
+            Roles.Admin + "," +
             Roles.MineSurveyor + "," +
             Roles.SurveyAnalyst + "," +
             Roles.Surveyor)]
@@ -485,11 +564,31 @@ namespace PegsBase.Controllers
             }
 
             using var stream = file.OpenReadStream();
-            var importModels = _pegFileParser.Parse(stream); // Still returns PegRegisterImportModel
+            var importModels = _pegFileParser.Parse(stream); // List<PegRegisterImportModel>
 
-            var mappedPegs = await _pegMapper.MapAsync(importModels);
+            var settings = _importSettingsService.GetSettings();
 
-            TempData["ParsedPegs"] = JsonConvert.SerializeObject(mappedPegs);
+            foreach (var model in importModels)
+            {
+                if (settings.SwapXY)
+                {
+                    var temp = model.XCoord;
+                    model.XCoord = model.YCoord;
+                    model.YCoord = temp;
+                }
+
+                if (settings.InvertX)
+                {
+                    model.XCoord = -model.XCoord;
+                }
+
+                if (settings.InvertY)
+                {
+                    model.YCoord = -model.YCoord;
+                }
+            }
+
+            TempData["ParsedPegs"] = JsonConvert.SerializeObject(importModels);
 
             return RedirectToAction("Preview");
         }
@@ -497,6 +596,7 @@ namespace PegsBase.Controllers
 
         [Authorize(Roles =
             Roles.Master + "," +
+            Roles.Admin + "," +
             Roles.Mrm + "," +
             Roles.MineSurveyor + "," +
             Roles.SurveyAnalyst + "," +
@@ -507,12 +607,14 @@ namespace PegsBase.Controllers
             if (!TempData.TryGetValue("ParsedPegs", out var rawData) || rawData == null)
                 return RedirectToAction("Upload");
 
-            var pegs = JsonConvert.DeserializeObject<List<PegRegister>>(rawData.ToString());
-            return View(pegs);
+            var pegs = JsonConvert.DeserializeObject<List<PegRegisterImportModel>>(rawData.ToString());
+            return View(pegs); // View now expects PegRegisterImportModel
         }
+
 
         [Authorize(Roles =
             Roles.Master + "," +
+            Roles.Admin + "," +
             Roles.MineSurveyor + "," +
             Roles.SurveyAnalyst + "," +
             Roles.Surveyor)]
@@ -548,6 +650,7 @@ namespace PegsBase.Controllers
 
         [Authorize(Roles =
             Roles.Master + "," +
+            Roles.Admin + "," +
             Roles.MineSurveyor + "," +
             Roles.SurveyAnalyst + "," +
             Roles.Surveyor)]
@@ -560,6 +663,7 @@ namespace PegsBase.Controllers
 
         [Authorize(Roles =
             Roles.Master + "," +
+            Roles.Admin + "," +
             Roles.Mrm + "," +
             Roles.MineSurveyor + "," +
             Roles.SurveyAnalyst + "," +
@@ -582,6 +686,7 @@ namespace PegsBase.Controllers
 
         [Authorize(Roles =
             Roles.Master + "," +
+            Roles.Admin + "," +
             Roles.MineSurveyor + "," +
             Roles.SurveyAnalyst + "," +
             Roles.Surveyor)]
@@ -593,6 +698,7 @@ namespace PegsBase.Controllers
 
         [Authorize(Roles =
             Roles.Master + "," +
+            Roles.Admin + "," +
             Roles.MineSurveyor + "," +
             Roles.SurveyAnalyst + "," +
             Roles.Surveyor)]
@@ -607,6 +713,28 @@ namespace PegsBase.Controllers
 
             using var reader = new StreamReader(model.CoordinateFile.OpenReadStream());
             var parsedRows = await _coordinateDatParserService.ParseDatAsync(reader);
+
+            var settings = _importSettingsService.GetSettings();
+
+            foreach (var row in parsedRows)
+            {
+                if (settings.SwapXY)
+                {
+                    var temp = row.XCoord;
+                    row.XCoord = row.YCoord;
+                    row.YCoord = temp;
+                }
+
+                if (settings.InvertX)
+                {
+                    row.XCoord = -row.XCoord;
+                }
+
+                if (settings.InvertY)
+                {
+                    row.YCoord = -row.YCoord;
+                }
+            }
 
             model.PreviewRows = parsedRows.Take(2).ToList(); // Only show first 2
 

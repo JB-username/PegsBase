@@ -1,0 +1,83 @@
+﻿@model List<PegsBase.Models.Entities.MainSection>
+
+@{
+    ViewData["Title"] = "Manage Sections";
+}
+
+<h2 class="mb-4">Manage Sections</h2>
+
+<!-- Create Main Section -->
+<form asp-action="CreateMainSection" method="post" class="row g-2 mb-4 align-items-end">
+    <div class="col-md-5">
+        <label for="name" class="form-label">Main Section Name</label>
+        <input type="text" name="name" class="form-control" placeholder="e.g., 3# Shaft" required />
+    </div>
+    <div class="col-md-5">
+        <label for="description" class="form-label">Description (optional)</label>
+        <input type="text" name="description" class="form-control" />
+    </div>
+    <div class="col-md-2">
+        <button type="submit" class="btn btn-primary w-100">Add Main Section</button>
+    </div>
+</form>
+
+@foreach (var section in Model)
+{
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <strong>@(section.Name)</strong>
+            <form asp-action="DeleteMainSection" method="post" class="d-inline">
+                <input type="hidden" name="id" value="@(section.Id)" />
+                <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Delete this main section?')">Delete</button>
+            </form>
+        </div>
+        <div class="card-body">
+            <!-- Edit Main Section -->
+            <form asp-action="EditMainSection" method="post" class="row g-2 mb-3 align-items-end">
+                <input type="hidden" name="id" value="@(section.Id)" />
+                <div class="col-md-5">
+                    <input type="text" name="name" value="@(section.Name)" class="form-control" required />
+                </div>
+                <div class="col-md-5">
+                    <input type="text" name="description" value="@(section.Description)" class="form-control" />
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-sm btn-success w-100">Save</button>
+                </div>
+            </form>
+
+            <!-- Sub Sections -->
+            <h5>Sub Sections</h5>
+            @foreach (var sub in section.SubSections)
+            {
+                <div class="mb-2">
+                    <form asp-action="EditSubSection" method="post" class="d-flex gap-2 align-items-center">
+                        <input type="hidden" name="id" value="@sub.Id" />
+                        <input type="text" name="name" value="@sub.Name" class="form-control" required />
+                        <input type="text" name="description" value="@sub.Description" class="form-control" />
+                        <button type="submit" class="btn btn-sm btn-success">Save</button>
+                        <form asp-action="DeleteSubSection" method="post" class="d-inline">
+                            <input type="hidden" name="id" value="@sub.Id" />
+                            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Delete this sub section?')">Delete</button>
+                        </form>
+                    </form>
+                </div>
+            }
+
+            <!-- Create Sub Section -->
+            <form asp-action="CreateSubSection" method="post" class="row g-2 mt-3 align-items-end">
+                <input type="hidden" name="mainSectionId" value="@(section.Id)" />
+                <div class="col-md-5">
+                    <input type="text" name="name" class="form-control" placeholder="New Sub Section" required />
+                </div>
+                <div class="col-md-5">
+                    <input type="text" name="description" class="form-control" placeholder="Description (optional)" />
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-sm btn-primary w-100">Add Sub</button>
+                </div>
+            </form>
+        </div>
+    </div>
+}
+
