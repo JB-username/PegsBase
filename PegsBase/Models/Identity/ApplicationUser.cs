@@ -26,14 +26,15 @@ namespace PegsBase.Models.Identity
             NormalizedFullName = Normalize($"{FirstName} {LastName}");
         }
 
-        public static string Normalize(string name)
+        public static string Normalize(string? name)
         {
-            return name?
+            var input = name ?? string.Empty;
+
+            return input
                 .Replace(".", "")
                 .Replace(" ", "")
                 .ToUpperInvariant()
                 .Trim();
         }
-
     }
 }

@@ -1,0 +1,17 @@
+﻿@model PegsBase.Models.QuickCalcs.CoordinateConversionPegLookupViewModel
+
+@foreach (var peg in Model.Pegs)
+{
+    <div class="form-check">
+        <input class="form-check-input"
+               type="checkbox"
+               name="SelectedPegIds"
+               value="@peg.Id"
+               id="pegCheck_@peg.Id"
+        @(Model.SelectedPegIds.Contains(peg.Id) ? "checked" : "") />
+        <label class="form-check-label" for="pegCheck_@peg.Id">
+            @peg.PegName (@peg.XCoord:F3, @peg.YCoord:F3, @peg.ZCoord:F3)
+        </label>
+    </div>
+}
+

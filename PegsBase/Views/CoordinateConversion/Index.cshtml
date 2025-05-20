@@ -1,0 +1,182 @@
+﻿@model PegsBase.Models.QuickCalcs.CoordinateConversionViewModel
+@using PegsBase.Models.Entities
+
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert" id="errorAlert">
+        <strong>Error:</strong> @TempData["Error"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    <script>
+        setTimeout(function () {
+            var alertElem = document.getElementById("errorAlert");
+            if (alertElem) {
+                // hide it after 5 seconds
+                bootstrap.Alert.getOrCreateInstance(alertElem).close();
+            }
+        }, 5000);
+    </script>
+}
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-info alert-dismissible fade show" role="alert" id="successAlert">
+        <strong>Success:</strong> @TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    <script>
+        setTimeout(function () {
+            var alertElem = document.getElementById("successAlert");
+            if (alertElem) {
+                bootstrap.Alert.getOrCreateInstance(alertElem).close();
+            }
+        }, 5000);
+    </script>
+}
+
+
+<form asp-action="Index" method="post" class="row g-3 mb-4">
+
+    <!-- 1) SRID selectors -->
+    <div class="col-md-3">
+        <label asp-for="SourceSrid" class="form-label"></label>
+        <select asp-for="SourceSrid"
+                asp-items="Model.SridOptions"
+                class="form-select">
+        </select>
+        <span asp-validation-for="SourceSrid" class="text-danger"></span>
+    </div>
+    <div class="col-md-3">
+        <label asp-for="TargetSrid" class="form-label"></label>
+        <select asp-for="TargetSrid"
+                asp-items="Model.SridOptions"
+                class="form-select">
+        </select>
+        <span asp-validation-for="TargetSrid" class="text-danger"></span>
+    </div>
+
+    <!-- 2) (Optional) manual X/Y if you still want them -->
+    <div class="col-md-3">
+        <label asp-for="InputX" class="form-label"></label>
+        <input asp-for="InputX" class="form-control" />
+    </div>
+    <div class="col-md-3">
+        <label asp-for="InputY" class="form-label"></label>
+        <input asp-for="InputY" class="form-control" />
+    </div>
+
+    <hr class="mt-4" />
+
+    <!-- 3) Checkboxes for each peg -->
+    <hr class="mt-4" />
+
+    <!-- Filters -->
+    <div class="row g-2 mb-3">
+        <div class="col-md-4">
+            <input type="text" name="search" class="form-control" placeholder="Search pegs…" />
+        </div>
+        <div class="col-md-4">
+            <select name="levelId" class="form-select">
+                <option value="">All Levels</option>
+                @foreach (var lvl in ViewBag.Levels as List<Level>)
+                {
+                    <option value="@lvl.Id">@lvl.Name</option>
+                }
+            </select>
+        </div>
+        <div class="col-md-4">
+            <select name="localityId" class="form-select">
+                <option value="">All Localities</option>
+                @foreach (var loc in ViewBag.Localities as List<Locality>)
+                {
+                    <option value="@loc.Id">@loc.Name</option>
+                }
+            </select>
+        </div>
+    </div>
+
+    <!-- Container for our AJAX-loaded checkboxes -->
+    <div id="pegLookupContainer"></div>
+
+    <hr />
+
+    <!-- 4) Submit -->
+    <div class="col-12">
+        <button type="submit" class="btn btn-primary">Convert Selected</button>
+    </div>
+</form>
+
+@if (Model.Results?.Any() == true)
+{
+    <h3>Results</h3>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>X</th>
+                <th>Y</th>
+                <th>Z</th>
+            </tr>
+        </thead>
+        <tbody>
+            @for (int i = 0; i < Model.Results.Count; i++)
+            {
+                var r = Model.Results[i];
+                <tr>
+                    <td>@(i + 1)</td>
+                    <td>@r.X.ToString("F3")</td>
+                    <td>@r.Y.ToString("F3")</td>
+                    <td>@(r.Z.HasValue ? r.Z.Value.ToString("F3") : "-")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@section Scripts{
+    <script>
+        // Simple debounce helper
+        function debounce(fn, ms){
+          let t;
+          return (...args)=> {
+            clearTimeout(t);
+            t = setTimeout(()=> fn(...args), ms);
+          }
+        }
+
+        async function loadPegs() {
+          const search     = document.querySelector('input[name="search"]').value;
+          const levelId    = document.querySelector('select[name="levelId"]').value;
+          const localityId = document.querySelector('select[name="localityId"]').value;
+
+          // capture any already‐checked IDs
+          const selected = Array.from(
+            document.querySelectorAll('#pegLookupContainer input:checked')
+          ).map(cb => cb.value);
+
+          const qs = new URLSearchParams({ search, levelId, localityId });
+          selected.forEach(id => qs.append('selectedPegIds', id));
+
+          const res = await fetch(`/coords/GetFilteredPegs?${qs}`, { method: 'GET' });
+          const html = await res.text();
+          document.getElementById('pegLookupContainer').innerHTML = html;
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+          // initial load
+          loadPegs();
+
+          // re-load on filter changes
+          document.querySelector('input[name="search"]')
+                  .addEventListener('input', debounce(loadPegs, 300));
+
+          document.querySelector('select[name="levelId"]')
+                  .addEventListener('change', loadPegs);
+
+          document.querySelector('select[name="localityId"]')
+                  .addEventListener('change', loadPegs);
+        });
+    </script>
+
+}

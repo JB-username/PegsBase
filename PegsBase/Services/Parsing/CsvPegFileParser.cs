@@ -6,74 +6,87 @@ namespace PegsBase.Services.Parsing
 {
     public class CsvPegFileParser : IPegFileParser
     {
-        public List<PegRegisterImportModel> Parse(Stream fileStream)
+        public List<CsvParseResult> Parse(Stream fileStream)
         {
-            var pegs = new List<PegRegisterImportModel>();
-
+            var results = new List<CsvParseResult>();
             using var reader = new StreamReader(fileStream);
-            string? headerLine = reader.ReadLine();
 
+            // Read and validate header
+            var headerLine = reader.ReadLine();
             if (string.IsNullOrWhiteSpace(headerLine))
-                throw new Exception("File is empty or missing headers.");
+                throw new Exception("Empty or missing headers.");
 
-            var headers = headerLine.Split(',').Select(h => h.Trim().ToLower()).ToArray();
+            var headers = headerLine
+                .Split(',')
+                .Select(h => h.Trim().ToLower())
+                .ToArray();
 
+            int rowNum = 1;
             while (!reader.EndOfStream)
             {
+                rowNum++;
                 var line = reader.ReadLine();
                 if (string.IsNullOrWhiteSpace(line)) continue;
 
                 var values = line.Split(',');
-
-                var peg = new PegRegisterImportModel();
+                var result = new CsvParseResult { RowNumber = rowNum };
+                var peg = result.Peg;
 
                 for (int i = 0; i < headers.Length; i++)
                 {
-                    string column = headers[i];
-                    string value = values.ElementAtOrDefault(i)?.Trim() ?? "";
+                    var col = headers[i];
+                    var raw = values.ElementAtOrDefault(i)?.Trim() ?? "";
 
-                    switch (column)
+                    switch (col)
                     {
                         case "pegname":
-                            peg.PegName = value;
+                            peg.PegName = raw;
+                            if (string.IsNullOrWhiteSpace(raw))
+                                result.Errors.Add("Missing PegName");
                             break;
                         case "xcoord":
-                            peg.XCoord = decimal.Parse(value);
+                            if (decimal.TryParse(raw, out var x)) peg.XCoord = x;
+                            else result.Errors.Add($"XCoord '{raw}' invalid");
                             break;
                         case "ycoord":
-                            peg.YCoord = decimal.Parse(value);
+                            if (decimal.TryParse(raw, out var y)) peg.YCoord = y;
+                            else result.Errors.Add($"YCoord '{raw}' invalid");
                             break;
                         case "zcoord":
-                            peg.ZCoord = decimal.Parse(value);
+                            if (decimal.TryParse(raw, out var z)) peg.ZCoord = z;
+                            else result.Errors.Add($"ZCoord '{raw}' invalid");
                             break;
                         case "gradeelevation":
-                            peg.GradeElevation = decimal.Parse(value);
+                            if (decimal.TryParse(raw, out var g)) peg.GradeElevation = g;
+                            else if (!string.IsNullOrEmpty(raw))
+                                result.Errors.Add($"GradeElevation '{raw}' invalid");
                             break;
                         case "surveyor":
-                            peg.SurveyorName = value;
+                            peg.SurveyorName = raw;
                             break;
                         case "locality":
-                            peg.LocalityName = value;
+                            peg.LocalityName = raw;
                             break;
                         case "level":
-                            peg.LevelName = value;
+                            peg.LevelName = raw;
                             break;
                         case "surveydate":
-                            if (DateOnly.TryParse(value, out var dateOnly))
-                                peg.SurveyDate = dateOnly;
+                            if (DateOnly.TryParse(raw, out var dt)) peg.SurveyDate = dt;
+                            else if (!string.IsNullOrEmpty(raw))
+                                result.Errors.Add($"SurveyDate '{raw}' invalid");
                             break;
                         case "pointtype":
-                            if (Enum.TryParse<SurveyPointType>(value, true, out var type))
-                                peg.PointType = type;
+                            if (Enum.TryParse<SurveyPointType>(raw, true, out var pt))
+                                peg.PointType = pt;
+                            else result.Errors.Add($"PointType '{raw}' invalid");
                             break;
                     }
                 }
 
-                pegs.Add(peg);
+                results.Add(result);
             }
 
-            return pegs;
+            return results;
         }
-
     }
 }

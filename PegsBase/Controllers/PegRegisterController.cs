@@ -3,9 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Storage.Json;
 using Newtonsoft.Json;
-using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using PegsBase.Data;
 using PegsBase.Models;
 using PegsBase.Models.Constants;
@@ -15,9 +13,9 @@ using PegsBase.Models.ViewModels;
 using PegsBase.Services.Parsing;
 using PegsBase.Services.Parsing.Interfaces;
 using PegsBase.Services.PegCalc.Interfaces;
-using System.Text;
-using Rotativa.AspNetCore;
 using PegsBase.Services.Settings;
+using Rotativa.AspNetCore;
+using System.Text;
 
 namespace PegsBase.Controllers
 {
@@ -25,6 +23,7 @@ namespace PegsBase.Controllers
     public class PegRegisterController : Controller
     {
         private readonly ApplicationDbContext _dbContext;
+        private readonly ILogger<PegRegisterController> _logger;
         private readonly IPegFileParser _pegFileParser;
         private readonly ICoordinateDatParserService _coordinateDatParserService;
         private readonly IPegCalcService _pegCalcService;
@@ -34,6 +33,7 @@ namespace PegsBase.Controllers
 
         public PegRegisterController(
             ApplicationDbContext db,
+            ILogger<PegRegisterController> logger,
             IPegFileParser pegFileParser,
             ICoordinateDatParserService coordinateDatParserService,
             IPegCalcService pegCalcService,
@@ -42,6 +42,7 @@ namespace PegsBase.Controllers
             IImportSettingsService importSettingsService)
         {
             _dbContext = db;
+            _logger = logger;
             _pegFileParser = pegFileParser;
             _coordinateDatParserService = coordinateDatParserService;
             _pegCalcService = pegCalcService;
@@ -50,13 +51,7 @@ namespace PegsBase.Controllers
             _importSettingsService = importSettingsService;
         }
 
-        [Authorize(Roles =
-            Roles.Master + "," +
-            Roles.Admin + "," +
-            Roles.Mrm + "," +
-            Roles.MineSurveyor + "," +
-            Roles.SurveyAnalyst + "," +
-            Roles.Surveyor)]
+        [Authorize(Policy = "SurveyDepartment")]
         public async Task<IActionResult> Index(SurveyPointType? filter, string sortOrder)
         {
             ViewBag.Levels = await _dbContext.Levels.OrderBy(l => l.Name).ToListAsync();
@@ -101,12 +96,7 @@ namespace PegsBase.Controllers
         }
 
 
-        [Authorize(Roles =
-            Roles.Master + "," +
-            Roles.Admin + "," +
-            Roles.MineSurveyor + "," +
-            Roles.SurveyAnalyst + "," +
-            Roles.Surveyor)]
+        [Authorize(Policy = "SurveyDepartment")]
         public async Task<IActionResult> Create()
         {
             var users = await _userManager.Users.ToListAsync();
@@ -132,12 +122,7 @@ namespace PegsBase.Controllers
             return View(peg); // Return just the model (not wrapped in a view model)
         }
 
-        [Authorize(Roles =
-            Roles.Master + "," +
-            Roles.Admin + "," +
-            Roles.MineSurveyor + "," +
-            Roles.SurveyAnalyst + "," +
-            Roles.Surveyor)]
+        [Authorize(Policy = "SurveyDepartment")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(PegRegister peg)
@@ -184,11 +169,7 @@ namespace PegsBase.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        [Authorize(Roles =
-            Roles.Master + "," +
-            Roles.Admin + "," +
-            Roles.MineSurveyor + "," +
-            Roles.SurveyAnalyst)]
+        [Authorize(Policy = "SurveyManagers")]
         [HttpGet]
         public async Task<IActionResult> Edit(int id)
         {
@@ -227,11 +208,7 @@ namespace PegsBase.Controllers
         }
 
 
-        [Authorize(Roles =
-            Roles.Master + "," +
-            Roles.Admin + "," +
-            Roles.MineSurveyor + "," +
-            Roles.SurveyAnalyst)]
+        [Authorize(Policy = "SurveyManagers")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(PegRegister peg, string? filter)
@@ -264,11 +241,7 @@ namespace PegsBase.Controllers
         }
 
 
-        [Authorize(Roles =
-            Roles.Master + "," +
-            Roles.Admin + "," +
-            Roles.MineSurveyor + "," +
-            Roles.SurveyAnalyst)]
+        [Authorize(Policy = "SurveyManagers")]
         [HttpGet]
         public IActionResult Delete(int? id, SurveyPointType? filter)
         {
@@ -292,11 +265,7 @@ namespace PegsBase.Controllers
             return View(pegEntry);
         }
 
-        [Authorize(Roles =
-            Roles.Master + "," +
-            Roles.Admin + "," +
-            Roles.MineSurveyor + "," +
-            Roles.SurveyAnalyst)]
+        [Authorize(Policy = "SurveyManagers")]
         [HttpPost]
         public IActionResult DeletePost(int? id)
         {
@@ -316,11 +285,7 @@ namespace PegsBase.Controllers
 
         }
 
-        [Authorize(Roles =
-            Roles.Master + "," +
-            Roles.Admin + "," +
-            Roles.MineSurveyor + "," +
-            Roles.SurveyAnalyst)]
+        [Authorize(Policy = "SurveyManagers")]
         [HttpPost]
         public IActionResult DeleteSelected(List<int> selectedIds)
         {
@@ -342,12 +307,7 @@ namespace PegsBase.Controllers
         }
 
 
-        [Authorize(Roles =
-            Roles.Master + "," +
-            Roles.Admin + "," +
-            Roles.MineSurveyor + "," +
-            Roles.SurveyAnalyst + "," +
-            Roles.Surveyor)]
+        [Authorize(Policy = "SurveyDepartment")]
         [HttpPost]
         public IActionResult ExportSelectedToCsvPlans(List<int> selectedIds)
         {
@@ -378,12 +338,7 @@ namespace PegsBase.Controllers
 
 
 
-        [Authorize(Roles =
-        Roles.Master + "," +
-        Roles.Admin + "," +
-        Roles.MineSurveyor + "," +
-        Roles.SurveyAnalyst + "," +
-        Roles.Surveyor)]
+        [Authorize(Policy = "SurveyDepartment")]
         [HttpPost]
         public IActionResult ExportSelectedToCsvInstrument(List<int> selectedIds)
         {
@@ -438,12 +393,7 @@ namespace PegsBase.Controllers
 
 
 
-        [Authorize(Roles =
-            Roles.Master + "," +
-            Roles.Admin + "," +
-            Roles.MineSurveyor + "," +
-            Roles.SurveyAnalyst + "," +
-            Roles.Surveyor)]
+        [Authorize(Policy = "SurveyDepartment")]
         [HttpPost]
         public IActionResult ExportSelectedToDxf(List<int> selectedIds)
         {
@@ -536,26 +486,16 @@ namespace PegsBase.Controllers
             return File(Encoding.UTF8.GetBytes(sb.ToString()), "application/dxf", "SelectedPegs.dxf");
         }
 
-        [Authorize(Roles =
-            Roles.Master + "," +
-            Roles.Admin + "," +
-            Roles.MineSurveyor + "," +
-            Roles.SurveyAnalyst + "," +
-            Roles.Surveyor)]
+        [Authorize(Policy = "SurveyDepartment")]
         [HttpGet]
-        public IActionResult Upload()
+        public IActionResult ImportCsvFile()
         {
             return View();
         }
 
-        [Authorize(Roles =
-            Roles.Master + "," +
-            Roles.Admin + "," +
-            Roles.MineSurveyor + "," +
-            Roles.SurveyAnalyst + "," +
-            Roles.Surveyor)]
+        [Authorize(Policy = "SurveyDepartment")]
         [HttpPost]
-        public async Task<IActionResult> Upload(IFormFile file)
+        public IActionResult ImportCsvFile(IFormFile file)
         {
             if (file == null || file.Length == 0)
             {
@@ -564,117 +504,210 @@ namespace PegsBase.Controllers
             }
 
             using var stream = file.OpenReadStream();
-            var importModels = _pegFileParser.Parse(stream); // List<PegRegisterImportModel>
+            var parseResults = _pegFileParser.Parse(stream);
 
             var settings = _importSettingsService.GetSettings();
 
-            foreach (var model in importModels)
+            // apply your SwapXY/InvertX/InvertY to the *Peg* inside each result
+            foreach (var row in parseResults)
             {
+                var peg = row.Peg;
+
                 if (settings.SwapXY)
                 {
-                    var temp = model.XCoord;
-                    model.XCoord = model.YCoord;
-                    model.YCoord = temp;
+                    var tmp = peg.XCoord;
+                    peg.XCoord = peg.YCoord;
+                    peg.YCoord = tmp;
                 }
 
                 if (settings.InvertX)
                 {
-                    model.XCoord = -model.XCoord;
+                    peg.XCoord = -peg.XCoord;
                 }
 
                 if (settings.InvertY)
                 {
-                    model.YCoord = -model.YCoord;
+                    peg.YCoord = -peg.YCoord;
                 }
             }
 
-            TempData["ParsedPegs"] = JsonConvert.SerializeObject(importModels);
+            TempData["CsvParseResults"] = JsonConvert.SerializeObject(parseResults);
 
-            return RedirectToAction("Preview");
+            return RedirectToAction(nameof(PreviewCsvImport));
         }
 
 
-        [Authorize(Roles =
-            Roles.Master + "," +
-            Roles.Admin + "," +
-            Roles.Mrm + "," +
-            Roles.MineSurveyor + "," +
-            Roles.SurveyAnalyst + "," +
-            Roles.Surveyor)]
+
+        [Authorize(Policy = "SurveyDepartment")]
         [HttpGet]
-        public IActionResult Preview()
+        public IActionResult PreviewCsvImport()
         {
-            if (!TempData.TryGetValue("ParsedPegs", out var rawData) || rawData == null)
-                return RedirectToAction("Upload");
+            if (!TempData.TryGetValue("CsvParseResults", out var raw)
+                || raw is not string json)
+                return RedirectToAction(nameof(ImportCsvFile));
 
-            var pegs = JsonConvert.DeserializeObject<List<PegRegisterImportModel>>(rawData.ToString());
-            return View(pegs); // View now expects PegRegisterImportModel
+            // keep it for the POST
+            TempData.Keep("CsvParseResults");
+
+            var allResults = JsonConvert
+                .DeserializeObject<List<CsvParseResult>>(json)
+                ?? new List<CsvParseResult>();
+
+            var good = allResults.Where(r => !r.Errors.Any()).ToList();
+            var bad = allResults.Where(r => r.Errors.Any()).ToList();
+
+            var vm = new CsvPreviewModel
+            {
+                TotalRows = allResults.Count,
+                TotalGood = good.Count,
+                GoodRows = good.Take(20).ToList(),
+                BadRows = bad
+            };
+
+            return View(vm);
         }
 
 
-        [Authorize(Roles =
-            Roles.Master + "," +
-            Roles.Admin + "," +
-            Roles.MineSurveyor + "," +
-            Roles.SurveyAnalyst + "," +
-            Roles.Surveyor)]
+
+        [Authorize(Policy = "SurveyDepartment")]
         [HttpPost]
-        public IActionResult ConfirmImport(string pegs)
+        public IActionResult ConfirmCsvImport()
         {
-            if (string.IsNullOrWhiteSpace(pegs))
-                return RedirectToAction("Upload");
-
-            try
+            // 1) Retrieve the full JSON blob from TempData
+            if (!TempData.TryGetValue("CsvParseResults", out var raw)
+                || raw is not string json
+                || string.IsNullOrWhiteSpace(json))
             {
-                var deserializedPegs = JsonConvert.DeserializeObject<List<PegRegister>>(pegs);
+                // Nothing to import — redirect back to upload
+                return RedirectToAction(nameof(ImportCsvFile));
+            }
 
-                if (deserializedPegs == null || !deserializedPegs.Any())
+            // 2) Deserialize the entire list of parse results
+            var parseResults = JsonConvert
+                .DeserializeObject<List<CsvParseResult>>(json)
+                ?? new List<CsvParseResult>();
+
+            var rowsToSave = new List<PegRegister>();
+            var mappingErrors = new List<string>();
+
+            // 3) For every row with no parse errors, attempt to map & build a PegRegister
+            foreach (var row in parseResults.Where(r => !r.Errors.Any()))
+            {
+                var m = row.Peg;
+
+                // Safely coalesce any null names
+                var levelName = m.LevelName ?? string.Empty;
+                var localityName = m.LocalityName ?? string.Empty;
+
+                // 3.1) Find Level by case-insensitive ILIKE
+                var level = _dbContext.Levels
+                    .FirstOrDefault(l => EF.Functions.ILike(l.Name, levelName));
+                if (level == null)
                 {
-                    TempData["Error"] = "No pegs found to import.";
-                    return RedirectToAction("Upload");
+                    mappingErrors.Add(
+                        $"Row {row.RowNumber}: Level '{levelName}' not found.");
+                    continue;
                 }
 
-                _dbContext.PegRegister.AddRange(deserializedPegs);
-                _dbContext.SaveChanges();
+                // 3.2) Find Locality scoped to that level
+                var locality = _dbContext.Localities
+                    .FirstOrDefault(loc =>
+                        EF.Functions.ILike(loc.Name, localityName)
+                        && loc.LevelId == level.Id);
+                if (locality == null)
+                {
+                    mappingErrors.Add(
+                        $"Row {row.RowNumber}: Locality '{localityName}' not found on level '{level.Name}'.");
+                    continue;
+                }
 
-                TempData["Success"] = $"{deserializedPegs.Count} pegs imported successfully!";
-                return RedirectToAction("Index");
+                // 3.3) Find Surveyor by normalized full‐name, or by initial+surname
+                ApplicationUser? user = null;
+                if (!string.IsNullOrWhiteSpace(m.SurveyorName))
+                {
+                    var rawName = m.SurveyorName.Trim();
+                    var normalized = ApplicationUser.Normalize(rawName);
+
+                    // Try exact match on normalized full name
+                    user = _userManager.Users
+                        .FirstOrDefault(u => u.NormalizedFullName == normalized);
+
+                    // If no full match and looks like “X. LastName”, match by surname
+                    if (user == null)
+                    {
+                        var tokens = rawName
+                            .Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                        if (tokens.Length == 2
+                            && tokens[0].Length == 2
+                            && tokens[0].EndsWith('.'))
+                        {
+                            var normSurname = ApplicationUser.Normalize(tokens[1]);
+                            user = _userManager.Users
+                                .FirstOrDefault(u =>
+                                    u.NormalizedFullName != null
+                                    && u.NormalizedFullName.EndsWith(normSurname));
+                        }
+                    }
+                }
+
+                // 3.4) Build the PegRegister entity
+                rowsToSave.Add(new PegRegister
+                {
+                    PegName = m.PegName,
+                    XCoord = m.XCoord,
+                    YCoord = m.YCoord,
+                    ZCoord = m.ZCoord,
+                    GradeElevation = m.GradeElevation,
+                    SurveyDate = m.SurveyDate ?? DateOnly.FromDateTime(DateTime.Today),
+                    PointType = m.PointType,
+                    LevelId = level.Id,
+                    LocalityId = locality.Id,
+                    SurveyorId = user?.Id,
+                    SurveyorNameText = user == null ? m.SurveyorName : null
+                });
             }
-            catch (Exception ex)
+
+            // 4) Persist all successfully mapped rows
+            if (rowsToSave.Any())
             {
-                // Optionally log exception
-                TempData["Error"] = "An error occurred while importing pegs.";
-                return RedirectToAction("Upload");
+                _dbContext.PegRegister.AddRange(rowsToSave);
+                _dbContext.SaveChanges();
             }
+
+            // 5) Prepare user feedback
+            TempData["Success"] = $"{rowsToSave.Count} pegs imported successfully.";
+            if (mappingErrors.Any())
+            {
+                // Join errors with newline so your UI can render them clearly
+                TempData["Error"] = string.Join("\\n", mappingErrors);
+            }
+
+            return RedirectToAction(nameof(Index));
         }
 
-        [Authorize(Roles =
-            Roles.Master + "," +
-            Roles.Admin + "," +
-            Roles.MineSurveyor + "," +
-            Roles.SurveyAnalyst + "," +
-            Roles.Surveyor)]
+
+
+        [Authorize(Policy = "SurveyDepartment")]
         public IActionResult DownloadTemplate()
         {
-            var csv = "PegName,XCoord,YCoord,ZCoord,GradeElevation,Locality,Level,Surveyor,SurveyDate,PointType\n";
-            var bytes = Encoding.UTF8.GetBytes(csv);
-            return File(bytes, "text/csv", "PegTemplate.csv");
+            var sb = new StringBuilder();
+            sb.AppendLine("PegName,XCoord,YCoord,ZCoord,GradeElevation,Locality,Level,Surveyor,SurveyDate,PointType");
+            sb.AppendLine("22033,5000.123,1500.456,250.789,50.0,MainShaft,Level1,george washington,2025-05-19,Peg");
+            sb.AppendLine("CP-001,5100.000,1520.000,260.000,60.0,SurveySite,Level2,g. washington,2025-05-18,Control");
+            sb.AppendLine("S563,5200.500,1550.750,270.250,70.0,BeaconArea,Level3,L. Mayberry,2025-05-17,Beacon");
+
+            var bytes = Encoding.UTF8.GetBytes(sb.ToString());
+            return File(bytes, "text/csv", "CSV_Peg_Import_Template.csv");
         }
 
-        [Authorize(Roles =
-            Roles.Master + "," +
-            Roles.Admin + "," +
-            Roles.Mrm + "," +
-            Roles.MineSurveyor + "," +
-            Roles.SurveyAnalyst + "," +
-            Roles.Surveyor)]
+        [Authorize(Policy = "SurveyDepartment")]
         [HttpPost]
         public IActionResult PrintSelected(List<int> selectedIds)
         {
             if (selectedIds == null || !selectedIds.Any())
             {
                 TempData["Error"] = "No pegs selected to print.";
-                return RedirectToAction("Index");
+                return RedirectToAction(nameof(Index));
             }
 
             var pegs = _dbContext.PegRegister
@@ -684,26 +717,16 @@ namespace PegsBase.Controllers
             return View("PrintView", pegs); // Pass data to a dedicated print view
         }
 
-        [Authorize(Roles =
-            Roles.Master + "," +
-            Roles.Admin + "," +
-            Roles.MineSurveyor + "," +
-            Roles.SurveyAnalyst + "," +
-            Roles.Surveyor)]
+        [Authorize(Policy = "SurveyDepartment")]
         [HttpGet]
-        public IActionResult UploadDat()
+        public IActionResult ImportDatFile()
         {
             return View(new CoordinateUploadViewModel());
         }
 
-        [Authorize(Roles =
-            Roles.Master + "," +
-            Roles.Admin + "," +
-            Roles.MineSurveyor + "," +
-            Roles.SurveyAnalyst + "," +
-            Roles.Surveyor)]
+        [Authorize(Policy = "SurveyDepartment")]
         [HttpPost]
-        public async Task<IActionResult> UploadDat(CoordinateUploadViewModel model)
+        public async Task<IActionResult> ImportDatFile(CoordinateUploadViewModel model)
         {
             if (model.CoordinateFile == null || model.CoordinateFile.Length == 0)
             {
@@ -746,30 +769,40 @@ namespace PegsBase.Controllers
 
             ViewBag.Levels = new SelectList(_dbContext.Levels.OrderBy(l => l.Name), "Id", "Name");
             ViewBag.Localities = new SelectList(_dbContext.Localities.OrderBy(l => l.Name), "Id", "Name");
-            ViewBag.Surveyors = new SelectList(
-                _dbContext.Users
-                    .OrderBy(u => u.LastName)
-                    .Select(u => new
-                    {
-                        u.Id,
-                        Name = u.FirstName.Substring(0, 1) + ". " + u.LastName
-                    }),
-                "Id",
-                "Name"
-            );
+            var rawUsers = _dbContext.Users
+                .OrderBy(u => u.LastName)
+                .Select(u => new {
+                    u.Id,
+                    u.FirstName,
+                    u.LastName
+                })
+                .AsEnumerable();
+
+            var surveyorItems = rawUsers
+                .Select(u => new SelectListItem
+                {
+                    Value = u.Id,
+                    Text = !string.IsNullOrEmpty(u.FirstName)
+                        ? $"{u.FirstName[0]}. {u.LastName}"
+                        : u.LastName
+                })
+                .ToList();
+
+            ViewBag.Surveyors = surveyorItems;
+
             TempData["RedirectAfterSaveUrl"] = model.RedirectAfterSaveUrl;
 
-            return View("PreviewCoordinate", model);
+            return View("PreviewDatImport", model);
         }
 
 
         [HttpPost]
-        public async Task<IActionResult> SaveCoordinatePegs(CoordinateUploadViewModel model)
+        public async Task<IActionResult> ConfirmDatImport(CoordinateUploadViewModel model)
         {
             if (model.PreviewRows == null || !model.PreviewRows.Any())
             {
                 ModelState.AddModelError("", "No pegs to save.");
-                return View("PreviewCoordinate", model);
+                return View(nameof(ImportDatFile), model);
             }
 
             var rowsToSave = model.PreviewRows.Take(2).ToList();
@@ -820,12 +853,7 @@ namespace PegsBase.Controllers
             return RedirectToAction("Index", "PegRegister");
         }
 
-        [Authorize(Roles =
-            Roles.Master + "," +
-            Roles.Admin + "," +
-            Roles.MineSurveyor + "," +
-            Roles.SurveyAnalyst + "," +
-            Roles.Surveyor)]
+        [Authorize(Policy = "SurveyDepartment")]
         public async Task<IActionResult> ViewPeg(int id)
         {
             var peg = await _dbContext.PegRegister
@@ -934,14 +962,14 @@ namespace PegsBase.Controllers
                     Surveyor = rawData.Surveyor,
                     SurveyDate = rawData.SurveyDate,
                     LocalityId = rawData.LocalityId,
-                    Level = peg.Level.Id,
+                    Level = peg.Level?.Id ?? 0,
                     PointType = peg.PointType,
                     PegFailed = rawData.PegFailed,
 
                     // Display info
                     SurveyorDisplayName = peg.Surveyor?.DisplayName ?? rawData.Surveyor,
-                    LocalityName = peg.Locality?.Name,
-                    LevelName = peg.Level?.Name
+                    LocalityName = peg.Locality?.Name ?? "(none)",
+                    LevelName = peg.Level?.Name ?? "(none)"
                 };
 
                 return View("PegCalcResultViewOnly", viewModel);
@@ -963,14 +991,28 @@ namespace PegsBase.Controllers
 
             if (!string.IsNullOrWhiteSpace(search))
             {
-                search = search.Trim().ToUpper(); // Normalize for case-insensitive matching
+                search = search.Trim();
+                var pattern = $"%{search}%";
 
                 query = query.Where(p =>
-                    p.PegName.ToUpper().Contains(search) ||
-                    p.Surveyor.NormalizedFullName.ToUpper().Contains(search) ||
-                    p.SurveyorNameText.ToUpper().Contains(search) ||
-                    p.Locality.Name.ToUpper().Contains(search));
+                    // PegName is non-nullable
+                    EF.Functions.ILike(p.PegName, pattern)
+
+                    // Only ILIKE a non-null NormalizedFullName
+                    || (p.Surveyor != null
+                        && p.Surveyor.NormalizedFullName != null
+                        && EF.Functions.ILike(p.Surveyor.NormalizedFullName, pattern))
+
+                    // Only ILIKE SurveyorNameText if present
+                    || (!string.IsNullOrEmpty(p.SurveyorNameText)
+                        && EF.Functions.ILike(p.SurveyorNameText, pattern))
+
+                    // Only ILIKE Locality.Name if Locality exists
+                    || (p.Locality != null
+                        && EF.Functions.ILike(p.Locality.Name, pattern))
+                );
             }
+
 
 
             if (!string.IsNullOrEmpty(filter) && Enum.TryParse<SurveyPointType>(filter, out var pointType))
@@ -1112,7 +1154,7 @@ namespace PegsBase.Controllers
                 Surveyor = rawData.Surveyor,
                 SurveyDate = rawData.SurveyDate,
                 LocalityId = rawData.LocalityId,
-                Level = peg.Level.Id,
+                Level = peg.Level?.Id ?? 0,
                 PointType = peg.PointType,
                 PegFailed = rawData.PegFailed,
 
@@ -1130,7 +1172,7 @@ namespace PegsBase.Controllers
             };
         }
 
-        public async Task<IActionResult> ExportPegCalcTestPdf(int id)
+        public IActionResult ExportPegCalcTestPdf(int id)
         {
             // Minimal logic for testing
             var model = new PegCalcViewModel
@@ -1171,8 +1213,5 @@ namespace PegsBase.Controllers
                 CustomSwitches = "--enable-local-file-access"
             };
         }
-
-
-
     }
 }

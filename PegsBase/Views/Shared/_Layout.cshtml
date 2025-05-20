@@ -127,28 +127,43 @@
 
 	@await RenderSectionAsync("Scripts", required: false)
 
-	<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1100">
-		<div id="appToast" class="toast align-items-center text-white bg-success border-0" role="alert">
-			<div class="d-flex">
-				<div class="toast-body" id="toast-body">Placeholder</div>
-				<button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+	@if (TempData["Success"] != null || TempData["Error"] != null)
+	{
+		var isError = TempData["Error"] != null;
+		var message = isError
+		? TempData["Error"].ToString()
+		: TempData["Success"].ToString();
+		var toastClass = isError
+		? "text-white bg-danger"
+		: "text-white bg-success";
+
+		<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1100">
+			<div id="appToast"
+				 class="toast align-items-center @toastClass border-0"
+				 role="alert"
+				 aria-live="assertive"
+				 aria-atomic="true"
+				 data-bs-autohide="true"
+				 data-bs-delay="4000">
+				<div class="d-flex">
+					<div class="toast-body">@message</div>
+					<button type="button"
+							class="btn-close btn-close-white me-2 m-auto"
+							data-bs-dismiss="toast"
+							aria-label="Close">
+					</button>
+				</div>
 			</div>
 		</div>
-	</div>
 
-
-	@if (TempData["Success"] != null)
-	{
 		<script>
 			window.addEventListener('DOMContentLoaded', () => {
-				const toastEl = document.getElementById('appToast');
-				if (toastEl) {
-					const toast = new bootstrap.Toast(toastEl, { delay: 4000 });
-					toast.show();
-				}
+			  const toastEl = document.getElementById('appToast');
+			  new bootstrap.Toast(toastEl).show();
 			});
 		</script>
 	}
+
 
 	<div id="loadingSpinner" class="position-fixed top-50 start-50 translate-middle" style="z-index: 2000; display: none;">
 		<div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">

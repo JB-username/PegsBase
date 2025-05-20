@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Npgsql.EntityFrameworkCore.PostgreSQL;
 using PegsBase.Data;
+using PegsBase.Models.Constants;
 using PegsBase.Models.Identity;
 using PegsBase.Models.Settings;
 using PegsBase.Services.Emails;
@@ -15,12 +16,12 @@ using PegsBase.Services.Parsing;
 using PegsBase.Services.Parsing.Interfaces;
 using PegsBase.Services.PegCalc.Implementations;
 using PegsBase.Services.PegCalc.Interfaces;
-using PegsBase.Services.Settings;
-using PegsBase.Services.QuickCalcs.Interfaces;
 using PegsBase.Services.QuickCalcs.Implementations;
+using PegsBase.Services.QuickCalcs.Interfaces;
+using PegsBase.Services.Settings;
+using Rotativa.AspNetCore;
 using System.Data.Common;
 using System.Globalization;
-using Rotativa.AspNetCore;
 
 namespace PegsBase
 {
@@ -47,6 +48,24 @@ namespace PegsBase
               .AddRoles<IdentityRole>()
               .AddEntityFrameworkStores<ApplicationDbContext>();
 
+            builder.Services.AddAuthorization(options =>
+            {
+                options.AddPolicy("SurveyDepartment", policy =>
+                    policy.RequireRole(RoleGroups.SurveyDepartment));
+
+                options.AddPolicy("Admins", policy =>
+                    policy.RequireRole(RoleGroups.Admins));
+
+                options.AddPolicy("SurveyManagers", policy =>
+                    policy.RequireRole(RoleGroups.SurveyManagers));
+
+                options.AddPolicy("MustBeSupervisor", policy =>
+                {
+                    policy.RequireRole("Supervisor");
+                    policy.RequireClaim("CanApprove");
+                });
+            });
+
             builder.Services.AddSession();
             builder.Services.AddControllersWithViews();
             builder.Services.AddRazorPages();
@@ -54,8 +73,9 @@ namespace PegsBase
 
             builder.Services.AddDbContext<ApplicationDbContext>(
                 options => options.UseNpgsql(
-                    builder.Configuration.GetConnectionString(
-                        "DefaultConnection"))
+                    builder.Configuration.GetConnectionString("DefaultConnection"),
+                    npgsqlOpts => npgsqlOpts.UseNetTopologySuite()
+                    )
                 );
 
             builder.Services.AddScoped<IPegFileParser, CsvPegFileParser>();
@@ -65,6 +85,7 @@ namespace PegsBase
             builder.Services.AddScoped<IMapImportModelsToPegs, MapImportModelsToPegs>();
             builder.Services.AddScoped<IImportSettingsService, ImportSettingsService>();
             builder.Services.AddScoped<IJoinCalculatorService, JoinCalculatorService>();
+            builder.Services.AddScoped<ICoordinateConversionService, CoordinateConversionService>();
 
             builder.Services.AddTransient<IEmailSender, EmailSender>();
 

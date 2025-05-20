@@ -7,9 +7,9 @@
 }
 
 @{
-	string filter = Context.Request.Query["filter"];
-	string search = Context.Request.Query["search"];
-	string sortOrder = Context.Request.Query["sortOrder"];
+	string filter = Context.Request.Query["filter"].ToString() ?? string.Empty;
+	string search = Context.Request.Query["search"].ToString() ?? string.Empty;
+	string sortOrder = Context.Request.Query["sortOrder"].ToString() ?? string.Empty;
 	bool isBeacon = filter == "Beacon";
 	bool isControl = filter == "Control";
 	bool showLevel = !isBeacon;
@@ -52,8 +52,8 @@
 			</button>
 			<ul class="dropdown-menu">
 				<li><a class="dropdown-item" asp-action="Create">Manual Entry</a></li>
-				<li><a class="dropdown-item" asp-action="Upload">Bulk Import CSV</a></li>
-				<li><a class="dropdown-item" asp-action="UploadDat">Upload Coordinate File</a></li>
+				<li><a class="dropdown-item" asp-action="ImportCsvFile">Bulk Import CSV</a></li>
+				<li><a class="dropdown-item" asp-action="ImportDatFile">Upload Coordinate File</a></li>
 			</ul>
 		</div>
 	</div>

@@ -1,10 +1,10 @@
 ﻿@{
-    ViewData["Title"] = "Upload Pegs";
+    ViewData["Title"] = "Import CSV File";
 }
 
-<h2 class="my-lg-5 text-center">Upload Peg CSV</h2>
+<h2 class="my-lg-5 text-center">Import CSV File</h2>
 
-<form asp-action="Upload" enctype="multipart/form-data" method="post">
+<form asp-action="ImportCsvFile" enctype="multipart/form-data" method="post">
     <div class="mb-3">
         <label for="file" class="form-label">Choose CSV File</label>
         <input class="form-control" type="file" name="file" accept=".csv" required />

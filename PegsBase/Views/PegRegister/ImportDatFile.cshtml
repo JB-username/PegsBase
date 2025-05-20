@@ -1,12 +1,12 @@
 ﻿@model CoordinateUploadViewModel
 
 @{
-    ViewData["Title"] = "Upload Coordinate File";
+    ViewData["Title"] = "Import Coordinate DAT File";
 }
 
-<h2 class="my-lg-5 text-center">Upload Coordinate (.dat) File</h2>
+<h2 class="my-lg-5 text-center">Import Coordinate (.dat) File</h2>
 
-<form asp-action="UploadDat" enctype="multipart/form-data" method="post">
+<form asp-action="ImportDatFile" enctype="multipart/form-data" method="post">
     <div class="mb-3">
         <label asp-for="CoordinateFile" class="form-label"></label>
         <input asp-for="CoordinateFile"
