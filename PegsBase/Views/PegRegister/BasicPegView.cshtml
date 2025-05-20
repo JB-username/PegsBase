@@ -82,11 +82,19 @@
 	</div>
 	<div class="mt-5">
 		<div class="row">
-			<div class="col-md-6">
+			<div class="col-md-4">
 				<button type="button" class="btn bg-info text-light" onclick="window.print();">Print</button>
 			</div>
-			<div class="col-md-6 text-end">
-				<a asp-controller="PegRegister" asp-action="Index" asp-route-filter="@TempData["LastFilter"]" class="btn btn-primary">Back</a>
+			<div class="col-md-4">
+				<a asp-controller="PegRegister"
+				   asp-action="ExportPreviewPdf"
+				   asp-route-pegName="@Model.PegName"
+				   class="btn btn-success d-print-none">
+					Download PDF
+				</a>
+			</div>
+			<div class="col-md-4 text-end">
+				<a asp-controller="PegRegister" asp-action="Index" asp-route-filter="@TempData["LastFilter"]" class="btn btn-danger">Back</a>
 			</div>
 		</div>
 	</div>

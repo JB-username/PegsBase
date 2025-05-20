@@ -406,14 +406,15 @@
 
 
 <div class="mt-4 text-center d-print-none">
-	<a asp-action="ExportPegCalcPdf"
-	   asp-controller="PegRegister"
-	   asp-route-id="@Model.Id"
-	   class="btn btn-danger">
-		Download PDF
-	</a>
-
-	<a href="/PegRegister/ExportPegCalcTestPdf/81" class="btn btn-primary">Test PDF Export</a>
+	<form asp-controller="PegRegister"
+		  asp-action="ExportPegCalcPdf"
+		  asp-route-id="@Model.Id"
+		  method="get"
+		  class="d-inline">
+		<button type="submit" class="btn btn-danger">
+			Download PDF
+		</button>
+	</form>
 
 
 	<button type="button" class="btn btn-secondary" onclick="window.print();">Print</button>

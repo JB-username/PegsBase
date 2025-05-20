@@ -22,6 +22,9 @@ using PegsBase.Services.Settings;
 using Rotativa.AspNetCore;
 using System.Data.Common;
 using System.Globalization;
+using QuestPDF;
+using QuestPDF.Drawing;
+
 
 namespace PegsBase
 {
@@ -93,6 +96,16 @@ namespace PegsBase
             CultureInfo.DefaultThreadCurrentCulture = cultureInfo;
             CultureInfo.DefaultThreadCurrentUICulture = cultureInfo;
 
+            var fontStream = File.OpenRead(
+            Path.Combine(
+                  builder.Environment.ContentRootPath,
+                  "wwwroot",
+                  "fonts",
+                  "OpenSans.ttf"
+                )
+            );
+            FontManager.RegisterFontWithCustomName("Open Sans", fontStream );
+            QuestPDF.Settings.License = QuestPDF.Infrastructure.LicenseType.Community;
 
             var app = builder.Build();
 

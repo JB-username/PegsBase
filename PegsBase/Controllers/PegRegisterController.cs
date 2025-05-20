@@ -14,6 +14,7 @@ using PegsBase.Services.Parsing;
 using PegsBase.Services.Parsing.Interfaces;
 using PegsBase.Services.PegCalc.Interfaces;
 using PegsBase.Services.Settings;
+using QuestPDF.Fluent;
 using Rotativa.AspNetCore;
 using System.Text;
 
@@ -305,6 +306,163 @@ namespace PegsBase.Controllers
             TempData["Success"] = $"{pegsToDelete.Count} peg(s) deleted successfully.";
             return RedirectToAction("Index");
         }
+
+        #region PDF Exports
+        [Authorize(Policy = "SurveyDepartment")]
+        [HttpGet]
+        public IActionResult ExportPegCalcPdf(int id)
+        {
+            // 1) Fetch the saved row (including any FKs you need)
+            var raw = _dbContext.RawSurveyData
+                         .Include(r => r.Locality)
+                         //.Include(r => r.Level)                       //TODO: add level to the pegcalc
+                         .FirstOrDefault(r => r.Id == id);
+
+            if (raw == null)
+                return NotFound();
+
+            // 2) Project **every** field into your VM
+            var model = new PegCalcViewModel
+            {
+                // metadata
+                SurveyorDisplayName = raw.Surveyor ?? "(unknown)",
+                SurveyDate = raw.SurveyDate,
+                LocalityName = raw.Locality.Name,
+                //LevelName = raw.Level.Name,
+
+                // peg IDs
+                StationPeg = raw.StationPeg,
+                BackSightPeg = raw.BackSightPeg,
+                ForeSightPeg = raw.ForeSightPeg,
+
+                // distances & heights
+                InstrumentHeight = raw.InstrumentHeight,
+                TargetHeightBacksight = raw.TargetHeightBacksight,
+                TargetHeightForesight = raw.TargetHeightForesight,
+                SlopeDistanceBacksight = raw.SlopeDistanceBacksight,
+                SlopeDistanceForesight = raw.SlopeDistanceForesight,
+
+                // horizontal angles (arc1 + arc2)
+                HAngleDirectArc1Backsight = raw.HAngleDirectArc1Backsight,
+                HAngleTransitArc1Backsight = raw.HAngleTransitArc1Backsight,
+                HAngleDirectArc1Foresight = raw.HAngleDirectArc1Foresight,
+                HAngleTransitArc1Foresight = raw.HAngleTransitArc1Foresight,
+
+                HAngleDirectArc2Backsight = raw.HAngleDirectArc2Backsight,
+                HAngleTransitArc2Backsight = raw.HAngleTransitArc2Backsight,
+                HAngleDirectArc2Foresight = raw.HAngleDirectArc2Foresight,
+                HAngleTransitArc2Foresight = raw.HAngleTransitArc2Foresight,
+
+                // vertical angles (arc1 + arc2)
+                VAngleDirectArc1Backsight = raw.VAngleDirectArc1Backsight,
+                VAngleTransitArc1Backsight = raw.VAngleTransitArc1Backsight,
+                VAngleDirectArc1Foresight = raw.VAngleDirectArc1Foresight,
+                VAngleTransitArc1Foresight = raw.VAngleTransitArc1Foresight,
+
+                VAngleDirectArc2Backsight = raw.VAngleDirectArc2Backsight,
+                VAngleTransitArc2Backsight = raw.VAngleTransitArc2Backsight,
+                VAngleDirectArc2Foresight = raw.VAngleDirectArc2Foresight,
+                VAngleTransitArc2Foresight = raw.VAngleTransitArc2Foresight,
+
+                // reduced & means
+                HAngleDirectReducedArc1 = raw.HAngleDirectReducedArc1,
+                HAngleTransitReducedArc1 = raw.HAngleTransitReducedArc1,
+                HAngleDirectReducedArc2 = raw.HAngleDirectReducedArc2,
+                HAngleTransitReducedArc2 = raw.HAngleTransitReducedArc2,
+
+                HAngleMeanArc1 = raw.HAngleMeanArc1,
+                HAngleMeanArc2 = raw.HAngleMeanArc2,
+                HAngleMeanFinal = raw.HAngleMeanFinal,
+                HAngleMeanFinalReturn = raw.HAngleMeanFinalReturn,
+
+                VAngleBacksightMeanArc1 = raw.VAngleBacksightMeanArc1,
+                VAngleBacksightMeanArc2 = raw.VAngleBacksightMeanArc2,
+                VAngleBacksightMeanFinal = raw.VAngleBacksightMeanFinal,
+
+                VAngleForesightMeanArc1 = raw.VAngleForesightMeanArc1,
+                VAngleForesightMeanArc2 = raw.VAngleForesightMeanArc2,
+                VAngleForesightMeanFinal = raw.VAngleForesightMeanFinal,
+
+                // bearings & back-check
+                BackBearingReturn = raw.BackBearingReturn,
+                ForwardBearing = raw.ForwardBearing,
+                ForwardBearingReturn = raw.ForwardBearingReturn,
+
+                HorizontalDistanceBacksight = raw.HorizontalDistanceBacksight,
+                HorizontalDistanceForesight = raw.HorizontalDistanceForesight,
+                VerticalDifferenceBacksight = raw.VerticalDifferenceBacksight,
+                VerticalDifferenceForesight = raw.VerticalDifferenceForesight,
+
+                BackCheckHorizontalDistance = raw.BackCheckHorizontalDistance,
+                BackCheckHorizontalDifference = raw.BackCheckHorizontalDifference,
+                BackCheckPegElevations = raw.BackCheckPegElevations,
+                BackCheckVerticalError = raw.BackCheckVerticalError,
+
+                // station & backsight coords
+                StationPegX = raw.StationPegX,
+                StationPegY = raw.StationPegY,
+                StationPegZ = raw.StationPegZ,
+                BacksightPegX = raw.BacksightPegX,
+                BacksightPegY = raw.BacksightPegY,
+                BacksightPegZ = raw.BacksightPegZ,
+
+                // new peg & deltas
+                NewPegX = raw.NewPegX,
+                NewPegY = raw.NewPegY,
+                NewPegZ = raw.NewPegZ,
+                DeltaX = raw.DeltaX,
+                DeltaY = raw.DeltaY,
+                DeltaZ = raw.DeltaZ,
+
+                PegFailed = raw.PegFailed
+            };
+
+            // 3) Generate the PDF
+            var document = new PegCalcReportDocument(model);
+            byte[] pdf = document.GeneratePdf();
+
+            // 4) Return it to the browser
+            return File(pdf,
+                        "application/pdf",
+                        $"PegCalc_{model.ForeSightPeg}.pdf");
+        }
+
+        [Authorize(Policy = "SurveyDepartment")]
+        [HttpGet]
+        public IActionResult ExportPreviewPdf(string pegName)
+        {
+            // load your peg preview – here I assume you find by PegName
+            var entity = _dbContext.PegRegister
+                            .FirstOrDefault(p => p.PegName == pegName);
+            if (entity == null) return NotFound();
+
+            // map to your PegPreviewModel
+            var model = new PegPreviewModel
+            {
+                PegName = entity.PegName,
+                XCoord = entity.XCoord,
+                YCoord = entity.YCoord,
+                ZCoord = entity.ZCoord,
+                GradeElevation = entity.GradeElevation,
+                LevelId = entity.LevelId,
+                Level = entity.Level,
+                LocalityId = entity.LocalityId,
+                Locality = entity.Locality,
+                SurveyDate = entity.SurveyDate,
+                SurveyorId = entity.SurveyorId,
+                Surveyor = entity.Surveyor,
+                //Type = entity.Type,
+                SaveToDatabase = true  // or some logic to reflect Pass/Fail
+            };
+
+            var document = new PegPreviewReportDocument(model);
+            byte[] pdf = document.GeneratePdf();
+
+            return File(pdf,
+                        "application/pdf",
+                        $"PegPreview_{model.PegName}.pdf");
+        }
+        #endregion
 
 
         [Authorize(Policy = "SurveyDepartment")]
@@ -1049,7 +1207,7 @@ namespace PegsBase.Controllers
 
 
 
-        public async Task<IActionResult> ExportPegCalcPdf(int id)
+        public async Task<IActionResult> ExportPegCalcPdfRotativaTest(int id)
         {
             var peg = await _dbContext.PegRegister
                 .Include(p => p.Level)
@@ -1169,48 +1327,6 @@ namespace PegsBase.Controllers
                 FileName = $"PegCalc_{model.ForeSightPeg}.pdf",
                 PageSize = Rotativa.AspNetCore.Options.Size.A4,
                 CustomSwitches = "--enable-local-file-access --debug-javascript"
-            };
-        }
-
-        public IActionResult ExportPegCalcTestPdf(int id)
-        {
-            // Minimal logic for testing
-            var model = new PegCalcViewModel
-            {
-                ForeSightPeg = "TEST-PEG",
-                SurveyDate = DateOnly.FromDateTime(DateTime.Today),
-                SurveyorDisplayName = "J. Tester",
-                LocalityName = "Test Locality",
-                LevelName = "Test Level",
-                PegFailed = false,
-
-                HAngleDirectArc1Backsight = 123.456m,
-                HAngleDirectArc1Foresight = 234.567m,
-                HAngleTransitArc1Backsight = 345.678m,
-                HAngleTransitArc1Foresight = 456.789m,
-
-                HAngleDirectArc2Backsight = 0,
-                HAngleDirectArc2Foresight = 0,
-                HAngleTransitArc2Backsight = 0,
-                HAngleTransitArc2Foresight = 0,
-
-                HAngleDirectReducedArc1 = 123.456m,
-                HAngleTransitReducedArc1 = 234.567m,
-                HAngleDirectReducedArc2 = 0,
-                HAngleTransitReducedArc2 = 0,
-
-                HAngleMeanArc1 = 179.999m,
-                HAngleMeanArc2 = 0,
-                HAngleMeanFinal = 180.000m,
-                HAngleMeanFinalReturn = 0
-            };
-
-
-            return new ViewAsPdf("PegCalcResultViewOnly", model)
-            {
-                FileName = $"TestPegCalc.pdf",
-                PageSize = Rotativa.AspNetCore.Options.Size.A4,
-                CustomSwitches = "--enable-local-file-access"
             };
         }
     }
