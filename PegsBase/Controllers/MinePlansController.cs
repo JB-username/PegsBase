@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using PegsBase.Data;
 using PegsBase.Models.MinePlans;
+using System.Diagnostics;
 
 namespace PegsBase.Controllers
 {

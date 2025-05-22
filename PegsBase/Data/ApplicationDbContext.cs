@@ -6,6 +6,7 @@ using PegsBase.Models.MinePlans;
 using PegsBase.Models.JobRequests;
 using PegsBase.Models.Entities;
 using PegsBase.Models.SurveyNotes;
+using PegsBase.Models.Subscriptions;
 
 namespace PegsBase.Data
 {
@@ -32,7 +33,7 @@ namespace PegsBase.Data
         public DbSet<SubSection> SubSections { get; set; }
 
         public DbSet<AppSettings> AppSettings { get; set; }
-
+        public DbSet<Subscription> Subscriptions { get; set; }
 
     }
 }

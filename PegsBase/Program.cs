@@ -10,6 +10,7 @@ using PegsBase.Data;
 using PegsBase.Models.Constants;
 using PegsBase.Models.Identity;
 using PegsBase.Models.Settings;
+using PegsBase.Models.Subscriptions;
 using PegsBase.Services.Emails;
 using PegsBase.Services.Identity;
 using PegsBase.Services.Parsing;
@@ -19,11 +20,12 @@ using PegsBase.Services.PegCalc.Interfaces;
 using PegsBase.Services.QuickCalcs.Implementations;
 using PegsBase.Services.QuickCalcs.Interfaces;
 using PegsBase.Services.Settings;
-using Rotativa.AspNetCore;
-using System.Data.Common;
-using System.Globalization;
 using QuestPDF;
 using QuestPDF.Drawing;
+using Rotativa.AspNetCore;
+using System.Configuration;
+using System.Data.Common;
+using System.Globalization;
 
 
 namespace PegsBase
@@ -43,6 +45,9 @@ namespace PegsBase
 
             builder.Services.Configure<ClientSettings>(
                 builder.Configuration.GetSection("ClientSettings"));
+
+            builder.Services.Configure<SubscriptionApiOptions>(
+                builder.Configuration.GetSection("SubscriptionApi"));
 
             builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
             {

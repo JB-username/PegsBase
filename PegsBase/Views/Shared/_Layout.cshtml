@@ -3,6 +3,7 @@
 @using Microsoft.AspNetCore.Identity;
 @using PegsBase.Models.Identity;
 
+@inject SignInManager<ApplicationUser> SignInManager
 @inject UserManager<ApplicationUser> UserManager
 @{
 	var currentUser = await UserManager.GetUserAsync(User);
@@ -58,7 +59,23 @@
 						<li class="nav-item">
 							<a class="nav-link text-light" asp-area="" asp-controller="JobRequests" asp-action="Index">Job Requests</a>
 						</li>
-
+						<li class="nav-item">
+							@if (SignInManager.IsSignedIn(User))
+							  {
+								  <form id="logoutForm"
+										asp-area="Identity"
+										asp-page="/Account/Logout"
+										asp-route-returnUrl="~/"
+										method="post"
+										class="d-inline">
+									  <button type="submit"
+											  class="btn btn-link nav-link text-light text-decoration-underline"
+											  >
+										Logout
+									  </button>
+								  </form>
+							  }
+						</li>
 					</ul>
 				</div>
 			</div>
