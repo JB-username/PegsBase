@@ -122,7 +122,10 @@ namespace PegsBase
                 var services = scope.ServiceProvider;
                 RoleSeeder.SeedRolesAsync(services).Wait();
                 UserSeeder.SeedUsersAsync(services).Wait();
+                MinePlanTypeSeeder.SeedAsync(services).Wait();
             }
+
+
 
             app.UseHttpsRedirection();
             app.UseRouting();

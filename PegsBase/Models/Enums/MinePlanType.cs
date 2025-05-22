@@ -6,8 +6,11 @@ namespace PegsBase.Models.Enums
     {
         [Display(Name = "Index Key Plan")]
         IndexKeyPlan,
+        [Display(Name = "Surface Plan")]
         SurfacePlan,
+        [Display(Name = "Surface Contour Plan")]
         SurfaceContourPlan,
+        [Display(Name = "Mine Vent And Rescue Plan")]
         MineVentAndRescuePlan,
         MinePlan,
         RehabilitationPlan,

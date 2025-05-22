@@ -5,6 +5,7 @@ using PegsBase.Models.Identity;
 using PegsBase.Models.MinePlans;
 using PegsBase.Models.JobRequests;
 using PegsBase.Models.Entities;
+using PegsBase.Models.SurveyNotes;
 
 namespace PegsBase.Data
 {
@@ -18,9 +19,10 @@ namespace PegsBase.Data
         public DbSet<PegRegister> PegRegister { get; set; }
         public DbSet<RawSurveyData> RawSurveyData { get; set; }
         public DbSet<Invite> Invites { get; set; }
-        public DbSet<SurveyNote> SurveyNotes { get; set; }
+        public DbSet<SurveyNoteModel> SurveyNotes { get; set; }
         public DbSet<WhitelistedEmails> WhitelistedEmails { get; set; }
         public DbSet<MinePlan> MinePlans { get; set; }
+        public DbSet<PlanType> PlanTypes { get; set; }
         public DbSet<JobRequest> JobRequests { get; set; }
         public DbSet<UserGroup> UserGroups { get; set; }
 

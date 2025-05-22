@@ -1,21 +1,18 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using PegsBase.Data;
-using PegsBase.Models;
 using PegsBase.Models.Constants;
 using PegsBase.Models.Enums;
-using PegsBase.Models.ViewModels;
+using PegsBase.Models.SurveyNotes;
 using System.Diagnostics;
+using System.Threading.Tasks;
 
 
 namespace PegsBase.Controllers
 {
-    [Authorize(Roles =
-        Roles.Surveyor + "," +
-        Roles.MineSurveyor + "," +
-        Roles.SurveyAnalyst + "," +
-        Roles.Master)]
+    [Authorize]
     public class SurveyNotesController : Controller
     {
         private readonly ApplicationDbContext _dbContext;
@@ -28,8 +25,12 @@ namespace PegsBase.Controllers
         }
 
         public async Task<IActionResult> Index(string? search, SurveyNoteType? type, string? level, bool? status, int page = 1, int pageSize = 10)
-        {
-            var query = _dbContext.SurveyNotes.AsQueryable();
+        {  
+            var query = _dbContext.SurveyNotes
+                .Include(n => n.Level)
+                .Include(n => n.Locality)
+                .Include(n => n.UploadedBy)
+                .AsQueryable();
 
             bool canViewAll = RoleGroups.CanViewAllNotes.Any(role => User.IsInRole(role));
             if (!canViewAll)
@@ -83,6 +84,39 @@ namespace PegsBase.Controllers
         }
 
 
+        private async Task PopulateDropDownsAsync(SurveyNoteUploadViewModel vm)
+        {
+            vm.Levels = await _dbContext.Levels
+                .OrderBy(l => l.Name)
+                .Select(l => new SelectListItem(l.Name, l.Id.ToString()))
+                .ToListAsync();
+
+            vm.Localities = await _dbContext.Localities
+                .OrderBy(loc => loc.Name)
+                .Select(loc => new SelectListItem(loc.Name, loc.Id.ToString()))
+                .ToListAsync();
+
+            vm.Surveyors = await _dbContext.Users
+                .OrderBy(u => u.UserName)
+                .Select(u => new SelectListItem(u.UserName, u.Id.ToString()))
+                .ToListAsync();
+        }
+
+        private async Task PopulateDropDownsAsync(SurveyNoteEditViewModel vm)
+        {
+            vm.LevelOptions = await _dbContext.Levels
+                .OrderBy(l => l.Name)
+                .Select(l => new SelectListItem(l.Name, l.Id.ToString()))
+                .ToListAsync();
+            vm.LocalityOptions = await _dbContext.Localities
+                .OrderBy(loc => loc.Name)
+                .Select(loc => new SelectListItem(loc.Name, loc.Id.ToString()))
+                .ToListAsync();
+            vm.SurveyorOptions = await _dbContext.Users
+                .OrderBy(u => u.UserName)
+                .Select(u => new SelectListItem(u.UserName, u.Id))
+                .ToListAsync();
+        }
 
         [HttpGet]
         public async Task<IActionResult> GetNotes(string search, SurveyNoteType? type, int page = 1, int pageSize = 10)
@@ -114,13 +148,16 @@ namespace PegsBase.Controllers
         }
 
 
-
+        [Authorize(Policy = "SurveyDepartment")]
         [HttpGet]
-        public IActionResult Upload()
+        public async Task<IActionResult> Upload()
         {
-            return View();
+            var vm = new SurveyNoteUploadViewModel();
+            await PopulateDropDownsAsync(vm);
+            return View(vm);
         }
 
+        [Authorize(Policy = "SurveyDepartment")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Upload(SurveyNoteUploadViewModel model)
@@ -175,17 +212,21 @@ namespace PegsBase.Controllers
                 }
 #endif
 
-            var note = new SurveyNote
+            var note = new SurveyNoteModel
             {
                 Title = model.Title,
-                UploadedById = model.SurveyorId,           // ✅ string FK to ApplicationUser.Id
+                NoteType = model.NoteType,
+
+                UploadedAt = DateTime.UtcNow,
+                UploadedById = model.SurveyorId == null ? string.Empty : model.SurveyorId,           // ✅ string FK to ApplicationUser.Id
+                
                 LevelId = model.LevelId,             // ✅ int FK to Level
                 LocalityId = model.LocalityId,       // ✅ int FK to Locality
-                FilePath = Path.Combine("SurveyNotes", folder, fileName),
-                UploadedAt = DateTime.UtcNow,
+                
                 IsSigned = model.IsSigned,
                 IsVerified = false,
-                NoteType = model.NoteType,
+                
+                FilePath = Path.Combine("SurveyNotes", folder, fileName),
                 ThumbnailPath = relativeThumbnailPath
             };
 
@@ -195,34 +236,31 @@ namespace PegsBase.Controllers
             return RedirectToAction("Index");
         }
 
-        [Authorize(Roles =
-            Roles.Master + "," +
-            Roles.MineSurveyor + "," +
-            Roles.SurveyAnalyst)]
-        [HttpGet]
-        public IActionResult Edit(int? id)
+        [HttpGet, Authorize(Policy = "SurveyDepartment")]
+        public async Task<IActionResult> Edit(int id)
         {
-            if (id == null || id == 0)
+            var note = await _dbContext.SurveyNotes.FindAsync(id);
+            if (note == null) return NotFound();
+
+            var vm = new SurveyNoteEditViewModel
             {
-                return NotFound();
-            }
-
-            SurveyNote? surveyNote = _dbContext.SurveyNotes.Find(id);
-
-            if (surveyNote == null)
-            {
-                return NotFound();
-            }
-
-            return View(surveyNote);
+                Id = note.Id,
+                Title = note.Title,
+                NoteType = note.NoteType,
+                IsSigned = note.IsSigned,
+                IsAbandoned = note.IsAbandoned,
+                AbandonmentReason = note.AbandonmentReason,
+                UploadedAt = note.UploadedAt,
+                LevelId = note.LevelId,
+                LocalityId = note.LocalityId,
+                SurveyorId = note.UploadedById
+            };
+            await PopulateDropDownsAsync(vm);
+            return View(vm);
         }
 
-        [Authorize(Roles =
-            Roles.Master + "," +
-            Roles.MineSurveyor + "," +
-            Roles.SurveyAnalyst)]
-        [HttpPost]
-        public async Task<IActionResult> Edit(SurveyNote obj)
+        [HttpPost, Authorize(Policy = "SurveyDepartment")]
+        public async Task<IActionResult> Edit(SurveyNoteEditViewModel vm)
         {
             if (!ModelState.IsValid)
             {
@@ -232,10 +270,11 @@ namespace PegsBase.Controllers
                         .Select(x => $"{x.Key}: {x.Value.Errors[0].ErrorMessage}")
                 );
                 TempData["Debug"] = $"ModelState invalid: {errors}";
-                return View(obj);
+                await PopulateDropDownsAsync(vm);
+                return View(vm);
             }
 
-            var existingNote = await _dbContext.SurveyNotes.FirstOrDefaultAsync(n => n.Id == obj.Id);
+            var existingNote = await _dbContext.SurveyNotes.FirstOrDefaultAsync(n => n.Id == vm.Id);
 
             if (existingNote == null)
             {
@@ -243,51 +282,48 @@ namespace PegsBase.Controllers
                 return NotFound();
             }
 
-            existingNote.Title = obj.Title;
-            existingNote.Level = obj.Level;
-            existingNote.Locality = obj.Locality;
-            existingNote.NoteType = obj.NoteType;
-            existingNote.UploadedBy = obj.UploadedBy;
-            existingNote.UploadedAt = obj.UploadedAt;
-            existingNote.IsAbandoned = obj.IsAbandoned;
-            existingNote.AbandonmentReason = obj.AbandonmentReason;
-            existingNote.IsSigned = obj.IsSigned;
-            existingNote.UploadedAt = DateTime.SpecifyKind(obj.UploadedAt, DateTimeKind.Utc);
+            existingNote.Title = vm.Title;
+            existingNote.LevelId = vm.LevelId;
+            existingNote.LocalityId = vm.LocalityId;
+            existingNote.NoteType = vm.NoteType;
+            existingNote.UploadedById = vm.SurveyorId;
+            existingNote.UploadedAt = vm.UploadedAt;
+            existingNote.IsAbandoned = vm.IsAbandoned;
+            existingNote.AbandonmentReason = vm.AbandonmentReason;
+            existingNote.IsSigned = vm.IsSigned;
+            existingNote.UploadedAt = DateTime.SpecifyKind(vm.UploadedAt, DateTimeKind.Utc);
 
             await _dbContext.SaveChangesAsync();
             TempData["Success"] = "Note updated successfully.";
-            return RedirectToAction("Index");
+            return RedirectToAction(nameof(Index));
         }
 
 
 
-        [Authorize(Roles =
-            Roles.Master + "," +
-            Roles.MineSurveyor + "," +
-            Roles.SurveyAnalyst)]
+        [Authorize(Policy = "SurveyDepartment")]
         [HttpGet]
-        public IActionResult Delete(int? id)
+        public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null || id == 0)
+            if (id == null || id.Value == 0)
             {
                 return NotFound();
             }
 
-            SurveyNote? pegEntry = _dbContext.SurveyNotes.Find(id);
+            var note = await _dbContext.SurveyNotes
+                .Include(n => n.Level)
+                .Include(n => n.Locality)
+                .Include(n => n.UploadedBy)
+                .FirstOrDefaultAsync(n => n.Id == id.Value);
 
-            if (pegEntry == null)
+            if (note == null)
             {
                 return NotFound();
             }
 
-            return View(pegEntry);
+            return View(note);
         }
 
-        [Authorize(Roles =
-            Roles.Master + "," +
-            Roles.MineSurveyor + "," +
-            Roles.SurveyAnalyst)]
-        [Authorize(Roles = Roles.Master + "," + Roles.MineSurveyor + "," + Roles.SurveyAnalyst)]
+        [Authorize(Policy = "SurveyDepartment")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeletePost(int? id)

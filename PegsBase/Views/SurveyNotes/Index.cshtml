@@ -1,6 +1,7 @@
-﻿@model PegsBase.Models.ViewModels.SurveyNotesListViewModel
-@using PegsBase.Models.Enums
+﻿@model SurveyNotesListViewModel
 @using PegsBase.Models.Constants
+@using PegsBase.Models.Enums
+@using PegsBase.Models.SurveyNotes
 
 @{
 	ViewData["Title"] = "Survey Notes";
@@ -87,8 +88,8 @@
 				</div>
 			</td>
 			<td>@note.Title</td>
-			<td>@note.Locality</td>
-			<td>@note.Level</td>
+			<td>@note.Locality?.Name</td>
+			<td>@note.Level?.Name</td>
 			<td>@note.NoteType</td>
 			<td>@(note.IsSigned ? "Signed" : "In Progress")</td>
 			<td>@note.UploadedAt.ToString("yyyy/MM/dd")</td>

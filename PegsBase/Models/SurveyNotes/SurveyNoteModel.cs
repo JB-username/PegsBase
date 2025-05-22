@@ -1,17 +1,19 @@
 ﻿
 
+using Microsoft.AspNetCore.Mvc.Rendering;
 using PegsBase.Models.Entities;
 using PegsBase.Models.Enums;
 using PegsBase.Models.Identity;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace PegsBase.Models
+namespace PegsBase.Models.SurveyNotes
 {
-    public class SurveyNote
+    public class SurveyNoteModel
     {
         public int Id { get; set; }
         public string Title { get; set; }
+
         public int LevelId { get; set; }
         public Level Level { get; set; }
         public string UploadedById { get; set; }
@@ -24,6 +26,7 @@ namespace PegsBase.Models
         public bool IsSigned { get; set; } // true = signed, false = in progress
         public bool IsAbandoned { get; set; }
         public string? AbandonmentReason { get; set; }
+
         public SurveyNoteType NoteType { get; set; }
         public string? FilePath { get; set; } // relative path to the stored PDF
         public bool RequiresManualSignature => NoteType == SurveyNoteType.HolingNote;

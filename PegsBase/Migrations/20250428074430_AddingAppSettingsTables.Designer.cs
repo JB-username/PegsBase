@@ -828,7 +828,7 @@ namespace PegsBase.Migrations
                     b.ToTable("RawSurveyData");
                 });
 
-            modelBuilder.Entity("PegsBase.Models.SurveyNote", b =>
+            modelBuilder.Entity("PegsBase.Models.SurveyNoteModel", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -1042,7 +1042,7 @@ namespace PegsBase.Migrations
                     b.Navigation("Locality");
                 });
 
-            modelBuilder.Entity("PegsBase.Models.SurveyNote", b =>
+            modelBuilder.Entity("PegsBase.Models.SurveyNoteModel", b =>
                 {
                     b.HasOne("PegsBase.Models.Entities.Level", "Level")
                         .WithMany()

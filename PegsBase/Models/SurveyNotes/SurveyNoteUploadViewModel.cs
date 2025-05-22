@@ -5,7 +5,7 @@ using PegsBase.Models.Enums;
 using PegsBase.Models.Identity;
 using System.ComponentModel.DataAnnotations;
 
-namespace PegsBase.Models.ViewModels
+namespace PegsBase.Models.SurveyNotes
 {
     public class SurveyNoteUploadViewModel
     {
@@ -15,25 +15,22 @@ namespace PegsBase.Models.ViewModels
         [Display(Name = "Level")]
         [Required(ErrorMessage = "Please select a level")]
         public int LevelId { get; set; }
-        public Level Level { get; set; }
+        public Level? Level { get; set; }
 
         [Display(Name = "Locality")]
         [Required(ErrorMessage = "Please select a locality")]
         public int LocalityId { get; set; }
-        public Locality Locality { get; set; }
+        public Locality? Locality { get; set; }
+        
+        [Display(Name = "Signed Off")]
+        public bool IsSigned { get; set; }
+
+        [Required]
+        public IFormFile? File { get; set; }
 
         [Display(Name = "Surveyor")]
         [Required(ErrorMessage = "Please select the surveyor")]
         public string? SurveyorId { get; set; }
-
-        [Display(Name = "Fully Signed")]
-        public bool IsSigned { get; set; }
-
-        [Required]
-        public IFormFile File { get; set; }
-
-        public string UploadedById { get; set; }
-        public ApplicationUser UploadedBy { get; set; }
 
         [Required]
         [Display(Name = "Note Type")]

@@ -1,6 +1,5 @@
-﻿@using PegsBase.Models.Enums
-
-@model PegsBase.Models.MinePlans.MinePlan
+﻿@model PegsBase.Models.MinePlans.MinePlanEditViewModel
+@using PegsBase.Models.Enums
 
 @{
     ViewData["Title"] = "Edit Mine Plan";
@@ -9,31 +8,44 @@
 <h2>Edit Mine Plan</h2>
 
 <form asp-action="Edit" method="post">
-    <input type="hidden" asp-for="Id" />
+    <input asp-for="Id" type="hidden" />
+
+    <div asp-validation-summary="All" class="text-danger mb-3"></div>
 
     <div class="form-group mb-3">
         <label asp-for="PlanName"></label>
         <input asp-for="PlanName" class="form-control" />
+        <span asp-validation-for="PlanName" class="text-danger"></span>
     </div>
 
     <div class="form-group mb-3">
-        <label asp-for="Level"></label>
-        <input asp-for="Level" class="form-control" />
+        <label asp-for="LevelId">Level</label>
+        <select asp-for="LevelId" asp-items="Model.LevelOptions" class="form-control">
+            <option value="">-- select level --</option>
+        </select>
+        <span asp-validation-for="LevelId" class="text-danger"></span>
     </div>
 
     <div class="form-group mb-3">
-        <label asp-for="Locality"></label>
-        <input asp-for="Locality" class="form-control" />
+        <label asp-for="LocalityId">Locality</label>
+        <select asp-for="LocalityId" asp-items="Model.LocalityOptions" class="form-control">
+            <option value="">-- select locality --</option>
+        </select>
+        <span asp-validation-for="LocalityId" class="text-danger"></span>
     </div>
 
     <div class="form-group mb-3">
         <label asp-for="Scale"></label>
-        <input asp-for="Scale" class="form-control" type="number" />
+        <input asp-for="Scale" type="number" class="form-control" />
+        <span asp-validation-for="Scale" class="text-danger"></span>
     </div>
 
     <div class="form-group mb-3">
-        <label asp-for="PlanType">Plan Type</label>
-        <select asp-for="PlanType" class="form-select" asp-items="Html.GetEnumSelectList<MinePlanType>()"></select>
+        <label asp-for="PlanType"></label>
+        <select asp-for="PlanTypeId" asp-items="Model.PlanTypeOptions" class="form-control">
+            <option value="">-- select plan type --</option>
+        </select>
+        <span asp-validation-for="PlanTypeId" class="text-danger"></span>
     </div>
 
     <div class="form-group form-check mb-3">
@@ -49,8 +61,13 @@
     <div class="form-group mb-3">
         <label asp-for="SupersededReference"></label>
         <input asp-for="SupersededReference" class="form-control" />
+        <span asp-validation-for="SupersededReference" class="text-danger"></span>
     </div>
 
     <button type="submit" class="btn btn-primary">Save</button>
     <a asp-action="Index" class="btn btn-secondary">Cancel</a>
 </form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

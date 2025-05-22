@@ -1,90 +1,103 @@
-﻿@using PegsBase.Models.Enums;
+﻿@model PegsBase.Models.SurveyNotes.SurveyNoteEditViewModel
+@using PegsBase.Models.Enums
 
-@model SurveyNote
 @if (TempData["Debug"] != null)
 {
-	<div class="alert alert-warning">@TempData["Debug"]</div>
+    <div class="alert alert-warning">@TempData["Debug"]</div>
 }
 
 <div class="container mt-4">
-	<div class="row">
-		<div class="col-md-8 offset-md-2">
-			<div class="card">
-				<div class="card-header bg-info text-white">
-					<h3>Edit Note</h3>
-				</div>
-				<div class="card-body">
-					<form asp-action="Edit" method="post">
-						@* <div asp-validation-summary="All" class="text-danger"></div> *@
-						<input type="hidden" asp-for="Id" />
-						<div class="form-group mb-3">
-							<label asp-for="Title" class="form-label">Peg Number</label>
-							<input asp-for="Title" class="form-control" placeholder="Enter note number" />
-							<span asp-validation-for="Title" class="text-danger"></span>
-						</div>
-						<div class="form-group mb-3">
-							<label asp-for="Level" class="form-label">Level Number</label>
-							<input asp-for="Level" class="form-control" placeholder="Enter level number" />
-							<span asp-validation-for="Level" class="text-danger"></span>
-						</div>
-						<div class="form-group mb-3">
-							<label asp-for="Locality" class="form-label">Locality</label>
-							<input asp-for="Locality" class="form-control" placeholder="Enter Peg location" />
-							<span asp-validation-for="Locality" class="text-danger"></span>
-						</div>
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h3>Edit Survey Note</h3>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Edit" method="post">
+                        <input asp-for="Id" type="hidden" />
 
-						<div class="form-group mb-3">
-							<label asp-for="UploadedBy" class="form-label">Surveyor</label>
-							<input asp-for="UploadedBy" class="form-control" placeholder="Enter surveyor name" />
-							<span asp-validation-for="UploadedBy" class="text-danger"></span>
-						</div>
-						<div class="form-group mb-3">
-							<label asp-for="UploadedAt" class="form-label">Survey Date</label>
-							<input asp-for="UploadedAt" class="form-control" type="date" />
-							<span asp-validation-for="UploadedAt" class="text-danger"></span>
-						</div>
-						<div class="form-group mb-3">
-							<label class="form-label">Note Type</label>
-							@foreach (SurveyNoteType type in Enum.GetValues(typeof(SurveyNoteType)))
-							{
-								<div class="form-check">
-									<input class="form-check-input" type="radio"
-										   asp-for="NoteType"
-										   value="@((int)type)"
-										   id="NoteType_@type"
-										   checked="@(Model.NoteType == type)"/>
-									<label class="form-check-label" for="NoteType_@type">
-										@type.ToString()
-									</label>
-								</div>
-							}
-							<span asp-validation-for="NoteType" class="text-danger"></span>
-						</div>
-						<div class="form-group form-check mb-3">
-							<input asp-for="IsSigned" class="form-check-input" type="checkbox" />
-							<label asp-for="IsSigned" class="form-check-label">Mark as Signed</label>
-						</div>
-						<div class="form-group form-check mb-3">
-							<input asp-for="IsAbandoned" class="form-check-input" type="checkbox" />
-							<label asp-for="IsAbandoned" class="form-check-label">Mark as Abandoned</label>
-						</div>
-						<div class="form-group mb-3">
-							<label asp-for="AbandonmentReason" class="form-label">Reason for Abandonment</label>
-							<textarea asp-for="AbandonmentReason" class="form-control" rows="3"></textarea>
-							<span asp-validation-for="AbandonmentReason" class="text-danger"></span>
-						</div>
+                        <div class="form-group mb-3">
+                            <label asp-for="Title" class="form-label">Title</label>
+                            <input asp-for="Title" class="form-control" />
+                            <span asp-validation-for="Title" class="text-danger"></span>
+                        </div>
 
-						<div class="d-flex justify-content-between">
-							<button type="submit" class="btn btn-primary">Save</button>
-							<a asp-controller="SurveyNotes" asp-action="Index" class="btn btn-danger">Cancel</a>
-						</div>
-					</form>
-				</div>
-			</div>
-		</div>
-	</div>
+                        <div class="form-group mb-3">
+                            <label asp-for="LevelId" class="form-label">Level</label>
+                            <select asp-for="LevelId" asp-items="Model.LevelOptions" class="form-control">
+                                <option value="">-- select level --</option>
+                            </select>
+                            <span asp-validation-for="LevelId" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label asp-for="LocalityId" class="form-label">Locality</label>
+                            <select asp-for="LocalityId" asp-items="Model.LocalityOptions" class="form-control">
+                                <option value="">-- select locality --</option>
+                            </select>
+                            <span asp-validation-for="LocalityId" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label asp-for="SurveyorId" class="form-label">Surveyor</label>
+                            <select asp-for="SurveyorId" asp-items="Model.SurveyorOptions" class="form-control">
+                                <option value="">-- select surveyor --</option>
+                            </select>
+                            <span asp-validation-for="SurveyorId" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label asp-for="UploadedAt" class="form-label">Survey Date</label>
+                            <input asp-for="UploadedAt" type="date" class="form-control" />
+                            <span asp-validation-for="UploadedAt" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label class="form-label">Note Type</label>
+                            @foreach (SurveyNoteType type in Enum.GetValues(typeof(SurveyNoteType)))
+                            {
+                                <div class="form-check">
+                                    <input asp-for="NoteType"
+                                           class="form-check-input"
+                                           type="radio"
+                                           value="@( (int)type )"
+                                           id="NoteType_@type" />
+                                    <label class="form-check-label" for="NoteType_@type">
+                                        @type
+                                    </label>
+                                </div>
+                            }
+                            <span asp-validation-for="NoteType" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group form-check mb-3">
+                            <input asp-for="IsSigned" class="form-check-input" />
+                            <label asp-for="IsSigned" class="form-check-label">Mark as Signed</label>
+                        </div>
+
+                        <div class="form-group form-check mb-3">
+                            <input asp-for="IsAbandoned" class="form-check-input" />
+                            <label asp-for="IsAbandoned" class="form-check-label">Mark as Abandoned</label>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label asp-for="AbandonmentReason" class="form-label">Reason for Abandonment</label>
+                            <textarea asp-for="AbandonmentReason" class="form-control" rows="3"></textarea>
+                            <span asp-validation-for="AbandonmentReason" class="text-danger"></span>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <button type="submit" class="btn btn-primary">Save</button>
+                            <a asp-controller="SurveyNotes" asp-action="Index" class="btn btn-danger">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 @section Scripts {
-	<partial name="_ValidationScriptsPartial" />
+    <partial name="_ValidationScriptsPartial" />
 }

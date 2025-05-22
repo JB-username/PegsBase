@@ -433,7 +433,11 @@ namespace PegsBase.Controllers
         {
             // load your peg preview – here I assume you find by PegName
             var entity = _dbContext.PegRegister
+                            .Include(p => p.Level)
+                            .Include(p => p.Locality)
+                            .Include(p => p.Surveyor)
                             .FirstOrDefault(p => p.PegName == pegName);
+            
             if (entity == null) return NotFound();
 
             // map to your PegPreviewModel
@@ -451,11 +455,14 @@ namespace PegsBase.Controllers
                 SurveyDate = entity.SurveyDate,
                 SurveyorId = entity.SurveyorId,
                 Surveyor = entity.Surveyor,
-                //Type = entity.Type,
-                SaveToDatabase = true  // or some logic to reflect Pass/Fail
+
+                FallBackSurveyorName = entity.SurveyorNameText == null
+                    ? string.Empty : entity.SurveyorNameText,
+
+                SaveToDatabase = true
             };
 
-            var document = new PegPreviewReportDocument(model);
+            var document = new BasicPegViewReportDocument(model);
             byte[] pdf = document.GeneratePdf();
 
             return File(pdf,
@@ -1203,131 +1210,6 @@ namespace PegsBase.Controllers
 
             var pegs = await query.ToListAsync();
             return PartialView("_PegTable", pegs);
-        }
-
-
-
-        public async Task<IActionResult> ExportPegCalcPdfRotativaTest(int id)
-        {
-            var peg = await _dbContext.PegRegister
-                .Include(p => p.Level)
-                .Include(p => p.Locality)
-                .Include(p => p.Surveyor)
-                .FirstOrDefaultAsync(p => p.Id == id);
-
-            if (peg == null)
-                return NotFound();
-
-            var rawData = await _dbContext.RawSurveyData
-                .FirstOrDefaultAsync(r => r.ForeSightPeg == peg.PegName);
-
-            if (rawData == null)
-                return View("BasicPegView", peg);
-
-            var model = new PegCalcViewModel
-            {
-                Id = peg.Id,
-
-                ForeSightPeg = rawData.ForeSightPeg,
-                StationPeg = rawData.StationPeg,
-                BackSightPeg = rawData.BackSightPeg,
-
-                TargetHeightBacksight = rawData.TargetHeightBacksight,
-                TargetHeightForesight = rawData.TargetHeightForesight,
-                InstrumentHeight = rawData.InstrumentHeight,
-                SlopeDistanceBacksight = rawData.SlopeDistanceBacksight,
-                SlopeDistanceForesight = rawData.SlopeDistanceForesight,
-
-                HorizontalDistanceBacksight = rawData.HorizontalDistanceBacksight,
-                HorizontalDistanceForesight = rawData.HorizontalDistanceForesight,
-
-                VerticalDifferenceBacksight = rawData.VerticalDifferenceBacksight,
-                VerticalDifferenceForesight = rawData.VerticalDifferenceForesight,
-
-                BackCheckHorizontalDistance = rawData.BackCheckHorizontalDistance,
-                BackCheckHorizontalDifference = rawData.BackCheckHorizontalDifference,
-
-                BackCheckPegElevations = rawData.BackCheckPegElevations,
-                BackCheckVerticalError = rawData.BackCheckVerticalError,
-
-                HAngleDirectArc1Backsight = rawData.HAngleDirectArc1Backsight,
-                HAngleDirectArc1Foresight = rawData.HAngleDirectArc1Foresight,
-                HAngleTransitArc1Backsight = rawData.HAngleTransitArc1Backsight,
-                HAngleTransitArc1Foresight = rawData.HAngleTransitArc1Foresight,
-
-                HAngleDirectArc2Backsight = rawData.HAngleDirectArc2Backsight,
-                HAngleDirectArc2Foresight = rawData.HAngleDirectArc2Foresight,
-                HAngleTransitArc2Backsight = rawData.HAngleTransitArc2Backsight,
-                HAngleTransitArc2Foresight = rawData.HAngleTransitArc2Foresight,
-
-                VAngleDirectArc1Backsight = rawData.VAngleDirectArc1Backsight,
-                VAngleDirectArc1Foresight = rawData.VAngleDirectArc1Foresight,
-                VAngleTransitArc1Backsight = rawData.VAngleTransitArc1Backsight,
-                VAngleTransitArc1Foresight = rawData.VAngleTransitArc1Foresight,
-
-                VAngleDirectArc2Backsight = rawData.VAngleDirectArc2Backsight,
-                VAngleDirectArc2Foresight = rawData.VAngleDirectArc2Foresight,
-                VAngleTransitArc2Backsight = rawData.VAngleTransitArc2Backsight,
-                VAngleTransitArc2Foresight = rawData.VAngleTransitArc2Foresight,
-
-                HAngleDirectReducedArc1 = rawData.HAngleDirectReducedArc1,
-                HAngleTransitReducedArc1 = rawData.HAngleTransitReducedArc1,
-                HAngleDirectReducedArc2 = rawData.HAngleDirectReducedArc2,
-                HAngleTransitReducedArc2 = rawData.HAngleTransitReducedArc2,
-
-                HAngleMeanArc1 = rawData.HAngleMeanArc1,
-                HAngleMeanArc2 = rawData.HAngleMeanArc2,
-                HAngleMeanFinal = rawData.HAngleMeanFinal,
-                HAngleMeanFinalReturn = rawData.HAngleMeanFinalReturn,
-
-                VAngleBacksightMeanArc1 = rawData.VAngleBacksightMeanArc1,
-                VAngleBacksightMeanArc2 = rawData.VAngleBacksightMeanArc2,
-                VAngleBacksightMeanFinal = rawData.VAngleBacksightMeanFinal,
-
-                VAngleForesightMeanArc1 = rawData.VAngleForesightMeanArc1,
-                VAngleForesightMeanArc2 = rawData.VAngleForesightMeanArc2,
-                VAngleForesightMeanFinal = rawData.VAngleForesightMeanFinal,
-
-                BackBearingReturn = rawData.BackBearingReturn,
-                ForwardBearing = rawData.ForwardBearing,
-                ForwardBearingReturn = rawData.ForwardBearingReturn,
-
-                BacksightPegX = rawData.BacksightPegX,
-                BacksightPegY = rawData.BacksightPegY,
-                BacksightPegZ = rawData.BacksightPegZ,
-
-                StationPegX = rawData.StationPegX,
-                StationPegY = rawData.StationPegY,
-                StationPegZ = rawData.StationPegZ,
-
-                NewPegX = rawData.NewPegX,
-                NewPegY = rawData.NewPegY,
-                NewPegZ = rawData.NewPegZ,
-
-                DeltaX = rawData.DeltaX,
-                DeltaY = rawData.DeltaY,
-                DeltaZ = rawData.DeltaZ,
-
-                // Metadata
-                Surveyor = rawData.Surveyor,
-                SurveyDate = rawData.SurveyDate,
-                LocalityId = rawData.LocalityId,
-                Level = peg.Level?.Id ?? 0,
-                PointType = peg.PointType,
-                PegFailed = rawData.PegFailed,
-
-                // Display info
-                SurveyorDisplayName = peg.Surveyor?.DisplayName ?? rawData.Surveyor,
-                LocalityName = peg.Locality?.Name,
-                LevelName = peg.Level?.Name
-            };
-
-            return new ViewAsPdf("PegCalcResultViewOnly", model)
-            {
-                FileName = $"PegCalc_{model.ForeSightPeg}.pdf",
-                PageSize = Rotativa.AspNetCore.Options.Size.A4,
-                CustomSwitches = "--enable-local-file-access --debug-javascript"
-            };
         }
     }
 }

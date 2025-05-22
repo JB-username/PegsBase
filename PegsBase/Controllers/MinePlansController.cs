@@ -1,17 +1,14 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using PegsBase.Data;
-using PegsBase.Models.Constants;
-using PegsBase.Models.Enums;
 using PegsBase.Models.MinePlans;
-using PegsBase.Models.ViewModels;
-using System.Diagnostics;
 
 namespace PegsBase.Controllers
 {
-    [Authorize(Roles = Roles.Surveyor + "," + Roles.MineSurveyor + "," + Roles.SurveyAnalyst + "," + Roles.Master)]
+    [Authorize]
     public class MinePlansController : Controller
     {
         private readonly ApplicationDbContext _dbContext;
@@ -23,44 +20,64 @@ namespace PegsBase.Controllers
             _env = env;
         }
 
-        public async Task<IActionResult> Index(string? search, MinePlanType? type, string? level, bool? isSigned, bool? isSuperseded, int page = 1, int pageSize = 10)
+        public async Task<IActionResult> Index(
+                    string? search,
+                    int? planTypeId,
+                    string? level,
+                    bool? isSigned,
+                    bool? isSuperseded,
+                    int page = 1,
+                    int pageSize = 10
+                )
         {
-            var query = _dbContext.MinePlans.AsQueryable();
+            // 1) Eager-load the navs
+            var query = _dbContext.MinePlans
+                .Include(p => p.Level)
+                .Include(p => p.Locality)
+                .Include(p => p.PlanType)
+                .AsQueryable();
 
+            // 2) Text search across PlanName, Level.Name, Locality.Name
             if (!string.IsNullOrWhiteSpace(search))
             {
                 var keywords = search
                     .Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 
-                foreach (var keyword in keywords)
+                foreach (var kw in keywords)
                 {
                     query = query.Where(p =>
-                        EF.Functions.ILike(p.PlanName, $"%{keyword}%") ||
-                        EF.Functions.ILike(p.Level.Name, $"%{keyword}%") ||
-                        EF.Functions.ILike(p.Locality, $"%{keyword}%"));
+                        EF.Functions.ILike(p.PlanName, $"%{kw}%") ||
+                        EF.Functions.ILike(p.Level.Name, $"%{kw}%") ||
+                        EF.Functions.ILike(p.Locality.Name, $"%{kw}%")
+                    );
                 }
             }
 
+            // 3) Filter by level name
             if (!string.IsNullOrWhiteSpace(level))
             {
                 query = query.Where(p => p.Level.Name == level);
             }
 
-            if (type.HasValue)
+            // 4) Filter by PlanTypeId (your new lookup table)
+            if (planTypeId.HasValue)
             {
-                query = query.Where(p => p.PlanType == type.Value);
+                query = query.Where(p => p.PlanTypeId == planTypeId.Value);
             }
 
+            // 5) Signed / In-Progress
             if (isSigned.HasValue)
             {
                 query = query.Where(p => p.IsSigned == isSigned.Value);
             }
 
+            // 6) Superseded or not
             if (isSuperseded.HasValue)
             {
                 query = query.Where(p => p.IsSuperseded == isSuperseded.Value);
             }
 
+            // 7) Paging + execution
             var total = await query.CountAsync();
             var plans = await query
                 .OrderByDescending(p => p.UploadedAt)
@@ -68,6 +85,18 @@ namespace PegsBase.Controllers
                 .Take(pageSize)
                 .ToListAsync();
 
+            // 8) Load your dropdown list of PlanTypes
+            var planTypeOptions = await _dbContext.PlanTypes
+                .OrderBy(pt => pt.Name)
+                .Select(pt => new SelectListItem
+                {
+                    Text = pt.Name,
+                    Value = pt.Id.ToString(),
+                    Selected = (pt.Id == planTypeId)
+                })
+                .ToListAsync();
+
+            // 9) Build the ViewModel
             var model = new MinePlanListViewModel
             {
                 Plans = plans,
@@ -76,25 +105,88 @@ namespace PegsBase.Controllers
                 PageSize = pageSize,
                 FilterSearch = search,
                 FilterLevel = level,
-                FilterType = type,
+                FilterPlanTypeId = planTypeId,        // now an int?
                 FilterIsSigned = isSigned,
-                FilterIsSuperseded = isSuperseded
+                FilterIsSuperseded = isSuperseded,
+                PlanTypeOptions = planTypeOptions    // your new dropdown source
             };
 
             return View(model);
         }
 
-        public IActionResult Upload()
+
+        private async Task PopulateDropDownsAsync(MinePlanUploadViewModel vm)
         {
-            return View();
+            vm.LevelOptions = await _dbContext.Levels
+                .OrderBy(l => l.Name)
+                .Select(l => new SelectListItem(l.Name, l.Id.ToString()))
+                .ToListAsync();
+
+            vm.LocalityOptions = await _dbContext.Localities
+                .OrderBy(loc => loc.Name)
+                .Select(loc => new SelectListItem(loc.Name, loc.Id.ToString()))
+                .ToListAsync();
+
+            var planTypes = await _dbContext.PlanTypes
+                                    .OrderBy(pt => pt.Name)
+                                    .ToListAsync();
+
+            vm.PlanTypeOptions = planTypes
+                .Select(pt => new SelectListItem
+                {
+                    Text = pt.Name,
+                    Value = pt.Id.ToString(),
+                    Selected = (pt.Id == vm.PlanTypeId)   // <— use vm.PlanTypeId, not a local var
+                })
+                .ToList();
+        }
+
+        private async Task PopulateDropDownsAsync(MinePlanEditViewModel vm)
+        {
+            vm.LevelOptions = await _dbContext.Levels
+                .OrderBy(l => l.Name)
+                .Select(l => new SelectListItem(l.Name, l.Id.ToString()))
+                .ToListAsync();
+
+            vm.LocalityOptions = await _dbContext.Localities
+                .OrderBy(loc => loc.Name)
+                .Select(loc => new SelectListItem(loc.Name, loc.Id.ToString()))
+                .ToListAsync();
+
+            var planTypes = await _dbContext.PlanTypes
+                                    .OrderBy(pt => pt.Name)
+                                    .ToListAsync();
+
+            vm.PlanTypeOptions = planTypes
+                .Select(pt => new SelectListItem
+                {
+                    Text = pt.Name,
+                    Value = pt.Id.ToString(),
+                    Selected = (pt.Id == vm.PlanTypeId)
+                })
+                .ToList();
+
+            await PopulateDropDownsAsync((MinePlanEditViewModel)vm);
+        }
+
+
+        [HttpGet]
+        public async Task<IActionResult> Upload()
+        {
+            var vm = new MinePlanUploadViewModel();
+            await PopulateDropDownsAsync(vm);
+            return View(vm);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Upload(MinePlanUploadViewModel model)
         {
-            if (!ModelState.IsValid) return View(model);
-
+            if (!ModelState.IsValid)
+            {
+                await PopulateDropDownsAsync(model);
+                return View(model);
+            }
             var fileName = $"{Guid.NewGuid()}.pdf";
             var folder = model.IsSigned ? "Signed" : "InProgress";
             var fullFolder = Path.Combine(_env.WebRootPath, "MinePlans", folder);
@@ -140,13 +232,15 @@ namespace PegsBase.Controllers
             var plan = new MinePlan
             {
                 PlanName = model.PlanName,
+                PlanTypeId = model.PlanTypeId.Value,
+                Scale = model.Scale,
+                IsSigned = model.IsSigned,
+                IsSuperseded = false,
+
                 LevelId = model.LevelId,
                 LocalityId = model.LocalityId,
-                Scale = model.Scale,
-                PlanType = model.PlanType,
-                IsSigned = model.IsSigned,
+
                 UploadedAt = DateTime.UtcNow,
-                IsSuperseded = false,
                 FilePath = Path.Combine("MinePlans", folder, fileName),
                 ThumbnailPath = relativeThumbnailPath
             };
@@ -154,40 +248,64 @@ namespace PegsBase.Controllers
             _dbContext.MinePlans.Add(plan);
             await _dbContext.SaveChangesAsync();
 
-            return RedirectToAction("Index");
+            return RedirectToAction(nameof(Index));
         }
 
+        [HttpGet, Authorize(Policy = "SurveyDepartment")]
         public async Task<IActionResult> Edit(int id)
         {
             var plan = await _dbContext.MinePlans.FindAsync(id);
             if (plan == null) return NotFound();
-            return View(plan);
+
+            var vm = new MinePlanEditViewModel
+            {
+                Id = plan.Id,
+                PlanName = plan.PlanName,
+                PlanTypeId = plan.PlanTypeId,
+                Scale = plan.Scale,
+                IsSigned = plan.IsSigned,
+                IsSuperseded = plan.IsSuperseded,
+                SupersededReference = plan.SupersededReference,
+                LevelId = plan.LevelId,
+                LocalityId = plan.LocalityId ?? 0,
+                UploadedAt = plan.UploadedAt,
+                // SurveyorId     = plan.SurveyorId ?? ""
+            };
+            await PopulateDropDownsAsync(vm);
+            return View(vm);
         }
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(MinePlan updated)
+        [HttpPost, ValidateAntiForgeryToken, Authorize(Policy = "SurveyDepartment")]
+        public async Task<IActionResult> Edit(MinePlanEditViewModel vm)
         {
-            if (!ModelState.IsValid) return View(updated);
+            if (!ModelState.IsValid)
+            {
+                await PopulateDropDownsAsync(vm);
+                return View(vm);
+            }
 
-            var existing = await _dbContext.MinePlans.FirstOrDefaultAsync(p => p.Id == updated.Id);
+            var existing = await _dbContext.MinePlans.FindAsync(vm.Id);
+
             if (existing == null) return NotFound();
 
-            existing.PlanName = updated.PlanName;
-            existing.Level = updated.Level;
-            existing.Locality = updated.Locality;
-            existing.Scale = updated.Scale;
-            existing.IsSigned = updated.IsSigned;
-            existing.IsSuperseded = updated.IsSuperseded;
-            existing.SupersededReference = updated.SupersededReference;
-            existing.PlanType = updated.PlanType;
-            existing.UploadedAt = updated.UploadedAt;
+            existing.PlanName = vm.PlanName;
+            existing.PlanTypeId = vm.PlanTypeId;
+            existing.Scale = vm.Scale;
+            existing.IsSigned = vm.IsSigned;
+            existing.IsSuperseded = vm.IsSuperseded;
+            existing.SupersededReference = vm.SupersededReference;
+
+            existing.LevelId = vm.LevelId;
+            existing.LocalityId = vm.LocalityId;
+
+            existing.UploadedAt = DateTime.SpecifyKind(vm.UploadedAt, DateTimeKind.Utc);
 
             await _dbContext.SaveChangesAsync();
             TempData["Success"] = "Mine plan updated successfully.";
-            return RedirectToAction("Index");
+            return RedirectToAction(nameof(Index));
         }
 
+        [HttpGet, Authorize(Policy = "SurveyManagers")]
         public async Task<IActionResult> Delete(int id)
         {
             var plan = await _dbContext.MinePlans.FindAsync(id);
@@ -195,8 +313,7 @@ namespace PegsBase.Controllers
             return View(plan);
         }
 
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
+        [HttpPost, ActionName("Delete"), ValidateAntiForgeryToken, Authorize(Policy = "SurveyManagers")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var plan = await _dbContext.MinePlans.FindAsync(id);
@@ -214,5 +331,28 @@ namespace PegsBase.Controllers
             TempData["Success"] = $"Deleted mine plan: {plan.PlanName}";
             return RedirectToAction("Index");
         }
+
+
+
+
+
+        [HttpGet]
+        public async Task<IActionResult> Download(int id)
+        {
+            var plan = await _dbContext.MinePlans.FindAsync(id);
+            if (plan == null || string.IsNullOrEmpty(plan.FilePath))
+                return NotFound();
+
+            // FilePath is something like "MinePlans/Signed/abc123.pdf"
+            var absolute = Path.Combine(_env.WebRootPath, plan.FilePath);
+            if (!System.IO.File.Exists(absolute))
+                return NotFound();
+
+            // force a download of the PDF
+            var fileName = Path.GetFileName(absolute);
+            const string contentType = "application/pdf";
+            return PhysicalFile(absolute, contentType, fileName);
+        }
+
     }
 }

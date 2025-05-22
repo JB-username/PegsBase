@@ -30,6 +30,10 @@ body {
   text-align: start;
 }
 
+.bg-purple {
+    background-color: #725daf;
+    color: white;
+}
 
 .btn-outline-purple {
     color: #725daf;

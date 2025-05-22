@@ -13,13 +13,10 @@
             <input type="text" name="search" value="@Model.FilterSearch" class="form-control" placeholder="Search by plan name..." />
         </div>
         <div class="col-md-2">
-            <select name="type" class="form-select">
+            <select asp-for="FilterPlanTypeId" asp-items="Model.PlanTypeOptions" class="form-select">
                 <option value="">All Types</option>
-                @foreach (var type in Enum.GetValues(typeof(MinePlanType)))
-                {
-                    <option value="@((int)type)" selected="@(Model.FilterType == (MinePlanType)type)">@type</option>
-                }
             </select>
+
         </div>
         <div class="col-md-2">
             <input type="text" name="level" value="@Model.FilterLevel" class="form-control" placeholder="Level..." />
@@ -70,17 +67,18 @@
                          class="img-thumbnail" />
                 </td>
                 <td>@plan.PlanName</td>
-                <td>@plan.Locality</td>
-                <td>@plan.Level</td>
-                <td>@plan.PlanType</td>
-                <td>@plan.Scale</td>
+                <td>@plan.Locality?.Name</td>
+                <td>@plan.Level?.Name</td>
+                <td>@plan.PlanType?.Name</td>
+                <td>@($"1:{plan.Scale}")</td>
                 <td>@(plan.IsSigned ? "Signed" : "In Progress")</td>
                 <td>@(plan.IsSuperseded ? "Yes" : "No")</td>
                 <td>@plan.UploadedAt.ToString("yyyy/MM/dd")</td>
                 <td>
-                    <a href="@Url.Content(plan.FilePath)" target="_blank" class="btn btn-sm btn-primary">View</a>
-                    <a asp-action="Edit" asp-route-id="@plan.Id" class="btn btn-sm btn-info">Edit</a>
-                    <a asp-action="Delete" asp-route-id="@plan.Id" class="btn btn-sm btn-danger">Delete</a>
+                    <a href="@Url.Content(plan.FilePath)" target="_blank" class="btn btn-sm bg-olive"><i class="bi bi-search"></i></a>
+                    <a asp-action="Edit" asp-route-id="@plan.Id" class="btn btn-sm btn-primary"><i class="bi bi-pen"></i></a>
+                    <a asp-action="Download" asp-route-id="@plan.Id" class="btn btn-sm btn-info"><i class="bi bi-download"></i></a>
+                    <a asp-action="Delete" asp-route-id="@plan.Id" class="btn btn-sm btn-danger"><i class="bi bi-trash"></i></a>
                 </td>
             </tr>
         }

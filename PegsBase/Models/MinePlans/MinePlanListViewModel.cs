@@ -1,5 +1,6 @@
-﻿using PegsBase.Models.MinePlans;
+﻿using Microsoft.AspNetCore.Mvc.Rendering;
 using PegsBase.Models.Enums;
+using PegsBase.Models.MinePlans;
 
 public class MinePlanListViewModel
 {
@@ -11,7 +12,8 @@ public class MinePlanListViewModel
     // Filters
     public string? FilterSearch { get; set; }
     public string? FilterLevel { get; set; }
-    public MinePlanType? FilterType { get; set; }
+    public int? FilterPlanTypeId { get; set; }
+    public IEnumerable<SelectListItem>? PlanTypeOptions { get; set; }
     public bool? FilterIsSigned { get; set; }
     public bool? FilterIsSuperseded { get; set; }
 }

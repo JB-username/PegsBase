@@ -20,6 +20,7 @@ namespace PegsBase.Migrations
                 .HasAnnotation("ProductVersion", "9.0.3")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
+            NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "postgis");
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -520,10 +521,6 @@ namespace PegsBase.Migrations
                     b.Property<int>("LevelId")
                         .HasColumnType("integer");
 
-                    b.Property<string>("Locality")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.Property<int?>("LocalityId")
                         .HasColumnType("integer");
 
@@ -531,7 +528,7 @@ namespace PegsBase.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int>("PlanType")
+                    b.Property<int>("PlanTypeId")
                         .HasColumnType("integer");
 
                     b.Property<int>("Scale")
@@ -550,7 +547,28 @@ namespace PegsBase.Migrations
 
                     b.HasIndex("LevelId");
 
+                    b.HasIndex("LocalityId");
+
+                    b.HasIndex("PlanTypeId");
+
                     b.ToTable("MinePlans");
+                });
+
+            modelBuilder.Entity("PegsBase.Models.MinePlans.PlanType", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("PlanTypes");
                 });
 
             modelBuilder.Entity("PegsBase.Models.PegRegister", b =>
@@ -825,7 +843,7 @@ namespace PegsBase.Migrations
                     b.ToTable("RawSurveyData");
                 });
 
-            modelBuilder.Entity("PegsBase.Models.SurveyNote", b =>
+            modelBuilder.Entity("PegsBase.Models.SurveyNotes.SurveyNoteModel", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -1000,7 +1018,21 @@ namespace PegsBase.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("PegsBase.Models.Entities.Locality", "Locality")
+                        .WithMany()
+                        .HasForeignKey("LocalityId");
+
+                    b.HasOne("PegsBase.Models.MinePlans.PlanType", "PlanType")
+                        .WithMany()
+                        .HasForeignKey("PlanTypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Level");
+
+                    b.Navigation("Locality");
+
+                    b.Navigation("PlanType");
                 });
 
             modelBuilder.Entity("PegsBase.Models.PegRegister", b =>
@@ -1039,7 +1071,7 @@ namespace PegsBase.Migrations
                     b.Navigation("Locality");
                 });
 
-            modelBuilder.Entity("PegsBase.Models.SurveyNote", b =>
+            modelBuilder.Entity("PegsBase.Models.SurveyNotes.SurveyNoteModel", b =>
                 {
                     b.HasOne("PegsBase.Models.Entities.Level", "Level")
                         .WithMany()

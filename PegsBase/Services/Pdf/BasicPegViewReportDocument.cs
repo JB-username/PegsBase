@@ -5,11 +5,11 @@ using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
 using System.Globalization;
 
-public class PegPreviewReportDocument : IDocument
+public class BasicPegViewReportDocument : IDocument
 {
     private readonly PegPreviewModel _model;
 
-    public PegPreviewReportDocument(PegPreviewModel model)
+    public BasicPegViewReportDocument(PegPreviewModel model)
     {
         _model = model;
     }
@@ -57,13 +57,13 @@ public class PegPreviewReportDocument : IDocument
                              .FontSize(16).Light().FontColor(Colors.White);
 
                           col.Item().Text($"{_model.SurveyDate:yyyy/MM/dd}")
-                             .FontSize(12).FontColor(Colors.White);
+                             .FontSize(10).FontColor(Colors.White);
                       });
 
               row.ConstantItem(80)
                      .AlignRight()
                      .Text(_model.Type?.ToString() ?? "")
-                     .FontSize(12)
+                     .FontSize(10)
                      .SemiBold();
             }));
     }
@@ -75,7 +75,7 @@ public class PegPreviewReportDocument : IDocument
             // 1) Coordinates table
             col.Item().Table(table =>
             {
-                // Define 3 equal columns
+                // Define 4 equal columns
                 table.ColumnsDefinition(c =>
                 {
                     c.RelativeColumn();
@@ -88,21 +88,21 @@ public class PegPreviewReportDocument : IDocument
                 table.Cell()
                      .AlignLeft()
                      .Text("Coordinates:")
-                     .FontSize(12)
+                     .FontSize(10)
                      .SemiBold();
 
                 // 2) Header row
-                table.Cell().Text("Y Coord").AlignCenter();
-                table.Cell().Text("X Coord").AlignCenter();
-                table.Cell().Text("Z Coord").AlignCenter();
+                table.Cell().Text("Y Coord").AlignLeft();
+                table.Cell().Text("X Coord").AlignLeft();
+                table.Cell().Text("Z Coord").AlignLeft();
 
                 table.Cell().ColumnSpan(4).Text("");
 
                 // 3) Data row
                 table.Cell().Text("").AlignLeft();
-                table.Cell().Text(_model.YCoord.ToString("F3")).AlignCenter();
-                table.Cell().Text(_model.XCoord.ToString("F3")).AlignCenter();
-                table.Cell().Text(_model.ZCoord.ToString("F3")).AlignCenter();
+                table.Cell().Text(_model.YCoord.ToString("F3")).AlignLeft();
+                table.Cell().Text(_model.XCoord.ToString("F3")).AlignLeft();
+                table.Cell().Text(_model.ZCoord.ToString("F3")).AlignLeft();
 
                 table.Cell().ColumnSpan(4).Text("");
 
@@ -110,11 +110,11 @@ public class PegPreviewReportDocument : IDocument
                 table.Cell()
                      .AlignLeft()
                      .Text("Grade Elevation:")
-                     .FontSize(12)
+                     .FontSize(10)
                      .SemiBold();
                 table.Cell().Text("");
                 table.Cell().Text("");
-                table.Cell().Text(_model.GradeElevation?.ToString("F3")).AlignCenter();
+                table.Cell().Text(_model.GradeElevation?.ToString("F3")).AlignLeft();
 
                 table.Cell().ColumnSpan(4).Text("");
             });
@@ -125,41 +125,55 @@ public class PegPreviewReportDocument : IDocument
                .LineHorizontal(1)
                .LineColor(Colors.Grey.Lighten1);
 
-            // 3) Metadata row (Level, Locality, Surveyed By)
-            col.Item().Element(c => c.Row(row =>
+            // 3) Metadata table
+            col.Item().PaddingTop(15).Table(table =>
             {
-                row.RelativeItem().Column(c =>
+                table.ColumnsDefinition(c =>
                 {
-                    c.Item().Text($"Level: {_model.Level?.Name ?? "—"}");
-                    c.Item().Text($"Locality: {_model.Locality?.Name ?? "—"}");
+                    c.RelativeColumn();
+                    c.RelativeColumn();
+                    c.RelativeColumn();
+                    c.RelativeColumn();
                 });
 
-                row.RelativeItem().Column(c =>
-                {
-                    c.Item().Text("Surveyed By:");
-                    var name = _model.Surveyor != null
-                        ? $"{_model.Surveyor.FirstName} {_model.Surveyor.LastName}"
-                        : _model.SurveyorId ?? "—";
-                    c.Item().Text(name);
-                });
-            }));
+                table.Cell()
+                     .AlignLeft()
+                     .Text("Level:")
+                     .FontSize(10)
+                     .SemiBold();
+                table.Cell().AlignLeft().Text($"{_model.Level?.Name ?? "—"}");
 
-            // 4) Pass/Fail row
-            col.Item()
-               .Background(_model.SaveToDatabase
-                      ? Colors.Red.Lighten4
-                      : Colors.Green.Lighten4)
-               .Border(1)
-               .BorderColor(_model.SaveToDatabase
-                      ? Colors.Red.Darken2
-                      : Colors.Green.Darken2)
-               .Padding(6)
-               .AlignCenter()
-               .Text(_model.SaveToDatabase ? "Failed" : "Passed")
-               .FontColor(_model.SaveToDatabase
-                      ? Colors.Red.Darken2
-                      : Colors.Green.Darken2)
-               .SemiBold();
+                table.Cell()
+                     .AlignLeft()
+                     .Text("Locality:")
+                     .FontSize(10)
+                     .SemiBold();
+                table.Cell().AlignLeft().Text($"{_model.Locality?.Name ?? "—"}");
+
+                table.Cell().ColumnSpan(4).Text("");
+
+                table.Cell()
+                     .AlignLeft()
+                     .Text("Surveyor:")
+                     .FontSize(10)
+                     .SemiBold();
+                var name = _model.Surveyor != null
+                    ? $"{_model.Surveyor.FirstName} {_model.Surveyor.LastName}"
+                    : _model.FallBackSurveyorName;
+                table.Cell().AlignLeft().Text($"{name}");
+
+                table.Cell()
+                     .AlignLeft()
+                     .Text("Check:")
+                     .FontSize(10)
+                     .SemiBold();
+                table.Cell()
+                     .AlignLeft()
+                     .Text("Passed")
+                     .BackgroundColor(Color.FromRGB(204,255,204))
+                     .FontColor(Color.FromRGB(0, 153, 75))
+                     ;
+            });
         });
     }
 }

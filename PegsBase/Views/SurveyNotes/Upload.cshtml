@@ -1,4 +1,4 @@
-﻿@model PegsBase.Models.ViewModels.SurveyNoteUploadViewModel
+﻿@model PegsBase.Models.SurveyNotes.SurveyNoteUploadViewModel
 @using PegsBase.Models.Enums
 
 @{
@@ -10,40 +10,51 @@
 <form asp-action="Upload" asp-controller="SurveyNotes" method="post" enctype="multipart/form-data">
     <div class="form-group">
         <label asp-for="Title"></label>
-        <input asp-for="Title" class="form-control" required />
+        <input asp-for="Title" class="form-control" />
+        <span asp-validation-for="Title" class="text-danger"></span>
     </div>
 
     <div class="form-group">
-        <label asp-for="Level"></label>
-        <input asp-for="Level" class="form-control" required />
+        <label asp-for="LevelId">Level</label>
+        <select asp-for="LevelId" asp-items="Model.Levels" class="form-control">
+            <option value="">-- select level --</option>
+        </select>
+        <span asp-validation-for="LevelId" class="text-danger"></span>
     </div>
 
     <div class="form-group">
-        <label asp-for="SurveyorId"></label>
-        <input asp-for="SurveyorId" class="form-control" required />
+        <label asp-for="LocalityId">Locality</label>
+        <select asp-for="LocalityId" asp-items="Model.Localities" class="form-control">
+            <option value="">-- select locality --</option>
+        </select>
+        <span asp-validation-for="LocalityId" class="text-danger"></span>
     </div>
 
     <div class="form-group">
-        <label asp-for="Locality"></label>
-        <input asp-for="Locality" class="form-control" />
+        <label asp-for="SurveyorId">Surveyor</label>
+        <select asp-for="SurveyorId" asp-items="Model.Surveyors" class="form-control">
+            <option value="">-- select surveyor --</option>
+        </select>
+        <span asp-validation-for="SurveyorId" class="text-danger"></span>
     </div>
 
-    <div class="form-group">
-        <label asp-for="IsSigned"></label>
-        <input asp-for="IsSigned" type="checkbox" class="form-check-input" />
-        <span class="ml-2">Only enable for fully signed note</span>
+    <div class="form-group form-check">
+        <input asp-for="IsSigned" class="form-check-input" />
+        <label asp-for="IsSigned" class="form-check-label">Only enable for fully signed note</label>
     </div>
+
     <div class="form-group">
         <label asp-for="NoteType" class="form-label">Note Type</label>
         @foreach (SurveyNoteType type in Enum.GetValues(typeof(SurveyNoteType)))
         {
             <div class="form-check">
-                <input class="form-check-input" type="radio"
-                       asp-for="NoteType"
-                       value="@((int)type)"
+                <input asp-for="NoteType"
+                       class="form-check-input"
+                       type="radio"
+                       value="@( (int)type )"
                        id="NoteType_@type" />
                 <label class="form-check-label" for="NoteType_@type">
-                    @type.ToString()
+                    @type
                 </label>
             </div>
         }
@@ -52,9 +63,15 @@
 
     <div class="form-group">
         <label asp-for="File"></label>
-        <input asp-for="File" type="file" accept="application/pdf" class="form-control" required />
+        <input asp-for="File" type="file" accept="application/pdf" class="form-control" />
+        <span asp-validation-for="File" class="text-danger"></span>
     </div>
 
     <button type="submit" class="btn btn-primary mt-3">Upload Note</button>
 </form>
 
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

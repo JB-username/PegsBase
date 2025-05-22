@@ -1,4 +1,6 @@
-﻿namespace PegsBase.Models.Entities
+﻿using PegsBase.Models.SurveyNotes;
+
+namespace PegsBase.Models.Entities
 {
     public class Locality
     {
@@ -11,7 +13,7 @@
         public int? SubSectionId { get; set; } // Nullable for flexibility
         public SubSection? SubSection { get; set; }
 
-        public ICollection<SurveyNote> SurveyNotes { get; set; } = new List<SurveyNote>();
+        public ICollection<SurveyNoteModel> SurveyNotes { get; set; } = new List<SurveyNoteModel>();
         public ICollection<PegRegister> Pegs { get; set; } = new List<PegRegister>();
     }
 }

@@ -1,10 +1,10 @@
 ﻿using PegsBase.Models.Enums;
 
-namespace PegsBase.Models.ViewModels
+namespace PegsBase.Models.SurveyNotes
 {
     public class SurveyNotesListViewModel
     {
-        public List<SurveyNote> Notes { get; set; }
+        public List<SurveyNoteModel> Notes { get; set; }
         public int Total { get; set; }
         public int Page { get; set; }
         public int PageSize { get; set; }

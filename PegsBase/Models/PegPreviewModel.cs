@@ -18,6 +18,7 @@ namespace PegsBase.Models
         // Editable metadata
         public string? SurveyorId { get; set; }        // ✅ FK to ApplicationUser
         public ApplicationUser? Surveyor { get; set; } // Optional navigation
+        public string FallBackSurveyorName { get; set; } = string.Empty;
 
         public int? LocalityId { get; set; }           // ✅ FK to Locality
         public Locality? Locality { get; set; }
