@@ -1,5 +1,4 @@
 ﻿@model PegsBase.Models.MinePlans.MinePlanEditViewModel
-@using PegsBase.Models.Enums
 
 @{
     ViewData["Title"] = "Edit Mine Plan";
@@ -41,11 +40,20 @@
     </div>
 
     <div class="form-group mb-3">
-        <label asp-for="PlanType"></label>
+        <label asp-for="PlanTypeId">Plan Type</label>
         <select asp-for="PlanTypeId" asp-items="Model.PlanTypeOptions" class="form-control">
             <option value="">-- select plan type --</option>
         </select>
         <span asp-validation-for="PlanTypeId" class="text-danger"></span>
+    </div>
+
+    <div class="form-group mb-3">
+        <label asp-for="UploadedAt"></label>
+        <input asp-for="UploadedAt"
+               type="date"
+               class="form-control"
+               asp-format="{0:yyyy-MM-dd}" />
+        <span asp-validation-for="UploadedAt" class="text-danger"></span>
     </div>
 
     <div class="form-group form-check mb-3">

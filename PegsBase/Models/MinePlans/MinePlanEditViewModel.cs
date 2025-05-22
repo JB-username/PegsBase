@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc.Rendering;
-using PegsBase.Models.Enums;
 using System.ComponentModel.DataAnnotations;
 
 namespace PegsBase.Models.MinePlans
@@ -10,13 +9,12 @@ namespace PegsBase.Models.MinePlans
 
         [Required]
         [Display(Name = "Plan Name")]
-        public string PlanName { get; set; }
-
-
+        public string PlanName { get; set; } = string.Empty;
+      
         [Required]
         public int PlanTypeId { get; set; }
         [Display(Name = "Plan Type")]
-        public MinePlanType PlanType { get; set; }
+        public List<SelectListItem> PlanTypeOptions { get; set; } = [];
 
         [Required]
         [Range(1, int.MaxValue)]
@@ -39,9 +37,8 @@ namespace PegsBase.Models.MinePlans
 
         public DateTime UploadedAt { get; set; }
 
-        public IEnumerable<SelectListItem>? LevelOptions { get; set; }
-        public IEnumerable<SelectListItem>? LocalityOptions { get; set; }
-        public IEnumerable<SelectListItem>? PlanTypeOptions { get; set; }
+        public List<SelectListItem>? LevelOptions { get; set; } = [];
+        public List<SelectListItem>? LocalityOptions { get; set; } = [];
 
     }
 }

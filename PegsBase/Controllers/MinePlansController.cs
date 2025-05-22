@@ -143,33 +143,36 @@ namespace PegsBase.Controllers
 
         private async Task PopulateDropDownsAsync(MinePlanEditViewModel vm)
         {
+            vm.PlanTypeOptions = await _dbContext.PlanTypes
+                .OrderBy(pt => pt.Name)
+                .Select(pt => new SelectListItem
+                {
+                    Value = pt.Id.ToString(),
+                    Text = pt.Name
+                })
+                .ToListAsync();    // <-- materialize here
+
             vm.LevelOptions = await _dbContext.Levels
                 .OrderBy(l => l.Name)
-                .Select(l => new SelectListItem(l.Name, l.Id.ToString()))
-                .ToListAsync();
+                .Select(l => new SelectListItem
+                {
+                    Value = l.Id.ToString(),
+                    Text = l.Name
+                })
+                .ToListAsync();    // <-- and here
 
             vm.LocalityOptions = await _dbContext.Localities
                 .OrderBy(loc => loc.Name)
-                .Select(loc => new SelectListItem(loc.Name, loc.Id.ToString()))
-                .ToListAsync();
-
-            var planTypes = await _dbContext.PlanTypes
-                                    .OrderBy(pt => pt.Name)
-                                    .ToListAsync();
-
-            vm.PlanTypeOptions = planTypes
-                .Select(pt => new SelectListItem
+                .Select(loc => new SelectListItem
                 {
-                    Text = pt.Name,
-                    Value = pt.Id.ToString(),
-                    Selected = (pt.Id == vm.PlanTypeId)
+                    Value = loc.Id.ToString(),
+                    Text = loc.Name
                 })
-                .ToList();
-
-            await PopulateDropDownsAsync((MinePlanEditViewModel)vm);
+                .ToListAsync();    // <-- and here
         }
 
 
+        #region Upload
         [HttpGet]
         public async Task<IActionResult> Upload()
         {
@@ -250,31 +253,40 @@ namespace PegsBase.Controllers
 
             return RedirectToAction(nameof(Index));
         }
+        #endregion
 
         [HttpGet, Authorize(Policy = "SurveyDepartment")]
         public async Task<IActionResult> Edit(int id)
         {
-            var plan = await _dbContext.MinePlans.FindAsync(id);
-            if (plan == null) return NotFound();
+            var existing = await _dbContext.MinePlans
+                .AsNoTracking()
+                .FirstOrDefaultAsync(mp => mp.Id == id);
 
+            if (existing == null)
+                return NotFound();
+
+            // Project into VM
             var vm = new MinePlanEditViewModel
             {
-                Id = plan.Id,
-                PlanName = plan.PlanName,
-                PlanTypeId = plan.PlanTypeId,
-                Scale = plan.Scale,
-                IsSigned = plan.IsSigned,
-                IsSuperseded = plan.IsSuperseded,
-                SupersededReference = plan.SupersededReference,
-                LevelId = plan.LevelId,
-                LocalityId = plan.LocalityId ?? 0,
-                UploadedAt = plan.UploadedAt,
-                // SurveyorId     = plan.SurveyorId ?? ""
+                Id = existing.Id,
+                PlanName = existing.PlanName,
+                LevelId = existing.LevelId,
+                LocalityId = existing.LocalityId.Value,
+                Scale = existing.Scale,
+                PlanTypeId = existing.PlanTypeId,
+                IsSigned = existing.IsSigned,
+                IsSuperseded = existing.IsSuperseded,
+                SupersededReference = existing.SupersededReference,
+                UploadedAt = DateTime.SpecifyKind(existing.UploadedAt, DateTimeKind.Utc)
+                            .ToLocalTime()
             };
+
             await PopulateDropDownsAsync(vm);
             return View(vm);
         }
 
+
+        #region Edit
         [HttpPost, ValidateAntiForgeryToken, Authorize(Policy = "SurveyDepartment")]
         public async Task<IActionResult> Edit(MinePlanEditViewModel vm)
         {
@@ -285,53 +297,76 @@ namespace PegsBase.Controllers
             }
 
             var existing = await _dbContext.MinePlans.FindAsync(vm.Id);
-
             if (existing == null) return NotFound();
 
+            // map changes
             existing.PlanName = vm.PlanName;
             existing.PlanTypeId = vm.PlanTypeId;
             existing.Scale = vm.Scale;
             existing.IsSigned = vm.IsSigned;
             existing.IsSuperseded = vm.IsSuperseded;
             existing.SupersededReference = vm.SupersededReference;
-
             existing.LevelId = vm.LevelId;
             existing.LocalityId = vm.LocalityId;
-
             existing.UploadedAt = DateTime.SpecifyKind(vm.UploadedAt, DateTimeKind.Utc);
 
             await _dbContext.SaveChangesAsync();
             TempData["Success"] = "Mine plan updated successfully.";
             return RedirectToAction(nameof(Index));
         }
+        #endregion
+
+        #region Delete
+        // MinePlanController.cs
 
         [HttpGet, Authorize(Policy = "SurveyManagers")]
         public async Task<IActionResult> Delete(int id)
         {
-            var plan = await _dbContext.MinePlans.FindAsync(id);
+            var plan = await _dbContext.MinePlans
+                .AsNoTracking()
+                .Include(mp => mp.PlanType)
+                .Include(mp => mp.Level)
+                .Include(mp => mp.Locality)
+                .FirstOrDefaultAsync(mp => mp.Id == id);
+
             if (plan == null) return NotFound();
-            return View(plan);
+
+            var vm = new MinePlanDeleteViewModel
+            {
+                Id = plan.Id,
+                PlanName = plan.PlanName,
+                PlanTypeName = plan.PlanType?.Name,
+                LevelName = plan.Level?.Name,
+                LocalityName = plan.Locality?.Name,
+                Scale = plan.Scale,
+                UploadedAt = plan.UploadedAt.ToLocalTime()
+            };
+
+            return View(vm);
         }
 
-        [HttpPost, ActionName("Delete"), ValidateAntiForgeryToken, Authorize(Policy = "SurveyManagers")]
+        [HttpPost, ValidateAntiForgeryToken, Authorize(Policy = "SurveyManagers")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var plan = await _dbContext.MinePlans.FindAsync(id);
             if (plan == null) return NotFound();
 
-            var filePath = Path.Combine(_env.WebRootPath, plan.FilePath ?? "");
-            if (System.IO.File.Exists(filePath)) System.IO.File.Delete(filePath);
+            // delete files from wwwroot
+            var webRoot = _env.WebRootPath;
+            var filePath = Path.Combine(webRoot, plan.FilePath ?? "");
+            var thumbPath = Path.Combine(webRoot, plan.ThumbnailPath ?? "");
 
-            var thumbPath = Path.Combine(_env.WebRootPath, plan.ThumbnailPath ?? "");
+            if (System.IO.File.Exists(filePath)) System.IO.File.Delete(filePath);
             if (System.IO.File.Exists(thumbPath)) System.IO.File.Delete(thumbPath);
 
             _dbContext.MinePlans.Remove(plan);
             await _dbContext.SaveChangesAsync();
 
             TempData["Success"] = $"Deleted mine plan: {plan.PlanName}";
-            return RedirectToAction("Index");
+            return RedirectToAction(nameof(Index));
         }
 
+        #endregion
 
 
 

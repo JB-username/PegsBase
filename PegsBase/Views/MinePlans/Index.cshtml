@@ -61,27 +61,50 @@
         {
             <tr>
                 <td>
-                    <img src="~/@(plan.ThumbnailPath ?? "images/placeholder-thumbnail.png")"
-                         alt="Thumbnail"
-                         style="max-width: 80px; height: auto;"
-                         class="img-thumbnail" />
-                </td>
-                <td>@plan.PlanName</td>
-                <td>@plan.Locality?.Name</td>
-                <td>@plan.Level?.Name</td>
-                <td>@plan.PlanType?.Name</td>
-                <td>@($"1:{plan.Scale}")</td>
-                <td>@(plan.IsSigned ? "Signed" : "In Progress")</td>
-                <td>@(plan.IsSuperseded ? "Yes" : "No")</td>
-                <td>@plan.UploadedAt.ToString("yyyy/MM/dd")</td>
-                <td>
-                    <a href="@Url.Content(plan.FilePath)" target="_blank" class="btn btn-sm bg-olive"><i class="bi bi-search"></i></a>
-                    <a asp-action="Edit" asp-route-id="@plan.Id" class="btn btn-sm btn-primary"><i class="bi bi-pen"></i></a>
-                    <a asp-action="Download" asp-route-id="@plan.Id" class="btn btn-sm btn-info"><i class="bi bi-download"></i></a>
-                    <a asp-action="Delete" asp-route-id="@plan.Id" class="btn btn-sm btn-danger"><i class="bi bi-trash"></i></a>
-                </td>
-            </tr>
-        }
+                    <!-- Clickable thumbnail -->
+                    <img src="~/@(string.IsNullOrEmpty(plan.ThumbnailPath) ? "images/placeholder-thumbnail.png"                                                                                                               : plan.ThumbnailPath)"
+                     alt="Thumbnail"
+                     style="cursor:pointer; max-width: 80px; height: auto;"
+                     class="img-thumbnail"
+                     data-bs-toggle="modal"
+                     data-bs-target="#thumbnailModal_@plan.Id" />
+
+                    <!-- Modal for large preview -->
+                    <div class="modal fade" id="thumbnailModal_@plan.Id" tabindex="-1" aria-labelledby="thumbnailModalLabel_@plan.Id" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered modal-lg">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="thumbnailModalLabel_@plan.Id">Preview: @plan.PlanName</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body text-center">
+                                    <img src="~/@(string.IsNullOrEmpty(plan.ThumbnailPath)
+                                        ? "images/placeholder-thumbnail.png"
+                                        : plan.ThumbnailPath)"
+                                     alt="Thumbnail Full"
+                                     class="img-fluid rounded shadow"
+                                     style="max-height: 80vh;" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </td>
+            <td>@plan.PlanName</td>
+            <td>@plan.Locality?.Name</td>
+            <td>@plan.Level?.Name</td>
+            <td>@plan.PlanType?.Name</td>
+            <td>@($"1:{plan.Scale}")</td>
+            <td>@(plan.IsSigned ? "Signed" : "In Progress")</td>
+            <td>@(plan.IsSuperseded ? "Yes" : "No")</td>
+            <td>@plan.UploadedAt.ToString("yyyy/MM/dd")</td>
+            <td>
+                <a href="@Url.Content(plan.FilePath)" target="_blank" class="btn btn-sm bg-olive"><i class="bi bi-search"></i></a>
+                <a asp-action="Edit" asp-route-id="@plan.Id" class="btn btn-sm btn-primary"><i class="bi bi-pen"></i></a>
+                <a asp-action="Download" asp-route-id="@plan.Id" class="btn btn-sm btn-info"><i class="bi bi-download"></i></a>
+                <a asp-action="Delete" asp-route-id="@plan.Id" class="btn btn-sm btn-danger"><i class="bi bi-trash"></i></a>
+            </td>
+        </tr>
+                }
     </tbody>
 </table>
 
